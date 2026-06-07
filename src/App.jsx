@@ -1,42 +1,61 @@
 import { useState, useEffect, useCallback } from "react";
 
 const C = {
-  forest:"#1A3F22", olive:"#58761B", gold:"#D99201",
-  burnt:"#905A01", cream:"#F5EDD6", paper:"#FFFDF7",
-  ink:"#0E1E12", mist:"#E8F0E0", shadow:"rgba(26,63,34,0.18)",
+  bg:       "#070a0f",
+  surface:  "#0d1117",
+  surface2: "#131920",
+  surface3: "#1a2332",
+  border:   "#1e2d3d",
+  cyan:     "#00e5ff",
+  cyanDim:  "rgba(0,229,255,0.08)",
+  cyanGlow: "rgba(0,229,255,0.25)",
+  gold:     "#D99201",
+  goldDim:  "rgba(217,146,1,0.1)",
+  goldGlow: "rgba(217,146,1,0.3)",
+  amber:    "#ff9900",
+  amberDim: "rgba(255,153,0,0.08)",
+  magenta:  "#ff0080",
+  magDim:   "rgba(255,0,128,0.08)",
+  green:    "#00ff88",
+  greenDim: "rgba(0,255,136,0.08)",
+  red:      "#ff3355",
+  text:     "#e2e8f0",
+  textDim:  "#8899aa",
+  textMute: "#445566",
+  shadow:   "rgba(0,229,255,0.12)",
 };
 
 const AFFIRMATIONS = [
-  "I didn't leave healthcare. I learned to defend it. And the world is about to know my name.",
-  "I am the Digital First Responder — the bridge between the clinical floor and the security operations center.",
-  "God placed this calling on my life long before I understood it. I walk in it fully and without apology.",
-  "I am not a non-traditional candidate. I am the candidate they didn't know they needed.",
-  "Every closed door redirected me closer to my purpose. I trust the process.",
-  "I protect patients from threats they never see coming. That is sacred work.",
-  "My 28 years are not a detour. They are my competitive advantage.",
-  "I am building something that will outlast me — for my family, my family, my family, and every generation after.",
-  "The red carpet on August 5th is not an arrival. It is a beginning.",
-  "I am a woman of faith, a grandmother, a clinician, a defender. All of it counts. All of it matters.",
-  "Remote, flexible, and fully compensated — the right role already exists and is looking for me.",
-  "I do not shrink to fit job descriptions. I expand organizations to fit my vision.",
-  "Caregiving and career excellence are not in conflict. I am proof that both can coexist.",
-  "My mother's care is covered. My children are thriving. My work is meaningful. This is the life I built.",
-  "I walk into every room — virtual or in-person — as the most prepared person there.",
-  "Black Hat. DEF CON. WiCyS. FBI Citizens Academy. I move in rooms that matter.",
-  "My expertise is rare. My story is powerful. My time is now.",
-  "I am not waiting for permission. I am the permission.",
-  "Every morning I wake up is another day to get closer to the life I declared.",
-  "The Digital First Responder methodology is my intellectual property and my legacy.",
-  "I am deeply rooted — like a forest — and I cannot be moved by uncertainty or delay.",
-  "Milwaukee is a season of love and service. Atlanta is home. The remote world is my office.",
-  "I answer to God first, family second, and mission always. Everything else follows.",
-  "I log wins, not complaints. I build momentum, not excuses.",
-  "The organization that hires me will wonder how they ever operated without me.",
-  "I am healthy, protected, purposeful, and covered. This is my declaration.",
-  "Setbacks are data. I analyze them, adjust, and keep moving forward.",
-  "I am the kind of woman who builds a lab, walks a red carpet, and tucks in her grandkids — all in the same week.",
-  "Every cert I earn, every scenario I build, every person I mentor — it compounds.",
-  "I am a Digital First Responder. I assess. I contain. I treat. I recover. Always.",
+  "I didn't leave healthcare. I learned to defend it. AND THE WORLD IS ABOUT TO KNOW MY NAME.",
+  "I am the Digital First Responder — the bridge between the clinical floor and the security operations center. NO ONE ELSE HAS THIS.",
+  "God placed this calling on my life long before I understood it. I walk in it FULLY and WITHOUT APOLOGY.",
+  "I am not a non-traditional candidate. I AM THE CANDIDATE THEY DIDN'T KNOW THEY NEEDED.",
+  "Every closed door REDIRECTED me closer to my purpose. The detours were the direction.",
+  "I protect patients from threats they never see coming. THAT IS SACRED WORK. That is my work.",
+  "My 28 years are not a detour. They are my COMPETITIVE ADVANTAGE. Nobody can replicate what I built.",
+  "I am building something that will OUTLAST ME — for my family, my family, my family, and every generation after.",
+  "The red carpet on August 5th is not an arrival. IT IS A BEGINNING. The world is watching.",
+  "I am a woman of faith, a grandmother, a clinician, a DEFENDER. All of it counts. ALL OF IT MATTERS.",
+  "Remote, flexible, and fully compensated — the right role ALREADY EXISTS and is looking for me.",
+  "I do not shrink to fit job descriptions. I EXPAND ORGANIZATIONS to fit my vision.",
+  "Caregiving and career excellence are not in conflict. I AM PROOF that both can coexist.",
+  "My mother's care is covered. My children are thriving. My work is meaningful. THIS IS THE LIFE I BUILT.",
+  "I walk into every room — virtual or in-person — as THE MOST PREPARED PERSON THERE. Full stop.",
+  "Black Hat. DEF CON. WiCyS. FBI Citizens Academy. I MOVE IN ROOMS THAT MATTER.",
+  "My expertise is rare. My story is powerful. MY TIME IS NOW. Not later. NOW.",
+  "I am not waiting for permission. I AM THE PERMISSION.",
+  "Every morning I wake up is another day to get closer to the life I DECLARED over myself.",
+  "The Digital First Responder methodology is MY INTELLECTUAL PROPERTY and my legacy.",
+  "I cannot be moved by uncertainty or delay. I AM ROOTED IN PURPOSE. Watch me move.",
+  "Milwaukee is a season of love and service. Atlanta is home. THE REMOTE WORLD IS MY OFFICE.",
+  "I answer to God first, family second, and mission always. EVERYTHING ELSE FOLLOWS.",
+  "I log wins, not complaints. I BUILD MOMENTUM, not excuses. Every single day.",
+  "The organization that hires me will wonder HOW THEY EVER OPERATED WITHOUT ME.",
+  "I am healthy, protected, purposeful, and covered. THIS IS MY DECLARATION. I speak it. I own it.",
+  "Setbacks are DATA. I analyze them, adjust, and KEEP MOVING FORWARD. Always forward.",
+  "I build labs, walk red carpets, and tuck in my grandkids — ALL IN THE SAME WEEK. That is my life.",
+  "Every cert I earn, every scenario I build, every person I mentor — IT COMPOUNDS. The work compounds.",
+  "I am a Digital First Responder. I assess. I contain. I treat. I recover. ALWAYS.",
 ];
 
 const WEEK_EVENTS = {
@@ -93,9 +112,10 @@ const WEEK_EVENTS = {
   ],
 };
 
-const CAL_COLORS={routine:C.olive,health:"#e05c5c",family:C.gold,growth:C.forest,finance:"#10b981",special:C.burnt,birthday:"#ec4899"};
+const CAL_COLORS={routine:C.textMute,health:C.red,family:C.gold,growth:C.cyan,finance:C.green,special:C.amber,birthday:C.magenta};
 const BLACK_HAT=new Date("2026-08-05T09:00:00");
-const STORE="ccd_hq_v3";
+const EXAM_DATE=new Date("2026-06-28T08:00:00");
+const STORE="ccd_hq_v4";
 
 const defaultData=()=>({
   weeklyFocus:"Land remote healthcare cyber role before Milwaukee move",
@@ -113,7 +133,7 @@ const defaultData=()=>({
   reflection:"",
   habits:{
     exercise:{label:"Exercise (30 min)",icon:"🏃‍♀️",days:[false,false,false,false,false,false,false]},
-    affirmation:{label:"Daily Affirmation",icon:"📖",days:[false,false,false,false,false,false,false]},
+    affirmation:{label:"Daily Affirmation",icon:"⚡",days:[false,false,false,false,false,false,false]},
     learning:{label:"AWS / TryHackMe",icon:"💻",days:[false,false,false,false,false,false,false]},
     water:{label:"Water Goal",icon:"💧",days:[false,false,false,false,false,false,false]},
     bedtime:{label:"Bedtime Routine (CPAP)",icon:"😴",days:[false,false,false,false,false,false,false]},
@@ -167,6 +187,8 @@ const defaultData=()=>({
 
 function loadData(){
   try{const r=localStorage.getItem(STORE);if(r)return{...defaultData(),...JSON.parse(r)};}catch{}
+  // Try migrating from old store
+  try{const r=localStorage.getItem("ccd_hq_v3");if(r){const d={...defaultData(),...JSON.parse(r)};localStorage.setItem(STORE,JSON.stringify(d));return d;}}catch{}
   return defaultData();
 }
 function saveData(d){try{localStorage.setItem(STORE,JSON.stringify(d));}catch{}}
@@ -177,13 +199,68 @@ function useFadeIn(dep){
   return v;
 }
 
-const card=(x={})=>({background:C.paper,border:`1.5px solid ${C.mist}`,borderRadius:14,padding:20,boxShadow:`0 2px 16px ${C.shadow}`,...x});
-const ST={fontFamily:"'Playfair Display',Georgia,serif",fontSize:18,color:C.forest,fontWeight:700,marginBottom:14};
-const LB={fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",color:C.olive,fontWeight:700,marginBottom:6,display:"block"};
-const INP={width:"100%",padding:"8px 12px",border:`1.5px solid ${C.mist}`,borderRadius:8,fontFamily:"'Lora',Georgia,serif",fontSize:14,color:C.ink,background:C.cream,outline:"none",boxSizing:"border-box"};
-const BTN=(bg=C.forest,x={})=>({background:bg,color:bg===C.cream?C.forest:"#fff",border:"none",borderRadius:8,padding:"7px 16px",cursor:"pointer",fontSize:13,fontFamily:"'Lora',Georgia,serif",fontWeight:600,transition:"all 0.18s",...x});
+// ── STYLE PRIMITIVES ──────────────────────────────────────────────────────────
+const card=(x={})=>({
+  background:C.surface,
+  border:`1px solid ${C.border}`,
+  borderRadius:12,
+  padding:20,
+  boxShadow:`0 4px 24px rgba(0,0,0,0.4)`,
+  ...x
+});
 
-const TABS=["🌿 Today","📅 Weekly","🌙 Monthly","🌾 Quarterly","🦅 Yearly","✅ Habits","🗺️ Vision Board","🪣 Bucket List"];
+const glowCard=(color=C.cyan,x={})=>({
+  ...card(),
+  border:`1px solid ${color}33`,
+  boxShadow:`0 0 0 1px ${color}11, 0 4px 24px rgba(0,0,0,0.5), inset 0 1px 0 ${color}11`,
+  ...x
+});
+
+const ST={
+  fontFamily:"'Space Grotesk',system-ui,sans-serif",
+  fontSize:11,
+  letterSpacing:"0.15em",
+  textTransform:"uppercase",
+  color:C.cyan,
+  fontWeight:700,
+  marginBottom:14,
+  display:"flex",
+  alignItems:"center",
+  gap:6,
+};
+
+const LB={fontSize:10,letterSpacing:"0.2em",textTransform:"uppercase",color:C.textMute,fontWeight:700,marginBottom:6,display:"block"};
+
+const INP={
+  width:"100%",
+  padding:"9px 13px",
+  border:`1px solid ${C.border}`,
+  borderRadius:8,
+  fontFamily:"'Space Grotesk',monospace",
+  fontSize:13,
+  color:C.text,
+  background:C.surface2,
+  outline:"none",
+  boxSizing:"border-box",
+  transition:"border-color 0.2s, box-shadow 0.2s",
+};
+
+const BTN=(bg=C.cyan,x={})=>({
+  background:bg===C.surface2?"transparent":bg,
+  color:bg===C.surface2?C.textDim:"#000",
+  border:bg===C.surface2?`1px solid ${C.border}`:"none",
+  borderRadius:8,
+  padding:"8px 18px",
+  cursor:"pointer",
+  fontSize:12,
+  fontFamily:"'Space Grotesk',monospace",
+  fontWeight:700,
+  letterSpacing:"0.05em",
+  transition:"all 0.18s",
+  ...x
+});
+
+const TABS=["⚡ TODAY","📡 WEEKLY","🌙 MONTHLY","◆ QUARTERLY","🦅 YEARLY","✅ HABITS","🗺️ VISION","🎯 BUCKET","📚 STUDY"];
 
 // ── COUNTDOWN ─────────────────────────────────────────────────────────────────
 function Countdown(){
@@ -197,17 +274,20 @@ function Countdown(){
     tick();const id=setInterval(tick,1000);return()=>clearInterval(id);
   },[]);
   return(
-    <div style={{background:`linear-gradient(135deg,${C.ink},#1a3020)`,borderRadius:14,padding:"18px 20px",border:`1px solid ${C.gold}40`}}>
-      <div style={{fontSize:10,letterSpacing:"0.25em",color:C.gold,textTransform:"uppercase",fontWeight:700,marginBottom:10}}>🎬 BLACK HAT USA · SEMPERIS PREMIERE · AUGUST 5 2026</div>
-      <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
+    <div style={{...glowCard(C.cyan),background:`linear-gradient(135deg,${C.surface} 0%,#0a1520 100%)`,position:"relative",overflow:"hidden"}}>
+      <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,transparent,${C.cyan},transparent)`}}/>
+      <div style={{fontSize:9,letterSpacing:"0.3em",color:C.cyan,textTransform:"uppercase",fontWeight:700,marginBottom:12}}>🎬 BLACK HAT USA · SEMPERIS PREMIERE · AUGUST 5 2026</div>
+      <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
         {[["DAYS",t.d],["HRS",t.h],["MIN",t.m],["SEC",t.s]].map(([l,v])=>(
-          <div key={l} style={{textAlign:"center",background:"rgba(217,146,1,0.12)",border:`1px solid ${C.gold}30`,borderRadius:10,padding:"10px 14px",minWidth:58}}>
-            <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:26,fontWeight:900,color:C.gold,lineHeight:1}}>{String(v).padStart(2,"0")}</div>
-            <div style={{fontSize:9,letterSpacing:"0.2em",color:"#a0b890",marginTop:3}}>{l}</div>
+          <div key={l} style={{textAlign:"center",background:`${C.cyan}08`,border:`1px solid ${C.cyan}22`,borderRadius:8,padding:"10px 12px",minWidth:54,flex:1}}>
+            <div style={{fontFamily:"'Space Grotesk',monospace",fontSize:28,fontWeight:900,color:C.cyan,lineHeight:1,textShadow:`0 0 20px ${C.cyanGlow}`}}>{String(v).padStart(2,"0")}</div>
+            <div style={{fontSize:8,letterSpacing:"0.2em",color:C.textMute,marginTop:3}}>{l}</div>
           </div>
         ))}
       </div>
-      <div style={{fontSize:11,color:"#a0b890",marginTop:10,fontStyle:"italic"}}>You are a Featured Defender. The red carpet is waiting. 🌹</div>
+      <div style={{fontSize:10,color:C.textDim,marginTop:10,fontStyle:"italic",borderTop:`1px solid ${C.border}`,paddingTop:9}}>
+        You are a Featured Defender. The red carpet is waiting. 🌹
+      </div>
     </div>
   );
 }
@@ -218,15 +298,29 @@ function Affirmation(){
   const [idx,setIdx]=useState(base);
   const [op,setOp]=useState(1);
   const go=(dir)=>{setOp(0);setTimeout(()=>{setIdx(i=>(i+dir+AFFIRMATIONS.length)%AFFIRMATIONS.length);setOp(1);},280);};
+  const aff=AFFIRMATIONS[idx];
   return(
-    <div style={{background:`linear-gradient(135deg,${C.forest},#2d5c36)`,borderRadius:14,padding:"18px 20px",border:`1px solid ${C.olive}40`}}>
-      <div style={{fontSize:10,letterSpacing:"0.25em",color:C.gold,textTransform:"uppercase",fontWeight:700,marginBottom:10}}>✨ Today's Affirmation</div>
-      <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:15,color:C.cream,lineHeight:1.75,fontStyle:"italic",minHeight:68,opacity:op,transition:"opacity 0.28s"}}>"{AFFIRMATIONS[idx]}"</div>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:12}}>
-        <span style={{fontSize:11,color:"#a0b890"}}>{idx+1}/{AFFIRMATIONS.length}</span>
+    <div style={{...glowCard(C.gold),background:`linear-gradient(135deg,${C.surface} 0%,#150f00 100%)`,position:"relative",overflow:"hidden"}}>
+      <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,transparent,${C.gold},transparent)`}}/>
+      <div style={{fontSize:9,letterSpacing:"0.3em",color:C.gold,textTransform:"uppercase",fontWeight:700,marginBottom:12}}>⚡ TODAY'S DECLARATION</div>
+      <div style={{
+        fontFamily:"'Playfair Display',Georgia,serif",
+        fontSize:14,
+        color:C.text,
+        lineHeight:1.85,
+        fontStyle:"italic",
+        minHeight:80,
+        opacity:op,
+        transition:"opacity 0.28s",
+        textShadow:`0 0 40px ${C.goldGlow}`,
+      }}>
+        "{aff}"
+      </div>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:12,borderTop:`1px solid ${C.border}`,paddingTop:9}}>
+        <span style={{fontSize:10,color:C.textMute,fontFamily:"monospace"}}>{idx+1}/{AFFIRMATIONS.length}</span>
         <div style={{display:"flex",gap:6}}>
-          <button onClick={()=>go(-1)} style={{...BTN("rgba(255,255,255,0.1)"),padding:"4px 12px",color:C.cream,fontSize:15}}>‹</button>
-          <button onClick={()=>go(1)} style={{...BTN(C.gold),padding:"4px 12px",fontSize:15}}>›</button>
+          <button onClick={()=>go(-1)} style={{...BTN(C.surface2),padding:"5px 12px",fontSize:13}}>‹</button>
+          <button onClick={()=>go(1)} style={{background:C.gold,color:"#000",border:"none",borderRadius:8,padding:"5px 14px",cursor:"pointer",fontSize:13,fontWeight:900}}>›</button>
         </div>
       </div>
     </div>
@@ -245,10 +339,10 @@ function Briefing({data,onSave}){
   const gen=useCallback(async()=>{
     setLoading(true);setErr("");
     try{
-      const prompt=`You are the personal AI assistant for Chaunda C. Dallas — healthcare cybersecurity strategist, Digital First Responder, grandmother, woman of faith. Generate her personalized morning briefing for today.
+      const prompt=`You are the personal AI command system for Chaunda C. Dallas — healthcare cybersecurity strategist, Digital First Responder, grandmother, woman of faith. Generate her personalized morning briefing.
 
 Context:
-- 28 years clinical emergency medicine, now cybersecurity
+- 28 years clinical emergency medicine, now cybersecurity strategist
 - Featured Defender in Semperis "Midnight in the War Room" premiering Black Hat Aug 5 — ${days} days away
 - WiCyS Technical Mentor Cohort 3 starts Jun 8-9
 - Relocating to Milwaukee mid-June for mother's dementia care  
@@ -256,15 +350,14 @@ Context:
 - Weekly focus: "${data.weeklyFocus}"
 - Pending tasks (${pending.length}): ${pending.map(t=>t.text).join(", ")||"all clear"}
 - Currently studying: ${data.currentRead}
-- Today's routine: Tea 6:30am, Affirmation 7:30am, Grandkids pickup 3:45pm, Learning 4pm, Exercise 6pm, Lights out 9:30pm
 
 Write her morning briefing in exactly 4 sections:
-1. 🌅 GOOD MORNING — faith-forward personal greeting (2 sentences max)
-2. 🎯 TODAY'S MISSION — top 3 specific priorities for today
-3. 📅 ON YOUR RADAR — 2-3 upcoming milestones (Black Hat countdown, Milwaukee, WiCyS)
-4. 💪 YOUR WORD TODAY — one powerful sentence that speaks to where she is right now
+1. ⚡ GOOD MORNING, DEFENDER — bold, faith-forward personal greeting (2 sentences — make it hit like a war cry)
+2. 🎯 TODAY'S MISSION — top 3 specific priorities, stated as commands
+3. 📡 ON YOUR RADAR — 2-3 upcoming milestones (Black Hat countdown, Milwaukee, WiCyS), stated as facts not reminders
+4. 🔥 YOUR WORD TODAY — one single sentence so powerful she'd put it on a banner
 
-Tone: warm, direct, faith-informed, no fluff. Every word earns its place.`;
+Tone: zero fluff. War room energy. Faith-informed. Direct. Every sentence earns its place or it doesn't exist.`;
 
       const res=await fetch("https://api.anthropic.com/v1/messages",{
         method:"POST",headers:{"Content-Type":"application/json"},
@@ -278,43 +371,62 @@ Tone: warm, direct, faith-informed, no fluff. Every word earns its place.`;
   },[data,days,pending]);
 
   return(
-    <div style={{...card(),background:`linear-gradient(160deg,#0e1e12,${C.forest})`,border:`1px solid ${C.gold}30`,color:C.cream}}>
+    <div style={{...glowCard(C.cyan),background:`linear-gradient(160deg,${C.surface} 0%,#050d14 100%)`,position:"relative",overflow:"hidden"}}>
+      <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,${C.cyan},${C.gold},${C.cyan})`}}/>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14,flexWrap:"wrap",gap:10}}>
         <div>
-          <div style={{fontSize:10,letterSpacing:"0.25em",color:C.gold,textTransform:"uppercase",fontWeight:700}}>☀️ AI Morning Briefing</div>
-          <div style={{fontSize:12,color:"#a0b890",marginTop:2}}>Powered by Claude · Personal to you</div>
+          <div style={{fontSize:9,letterSpacing:"0.3em",color:C.cyan,textTransform:"uppercase",fontWeight:700}}>☀️ AI MORNING BRIEFING</div>
+          <div style={{fontSize:11,color:C.textMute,marginTop:2,fontFamily:"monospace"}}>Powered by Claude · Personal to you · Classified: Chaunda only</div>
         </div>
-        <button onClick={gen} disabled={loading} style={{...BTN(C.gold),opacity:loading?0.7:1,display:"flex",alignItems:"center",gap:6}}>
-          {loading?<><span style={{display:"inline-block",animation:"spin 1s linear infinite"}}>⟳</span> Generating…</>:(text?"🔄 Regenerate":"✨ Generate My Briefing")}
+        <button onClick={gen} disabled={loading} style={{
+          background:loading?"transparent":`linear-gradient(135deg,${C.cyan},#0099bb)`,
+          color:loading?C.textDim:"#000",
+          border:loading?`1px solid ${C.border}`:"none",
+          borderRadius:8,padding:"8px 16px",cursor:"pointer",fontSize:11,
+          fontFamily:"'Space Grotesk',monospace",fontWeight:700,letterSpacing:"0.05em",
+          display:"flex",alignItems:"center",gap:6,transition:"all 0.2s",
+          opacity:loading?0.7:1,
+        }}>
+          {loading?<><span style={{display:"inline-block",animation:"spin 1s linear infinite"}}>⟳</span> GENERATING…</>:(text?"⟳ REGENERATE":"⚡ GENERATE BRIEFING")}
         </button>
       </div>
-      {err&&<div style={{background:"rgba(224,92,92,0.2)",borderRadius:8,padding:"10px 14px",fontSize:13,color:"#ffaaaa",marginBottom:12}}>{err}</div>}
+      {err&&<div style={{background:"rgba(255,51,85,0.1)",border:"1px solid rgba(255,51,85,0.3)",borderRadius:8,padding:"10px 14px",fontSize:12,color:C.red,marginBottom:12}}>{err}</div>}
       {!text&&!loading&&(
-        <div style={{textAlign:"center",padding:"24px",opacity:0.5}}>
-          <div style={{fontSize:28,marginBottom:6}}>☀️</div>
-          <div style={{fontSize:13,fontStyle:"italic",color:"#a0b890"}}>Hit Generate to start your day with intention.</div>
+        <div style={{textAlign:"center",padding:"28px",opacity:0.4}}>
+          <div style={{fontSize:32,marginBottom:8}}>⚡</div>
+          <div style={{fontSize:12,color:C.textMute,fontFamily:"monospace",letterSpacing:"0.1em"}}>AWAITING INITIALIZATION</div>
         </div>
       )}
       {loading&&(
-        <div style={{textAlign:"center",padding:"24px"}}>
-          <div style={{display:"flex",justifyContent:"center",gap:6}}>
-            {[0,1,2].map(i=><div key={i} style={{width:8,height:8,borderRadius:"50%",background:C.gold,animation:`bounce 1.2s ease-in-out ${i*0.2}s infinite`}}/>)}
+        <div style={{textAlign:"center",padding:"28px"}}>
+          <div style={{display:"flex",justifyContent:"center",gap:6,marginBottom:12}}>
+            {[0,1,2].map(i=><div key={i} style={{width:6,height:6,borderRadius:"50%",background:C.cyan,animation:`bounce 1.2s ease-in-out ${i*0.2}s infinite`,boxShadow:`0 0 10px ${C.cyan}`}}/>)}
           </div>
-          <div style={{fontSize:12,color:"#a0b890",marginTop:10,fontStyle:"italic"}}>Preparing your briefing…</div>
+          <div style={{fontSize:10,color:C.textMute,fontFamily:"monospace",letterSpacing:"0.2em"}}>COMPILING YOUR BRIEFING…</div>
         </div>
       )}
-      {text&&!loading&&<div style={{fontFamily:"'Lora',Georgia,serif",fontSize:14,lineHeight:1.85,color:C.cream,whiteSpace:"pre-wrap",borderTop:`1px solid rgba(255,255,255,0.1)`,paddingTop:14}}>{text}</div>}
+      {text&&!loading&&(
+        <div style={{
+          fontFamily:"'Space Grotesk',monospace",
+          fontSize:13,
+          lineHeight:1.9,
+          color:C.text,
+          whiteSpace:"pre-wrap",
+          borderTop:`1px solid ${C.border}`,
+          paddingTop:14,
+        }}>{text}</div>
+      )}
     </div>
   );
 }
 
-// ── HABIT TRACKER (Casey-style) ────────────────────────────────────────────────
+// ── HABIT TRACKER ─────────────────────────────────────────────────────────────
 function HabitTracker({data,update}){
   const dayLabels=["T","F","Sa","Su","M","T","W"];
-  const todayIdx=0;
   const allChecks=Object.values(data.habits).reduce((a,h)=>a+h.days.filter(Boolean).length,0);
   const totalChecks=Object.keys(data.habits).length*7;
   const score=Math.round((allChecks/totalChecks)*100);
+  const scoreColor=score>=80?C.green:score>=50?C.cyan:score>=30?C.gold:C.red;
 
   const toggle=(habit,i)=>{
     const h={...data.habits,[habit]:{...data.habits[habit],days:[...data.habits[habit].days]}};
@@ -324,35 +436,37 @@ function HabitTracker({data,update}){
 
   return(
     <div style={{display:"flex",flexDirection:"column",gap:20,maxWidth:800}}>
-      <div style={{...card(),background:`linear-gradient(120deg,${C.olive},${C.forest})`,color:"#fff",border:"none"}}>
+      <div style={{...glowCard(scoreColor),background:`linear-gradient(135deg,${C.surface},${C.surface2})`,position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,transparent,${scoreColor},transparent)`}}/>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
           <div>
-            <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:20,fontWeight:700}}>Habit Tracker</div>
-            <div style={{fontSize:12,opacity:0.75,marginTop:2}}>Week of Jun 4 · {allChecks}/{totalChecks} completions</div>
+            <div style={{fontSize:9,letterSpacing:"0.3em",color:scoreColor,textTransform:"uppercase",fontWeight:700,marginBottom:4}}>HABIT TRACKER</div>
+            <div style={{fontSize:13,color:C.textDim}}>Week of Jun 4 · {allChecks}/{totalChecks} completions</div>
           </div>
           <div style={{textAlign:"right"}}>
-            <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:32,fontWeight:900,color:C.gold}}>{score}%</div>
-            <div style={{fontSize:10,color:"rgba(255,255,255,0.6)",letterSpacing:"0.1em"}}>WEEKLY SCORE</div>
+            <div style={{fontFamily:"'Space Grotesk',monospace",fontSize:40,fontWeight:900,color:scoreColor,lineHeight:1,textShadow:`0 0 30px ${scoreColor}66`}}>{score}%</div>
+            <div style={{fontSize:9,color:C.textMute,letterSpacing:"0.15em"}}>WEEKLY SCORE</div>
           </div>
         </div>
-        <div style={{height:6,background:"rgba(255,255,255,0.15)",borderRadius:99,overflow:"hidden",marginTop:12}}>
-          <div style={{height:"100%",width:`${score}%`,background:`linear-gradient(90deg,${C.gold},#f0b429)`,borderRadius:99,transition:"width 0.6s ease"}}/>
+        <div style={{height:4,background:C.surface3,borderRadius:99,overflow:"hidden",marginTop:14}}>
+          <div style={{height:"100%",width:`${score}%`,background:`linear-gradient(90deg,${scoreColor},${scoreColor}aa)`,borderRadius:99,transition:"width 0.8s cubic-bezier(0.4,0,0.2,1)",boxShadow:`0 0 12px ${scoreColor}`}}/>
         </div>
       </div>
 
       <div style={card()}>
-        <div style={{fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",color:"#999",fontWeight:700,marginBottom:14}}>Daily Habits</div>
+        <div style={ST}><span style={{color:C.cyan}}>◆</span> Daily Habits</div>
         {/* Date row */}
-        <div style={{display:"flex",alignItems:"center",marginBottom:10}}>
+        <div style={{display:"flex",alignItems:"center",marginBottom:12}}>
           <div style={{flex:1}}/>
-          <div style={{display:"flex",gap:6,marginRight:4}}>
+          <div style={{display:"flex",gap:5}}>
             {[4,5,6,7,8,9,10].map((d,i)=>(
-              <div key={i} style={{width:34,height:34,borderRadius:8,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
-                background:i===0?C.forest:"transparent",
-                border:i===0?`none`:`1.5px solid ${C.mist}`,
+              <div key={i} style={{
+                width:34,height:34,borderRadius:7,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
+                background:i===0?`${C.cyan}15`:"transparent",
+                border:i===0?`1px solid ${C.cyan}44`:`1px solid ${C.border}`,
               }}>
-                <div style={{fontSize:9,color:i===0?"#fff":"#aaa",letterSpacing:"0.05em"}}>{dayLabels[i]}</div>
-                <div style={{fontSize:12,fontWeight:700,color:i===0?"#fff":C.ink}}>{d}</div>
+                <div style={{fontSize:8,color:i===0?C.cyan:C.textMute,letterSpacing:"0.05em"}}>{dayLabels[i]}</div>
+                <div style={{fontSize:11,fontWeight:700,color:i===0?C.cyan:C.textDim}}>{d}</div>
               </div>
             ))}
           </div>
@@ -360,31 +474,208 @@ function HabitTracker({data,update}){
         {Object.entries(data.habits).map(([key,habit])=>{
           const done=habit.days.filter(Boolean).length;
           return(
-            <div key={key} style={{marginBottom:16,paddingBottom:16,borderBottom:`1px solid ${C.mist}`}}>
+            <div key={key} style={{marginBottom:14,paddingBottom:14,borderBottom:`1px solid ${C.border}`}}>
               <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
                 <span style={{fontSize:18}}>{habit.icon}</span>
                 <div style={{flex:1}}>
-                  <div style={{fontSize:14,color:C.ink,fontWeight:600}}>{habit.label}</div>
-                  <div style={{height:3,background:C.mist,borderRadius:99,overflow:"hidden",marginTop:4}}>
-                    <div style={{height:"100%",width:`${(done/7)*100}%`,background:`linear-gradient(90deg,${C.olive},${C.gold})`,borderRadius:99,transition:"width 0.4s ease"}}/>
+                  <div style={{fontSize:13,color:C.text,fontWeight:600}}>{habit.label}</div>
+                  <div style={{height:3,background:C.surface3,borderRadius:99,overflow:"hidden",marginTop:4}}>
+                    <div style={{height:"100%",width:`${(done/7)*100}%`,background:`linear-gradient(90deg,${C.cyan},${C.gold})`,borderRadius:99,transition:"width 0.4s ease",boxShadow:`0 0 8px ${C.cyanGlow}`}}/>
                   </div>
                 </div>
-                <div style={{fontSize:12,color:C.olive,fontWeight:700,minWidth:28,textAlign:"right"}}>{done}/5</div>
+                <div style={{fontSize:11,color:C.cyan,fontWeight:700,minWidth:28,textAlign:"right",fontFamily:"monospace"}}>{done}/7</div>
               </div>
-              <div style={{display:"flex",gap:6,justifyContent:"flex-end"}}>
+              <div style={{display:"flex",gap:5,justifyContent:"flex-end"}}>
                 {habit.days.map((checked,i)=>(
                   <div key={i} onClick={()=>toggle(key,i)} style={{
-                    width:34,height:34,borderRadius:8,cursor:"pointer",
-                    background:checked?`linear-gradient(135deg,${C.olive},${C.gold})`:"transparent",
-                    border:`1.5px solid ${checked?C.olive:C.mist}`,
+                    width:34,height:34,borderRadius:7,cursor:"pointer",
+                    background:checked?`linear-gradient(135deg,${C.cyan}33,${C.cyan}11)`:"transparent",
+                    border:`1px solid ${checked?C.cyan:C.border}`,
                     display:"flex",alignItems:"center",justifyContent:"center",
-                    fontSize:14,transition:"all 0.18s",transform:checked?"scale(1.05)":"scale(1)",
-                  }}>{checked&&<span style={{color:"#fff",fontSize:13,fontWeight:700}}>✓</span>}</div>
+                    fontSize:14,transition:"all 0.18s",
+                    boxShadow:checked?`0 0 12px ${C.cyanGlow}`:"none",
+                  }}>{checked&&<span style={{color:C.cyan,fontSize:14,fontWeight:900}}>✓</span>}</div>
                 ))}
               </div>
             </div>
           );
         })}
+      </div>
+    </div>
+  );
+}
+
+// ── STUDY TAB ─────────────────────────────────────────────────────────────────
+function StudyTab(){
+  const [examDays,setExamDays]=useState(0);
+  useEffect(()=>{
+    const diff=EXAM_DATE-new Date();
+    setExamDays(Math.max(0,Math.ceil(diff/86400000)));
+  },[]);
+
+  const SCHEDULE=[
+    {time:"8:00–9:00",tag:"SEC+",tagColor:C.cyan,title:"Security+ Core Block",desc:"1 Gibson/Shelley chapter → Professor Messer video → 5 ExamCompass questions. Active recall: explain the concept back before moving on."},
+    {time:"9:00–9:30",tag:"LAB",tagColor:C.green,title:"TryHackMe: HealthHackHer (4×/week)",desc:"Pre-Security path · Network Fundamentals · OSINT. Skip Tue/Thu — replace with AWS Skill Builder. Attacker mindset for patient & IoMT defense."},
+    {time:"9:30–10:00",tag:"BREAK",tagColor:C.textMute,title:"Hard Stop — Move Your Body",desc:"Walk, stretch, water. No screens. Spaced repetition requires rest intervals to consolidate memory."},
+    {time:"10:00–11:30",tag:"AWS",tagColor:C.amber,title:"AWS Cloud Practitioner Block",desc:"AWS Skill Builder · CLF-C02 modules in order. Focus: Cloud Concepts → Security & Compliance → Technology → Billing."},
+    {time:"11:30–12:00",tag:"AI QUIZ",tagColor:"#a78bfa",title:"Active Recall with Claude",desc:"Paste today's topics → ask Claude for 10 scenario-based exam questions. Grade yourself. Flag misses in Apple Notes for tomorrow."},
+    {time:"12:00–1:00",tag:"LUNCH",tagColor:C.textMute,title:"Real Lunch — Full Break",desc:"No passive study. Your brain files away morning material during downtime. This is not wasted time."},
+    {time:"1:00–2:30",tag:"SEC+",tagColor:C.cyan,title:"Security+ Deep Dive (Rotating Domain)",desc:"Mon/Wed: GRC + compliance (maps to HCISPP). Tue/Thu: Network security, cryptography, cloud security. Fri: Threats, vulnerabilities, IR."},
+    {time:"3:00–4:30",tag:"ROTATING",tagColor:C.gold,title:"Afternoon Specialty Block",desc:"Mon/Wed: HCISPP (HIMSS, NIST, HHS HIPAA). Tue/Thu: AWS Skill Builder. Fri: IEC 62443 / CISA ICS-CERT. Weekend: Full practice exams."},
+    {time:"Evening",tag:"OPTIONAL",tagColor:C.textMute,title:"DFR Lab OR LinkedIn (never both)",desc:"Alternating nights only. Keep light — evenings are consolidation time. If exhausted, skip. Rest is part of the system."},
+  ];
+
+  const PHASES=[
+    {num:"PHASE 1",days:"Days 1–7",dates:"Jun 7–13",title:"FOUNDATION LOCK-IN",color:C.cyan,items:["SEC+ Domains 1–2: General Security Concepts + Threats & Vulnerabilities","AWS: Cloud Concepts + Cloud Economics (CLF-C02 Module 1–2)","Daily 10-question Claude quiz on each cert","Flag every weak area in Apple Notes #sec-misses and #aws-misses","ExamCompass baseline score by Day 5"]},
+    {num:"PHASE 2",days:"Days 8–14",dates:"Jun 14–20",title:"TECHNICAL DEPTH",color:C.amber,items:["SEC+ Domains 3–4: Security Architecture + Implementation","AWS: Security, Compliance & Governance + Technology (S3, EC2, IAM)","TryHackMe: escalate to Network Fundamentals rooms","First full practice exam (Sec+) — mine it for gaps, don't stress the score","HCISPP overlap mapping: where does Sec+ content directly apply?"]},
+    {num:"PHASE 3",days:"Days 15–21",dates:"Jun 21–27",title:"EXAM SIMULATION",color:C.green,items:["SEC+ Domains 4–5: Operations & Incident Response + GRC","AWS: Billing, Pricing, Support + full CLF-C02 practice exam","Daily timed 30-question mixed practice (both certs)","Performance-Based Question (PBQ) drills for Sec+","Day 20: light review only. Day 21: rest, hydrate, sleep by 10pm."]},
+  ];
+
+  const DOMAINS_SEC=[
+    {name:"1.0 General Security Concepts",pct:"12%"},
+    {name:"2.0 Threats, Vulnerabilities & Mitigations",pct:"22%"},
+    {name:"3.0 Security Architecture",pct:"18%"},
+    {name:"4.0 Security Operations",pct:"28%"},
+    {name:"5.0 Security Program Management & Oversight",pct:"20%"},
+  ];
+
+  const DOMAINS_AWS=[
+    {name:"1. Cloud Concepts",pct:"24%"},
+    {name:"2. Security & Compliance",pct:"30%"},
+    {name:"3. Cloud Technology & Services",pct:"34%"},
+    {name:"4. Billing, Pricing & Support",pct:"12%"},
+  ];
+
+  return(
+    <div style={{display:"flex",flexDirection:"column",gap:20}}>
+      {/* Banner */}
+      <div style={{...glowCard(C.cyan),background:`linear-gradient(135deg,${C.surface} 0%,#020810 100%)`,position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,${C.cyan},${C.amber},${C.green})`}}/>
+        <div style={{position:"absolute",top:0,right:0,bottom:0,width:200,background:`radial-gradient(ellipse at right,${C.cyan}08,transparent)`,pointerEvents:"none"}}/>
+        <div style={{fontSize:9,letterSpacing:"0.3em",color:C.cyan,textTransform:"uppercase",fontWeight:700,marginBottom:6}}>📚 STUDY COMMAND CENTER</div>
+        <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:20,color:C.text,fontWeight:700,marginBottom:4}}>21-Day Dual Cert Sprint</div>
+        <div style={{fontSize:12,color:C.textDim}}>CompTIA Security+ SY0-701 · AWS Cloud Practitioner CLF-C02</div>
+      </div>
+
+      {/* Countdowns */}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
+        <div style={{...glowCard(C.cyan),position:"relative",overflow:"hidden"}}>
+          <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:C.cyan}}/>
+          <div style={{fontSize:9,letterSpacing:"0.2em",color:C.cyan,fontWeight:700,marginBottom:6}}>COMPTIA SECURITY+ SY0-701</div>
+          <div style={{display:"flex",alignItems:"baseline",gap:6}}>
+            <span style={{fontFamily:"'Space Grotesk',monospace",fontSize:44,fontWeight:900,color:C.cyan,lineHeight:1,textShadow:`0 0 30px ${C.cyanGlow}`}}>{examDays}</span>
+            <span style={{fontSize:12,color:C.textDim}}>days</span>
+          </div>
+          <div style={{fontSize:11,color:C.textMute,marginTop:4}}>Target exam: June 28, 2026</div>
+        </div>
+        <div style={{...glowCard(C.amber),position:"relative",overflow:"hidden"}}>
+          <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:C.amber}}/>
+          <div style={{fontSize:9,letterSpacing:"0.2em",color:C.amber,fontWeight:700,marginBottom:6}}>AWS CLOUD PRACTITIONER CLF-C02</div>
+          <div style={{display:"flex",alignItems:"baseline",gap:6}}>
+            <span style={{fontFamily:"'Space Grotesk',monospace",fontSize:44,fontWeight:900,color:C.amber,lineHeight:1,textShadow:`0 0 30px rgba(255,153,0,0.4)`}}>{examDays}</span>
+            <span style={{fontSize:12,color:C.textDim}}>days</span>
+          </div>
+          <div style={{fontSize:11,color:C.textMute,marginTop:4}}>Parallel sprint window · Same 21-day track</div>
+        </div>
+      </div>
+
+      {/* Daily Schedule */}
+      <div style={card()}>
+        <div style={ST}><span>◆</span> Daily Schedule — Mon–Fri (5–6 hrs)</div>
+        <div style={{display:"flex",flexDirection:"column",gap:0,border:`1px solid ${C.border}`,borderRadius:8,overflow:"hidden"}}>
+          {SCHEDULE.map((s,i)=>(
+            <div key={i} style={{display:"grid",gridTemplateColumns:"90px auto 1fr",borderBottom:i<SCHEDULE.length-1?`1px solid ${C.border}`:"none"}}>
+              <div style={{background:C.surface2,padding:"12px 14px",display:"flex",alignItems:"center",fontFamily:"monospace",fontSize:10,color:C.textMute,borderRight:`1px solid ${C.border}`}}>{s.time}</div>
+              <div style={{padding:"12px 10px",display:"flex",alignItems:"center",borderRight:`1px solid ${C.border}`,background:C.surface}}>
+                <span style={{fontSize:9,fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",padding:"3px 7px",borderRadius:4,background:`${s.tagColor}15`,color:s.tagColor,border:`1px solid ${s.tagColor}33`,whiteSpace:"nowrap"}}>{s.tag}</span>
+              </div>
+              <div style={{padding:"12px 14px",background:C.surface}}>
+                <div style={{fontSize:12,fontWeight:700,color:C.text,marginBottom:2}}>{s.title}</div>
+                <div style={{fontSize:11,color:C.textMute,lineHeight:1.5}}>{s.desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 21-Day Phases */}
+      <div>
+        <div style={ST}><span>◆</span> 21-Day Phase Breakdown</div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12}}>
+          {PHASES.map((p,i)=>(
+            <div key={i} style={{...glowCard(p.color),position:"relative",overflow:"hidden"}}>
+              <div style={{position:"absolute",bottom:0,left:0,right:0,height:3,background:`linear-gradient(90deg,${p.color},transparent)`}}/>
+              <div style={{fontSize:9,letterSpacing:"0.2em",color:p.color,fontWeight:700,marginBottom:2}}>{p.num} · {p.days}</div>
+              <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:15,fontWeight:700,color:C.text,marginBottom:2}}>{p.title}</div>
+              <div style={{fontSize:10,color:C.textMute,fontFamily:"monospace",marginBottom:10}}>{p.dates}</div>
+              {p.items.map((item,j)=>(
+                <div key={j} style={{fontSize:11,color:C.textDim,padding:"5px 0",borderTop:`1px solid ${C.border}`,display:"flex",gap:7,alignItems:"flex-start",lineHeight:1.4}}>
+                  <span style={{color:p.color,flexShrink:0,fontFamily:"monospace"}}>→</span>{item}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Domain Coverage */}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
+        <div style={card()}>
+          <div style={{...ST,color:C.cyan}}><span>◆</span> Security+ SY0-701 Domains</div>
+          {DOMAINS_SEC.map((d,i)=>(
+            <div key={i} style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
+              <div style={{fontSize:11,color:C.textDim,flex:1,lineHeight:1.3}}>{d.name}</div>
+              <div style={{width:70,height:4,background:C.surface3,borderRadius:99,overflow:"hidden",flexShrink:0}}>
+                <div style={{height:"100%",width:"0%",background:C.cyan,borderRadius:99}}/>
+              </div>
+              <div style={{fontSize:10,color:C.textMute,fontFamily:"monospace",width:30,textAlign:"right",flexShrink:0}}>{d.pct}</div>
+            </div>
+          ))}
+        </div>
+        <div style={card()}>
+          <div style={{...ST,color:C.amber}}><span>◆</span> AWS CLF-C02 Domains</div>
+          {DOMAINS_AWS.map((d,i)=>(
+            <div key={i} style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
+              <div style={{fontSize:11,color:C.textDim,flex:1,lineHeight:1.3}}>{d.name}</div>
+              <div style={{width:70,height:4,background:C.surface3,borderRadius:99,overflow:"hidden",flexShrink:0}}>
+                <div style={{height:"100%",width:"0%",background:C.amber,borderRadius:99}}/>
+              </div>
+              <div style={{fontSize:10,color:C.textMute,fontFamily:"monospace",width:30,textAlign:"right",flexShrink:0}}>{d.pct}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* AI Study Methods */}
+      <div>
+        <div style={ST}><span>◆</span> How to Study with AI (The Right Way)</div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+          {[
+            {icon:"🎯",title:"Active Recall Quizzing",color:C.cyan,desc:"After each chapter, tell Claude what you studied and ask for 10 scenario-based SY0-701-style questions. Wrong answers get a mini-lesson immediately.",prompt:"I just finished Security+ Domain 2 on malware types. Give me 10 scenario-based SY0-701-style questions. After I answer, explain what I got wrong and why."},
+            {icon:"🏥",title:"Healthcare Context Anchoring",color:C.green,desc:"Your 28 years of clinical context is a cheat code. Ask Claude to translate every concept into a healthcare or IoMT scenario. This locks memory faster than abstract definitions.",prompt:"Explain the difference between authentication and authorization using an Epic EMR login scenario in an ER setting."},
+            {icon:"🔁",title:"Feynman Technique Loop",color:C.amber,desc:"Explain a concept to Claude as if teaching a new ER tech. Claude will identify gaps in your explanation. Single highest-ROI study method.",prompt:"I'm going to explain PKI like I'm teaching a new ER tech. Interrupt me if I get anything wrong or skip something important."},
+            {icon:"📋",title:"Gap Tracking System",color:"#a78bfa",desc:"Every missed question goes in Apple Notes under #sec-misses or #aws-misses. Start each morning with a 10-min warm-up on yesterday's misses.",prompt:"These are my flagged weak areas from yesterday: [paste list]. Quiz me specifically on these topics before I start today's new material."},
+          ].map((m,i)=>(
+            <div key={i} style={{...glowCard(m.color)}}>
+              <div style={{fontSize:22,marginBottom:8}}>{m.icon}</div>
+              <div style={{fontSize:13,fontWeight:700,color:C.text,marginBottom:6}}>{m.title}</div>
+              <div style={{fontSize:11,color:C.textMute,lineHeight:1.6,marginBottom:10}}>{m.desc}</div>
+              <div style={{background:C.bg,border:`1px solid ${C.border}`,borderLeft:`3px solid ${m.color}`,borderRadius:6,padding:"9px 12px",fontFamily:"monospace",fontSize:10,color:m.color,lineHeight:1.6}}>"{m.prompt}"</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Tip */}
+      <div style={{...card(),borderLeft:`3px solid ${C.gold}`,background:`${C.goldDim}`}}>
+        <div style={{display:"flex",gap:12,alignItems:"flex-start"}}>
+          <span style={{fontSize:18,flexShrink:0}}>⚡</span>
+          <div style={{fontSize:12,color:C.textDim,lineHeight:1.7}}>
+            <span style={{color:C.gold,fontWeight:700}}>Job search + study conflict strategy: </span>
+            Treat 8am–4:30pm as sacred study hours. Job applications and outreach happen after 4:30pm — not during study blocks. A passing Security+ score before June 28 is a concrete deliverable you can tell every warm contact about RIGHT NOW.{" "}
+            <span style={{color:C.gold,fontWeight:700}}>Use it as a live proof point in your Anthony Freed, Aví D., and Bill Keeler outreach this week.</span>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -398,7 +689,7 @@ export default function App(){
   const [newWin,setNewWin]=useState("");
   const [newBucket,setNewBucket]=useState("");
   const [newIdea,setNewIdea]=useState("");
-  const [newVision,setNewVision]=useState({emoji:"✨",label:"",desc:""});
+  const [newVision,setNewVision]=useState({emoji:"⚡",label:"",desc:""});
   const [showVAdd,setShowVAdd]=useState(false);
   const visible=useFadeIn(tab);
 
@@ -412,50 +703,80 @@ export default function App(){
   const toggleBucket=(i)=>{const b=[...data.bucketList];b[i]={...b[i],done:!b[i].done};update({bucketList:b});};
   const addBucketItem=()=>{if(!newBucket.trim())return;update({bucketList:[...data.bucketList,{text:newBucket,done:false}]});setNewBucket("");};
   const addIdea=()=>{if(!newIdea.trim())return;update({ideasParking:[...data.ideasParking,newIdea]});setNewIdea("");};
-  const addVision=()=>{if(!newVision.label)return;update({visionBoard:[...data.visionBoard,{...newVision}]});setNewVision({emoji:"✨",label:"",desc:""});setShowVAdd(false);};
+  const addVision=()=>{if(!newVision.label)return;update({visionBoard:[...data.visionBoard,{...newVision}]});setNewVision({emoji:"⚡",label:"",desc:""});setShowVAdd(false);};
   const saveBriefing=(t,d)=>update({savedBriefing:t,lastBriefingDate:d});
 
   const today="Thu Jun 4";
 
   return(
-    <div style={{minHeight:"100vh",background:`linear-gradient(160deg,${C.forest} 0%,#0E2415 40%,#0a1a0d 100%)`,fontFamily:"'Lora',Georgia,serif",color:C.ink}}>
+    <div style={{minHeight:"100vh",background:C.bg,fontFamily:"'Space Grotesk',system-ui,sans-serif",color:C.text,position:"relative"}}>
+
+      {/* Animated grid BG */}
+      <div style={{position:"fixed",inset:0,backgroundImage:`linear-gradient(${C.border} 1px,transparent 1px),linear-gradient(90deg,${C.border} 1px,transparent 1px)`,backgroundSize:"40px 40px",opacity:0.25,pointerEvents:"none",zIndex:0}}/>
+
+      {/* Ambient glow top */}
+      <div style={{position:"fixed",top:0,left:"50%",transform:"translateX(-50%)",width:600,height:200,background:`radial-gradient(ellipse at top,${C.cyan}08,transparent 70%)`,pointerEvents:"none",zIndex:0}}/>
 
       {/* HEADER */}
-      <div style={{padding:"20px 20px 0",maxWidth:1100,margin:"0 auto"}}>
+      <div style={{position:"relative",zIndex:1,padding:"20px 20px 0",maxWidth:1100,margin:"0 auto"}}>
         <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",flexWrap:"wrap",gap:12,marginBottom:6}}>
           <div>
-            <div style={{fontSize:10,letterSpacing:"0.25em",color:C.gold,textTransform:"uppercase",fontWeight:700}}>Digital First Responder HQ</div>
-            <h1 style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:26,color:C.cream,margin:"3px 0 2px",fontWeight:700,letterSpacing:"-0.02em"}}>Hey Chaunda ✦</h1>
-            <div style={{fontSize:11,color:"#a0b890"}}>{new Date().toLocaleDateString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}</div>
+            <div style={{fontSize:9,letterSpacing:"0.35em",color:C.cyan,textTransform:"uppercase",fontWeight:700,marginBottom:4}}>
+              ◆ DIGITAL FIRST RESPONDER HQ ◆
+            </div>
+            <h1 style={{
+              fontFamily:"'Playfair Display',Georgia,serif",
+              fontSize:28,
+              color:C.text,
+              margin:"3px 0 4px",
+              fontWeight:900,
+              letterSpacing:"-0.02em",
+              textShadow:`0 0 40px ${C.cyanGlow}`,
+            }}>
+              CHAUNDA C. DALLAS
+            </h1>
+            <div style={{fontSize:10,color:C.textMute,fontFamily:"monospace",letterSpacing:"0.1em"}}>
+              {new Date().toLocaleDateString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric"}).toUpperCase()}
+            </div>
           </div>
           <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-            {[["🎬","Aug 5","Black Hat"],["🎓","Jun 8","WiCyS"],["✈️","Mid-Jun","Milwaukee"]].map(([em,d,l])=>(
-              <div key={l} style={{background:"rgba(217,146,1,0.15)",border:`1px solid ${C.gold}40`,borderRadius:10,padding:"7px 12px",textAlign:"center"}}>
-                <div style={{fontSize:15}}>{em}</div>
-                <div style={{fontSize:12,color:C.gold,fontWeight:700}}>{d}</div>
-                <div style={{fontSize:9,color:"#a0b890",letterSpacing:"0.05em"}}>{l}</div>
+            {[["🎬","AUG 5","BLACK HAT",C.cyan],["🎓","JUN 8","WiCyS",C.gold],["✈️","MID-JUN","MILWAUKEE",C.amber]].map(([em,d,l,color])=>(
+              <div key={l} style={{background:C.surface,border:`1px solid ${color}33`,borderRadius:8,padding:"8px 12px",textAlign:"center",boxShadow:`0 0 12px ${color}11`}}>
+                <div style={{fontSize:14}}>{em}</div>
+                <div style={{fontSize:11,color:color,fontWeight:700,fontFamily:"monospace",letterSpacing:"0.05em"}}>{d}</div>
+                <div style={{fontSize:8,color:C.textMute,letterSpacing:"0.1em"}}>{l}</div>
               </div>
             ))}
           </div>
         </div>
 
         {/* TABS */}
-        <div style={{display:"flex",gap:2,marginTop:16,overflowX:"auto",paddingBottom:2,scrollbarWidth:"none"}}>
+        <div style={{display:"flex",gap:1,marginTop:18,overflowX:"auto",paddingBottom:2,scrollbarWidth:"none"}}>
           {TABS.map((t,i)=>(
             <button key={i} onClick={()=>setTab(i)} style={{
-              padding:"8px 13px",borderRadius:"9px 9px 0 0",border:"none",cursor:"pointer",
-              background:tab===i?C.paper:"rgba(255,255,255,0.06)",
-              color:tab===i?C.forest:"#a0b890",
-              fontFamily:"'Lora',Georgia,serif",fontSize:12,fontWeight:tab===i?700:400,
-              transition:"all 0.18s",whiteSpace:"nowrap",flexShrink:0,
+              padding:"9px 14px",
+              borderRadius:"8px 8px 0 0",
+              border:`1px solid ${tab===i?C.cyan+"44":C.border}`,
+              borderBottom:"none",
+              cursor:"pointer",
+              background:tab===i?C.surface:`${C.surface}88`,
+              color:tab===i?C.cyan:C.textMute,
+              fontFamily:"'Space Grotesk',monospace",
+              fontSize:11,
+              fontWeight:tab===i?700:400,
+              letterSpacing:"0.05em",
+              transition:"all 0.18s",
+              whiteSpace:"nowrap",
+              flexShrink:0,
+              boxShadow:tab===i?`0 0 12px ${C.cyanGlow},inset 0 1px 0 ${C.cyan}22`:"none",
             }}>{t}</button>
           ))}
         </div>
       </div>
 
       {/* CONTENT */}
-      <div style={{background:C.mist,minHeight:"calc(100vh - 150px)",paddingBottom:60}}>
-        <div style={{maxWidth:1100,margin:"0 auto",padding:"22px 18px",opacity:visible?1:0,transform:visible?"translateY(0)":"translateY(12px)",transition:"all 0.32s cubic-bezier(0.4,0,0.2,1)"}}>
+      <div style={{position:"relative",zIndex:1,background:C.surface,minHeight:"calc(100vh - 140px)",borderTop:`1px solid ${C.border}`,paddingBottom:60}}>
+        <div style={{maxWidth:1100,margin:"0 auto",padding:"22px 18px",opacity:visible?1:0,transform:visible?"translateY(0)":"translateY(10px)",transition:"all 0.3s cubic-bezier(0.4,0,0.2,1)"}}>
 
           {/* TODAY */}
           {tab===0&&(
@@ -466,32 +787,34 @@ export default function App(){
               </div>
               <Briefing data={data} onSave={saveBriefing}/>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:18}}>
+                {/* Calendar */}
                 <div style={card()}>
-                  <div style={ST}>📅 Today's Calendar</div>
-                  <div style={{display:"flex",flexDirection:"column",gap:7}}>
+                  <div style={ST}><span>◆</span> Today's Calendar</div>
+                  <div style={{display:"flex",flexDirection:"column",gap:6}}>
                     {WEEK_EVENTS[today].map((ev,i)=>(
-                      <div key={i} style={{display:"flex",gap:8,alignItems:"flex-start",padding:"7px 9px",borderRadius:7,background:C.cream,borderLeft:`3px solid ${CAL_COLORS[ev.cal]||C.olive}`}}>
-                        <div style={{fontSize:10,color:C.olive,fontWeight:700,minWidth:60}}>{ev.time}</div>
-                        <div style={{fontSize:12,color:C.ink}}>{ev.title}</div>
+                      <div key={i} style={{display:"flex",gap:8,alignItems:"center",padding:"8px 10px",borderRadius:7,background:C.surface2,borderLeft:`3px solid ${CAL_COLORS[ev.cal]||C.cyan}`}}>
+                        <div style={{fontSize:10,color:C.textMute,fontWeight:700,minWidth:65,fontFamily:"monospace"}}>{ev.time}</div>
+                        <div style={{fontSize:12,color:C.text}}>{ev.title}</div>
                       </div>
                     ))}
                   </div>
                 </div>
+                {/* Tasks */}
                 <div style={card()}>
-                  <div style={ST}>✅ Tasks</div>
-                  <div style={{display:"flex",flexDirection:"column",gap:7,marginBottom:12}}>
+                  <div style={ST}><span>◆</span> Active Tasks</div>
+                  <div style={{display:"flex",flexDirection:"column",gap:6,marginBottom:12}}>
                     {data.tasks.map(t=>(
-                      <div key={t.id} onClick={()=>toggleTask(t.id)} style={{display:"flex",gap:8,alignItems:"center",cursor:"pointer",padding:"7px 9px",borderRadius:7,background:t.done?"#edf7ed":C.cream,transition:"all 0.15s"}}>
-                        <div style={{width:18,height:18,borderRadius:5,border:`2px solid ${t.done?C.olive:C.gold}`,background:t.done?C.olive:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all 0.15s"}}>
-                          {t.done&&<span style={{color:"#fff",fontSize:11}}>✓</span>}
+                      <div key={t.id} onClick={()=>toggleTask(t.id)} style={{display:"flex",gap:8,alignItems:"center",cursor:"pointer",padding:"8px 10px",borderRadius:7,background:t.done?`${C.green}08`:C.surface2,border:`1px solid ${t.done?C.green+"33":C.border}`,transition:"all 0.15s"}}>
+                        <div style={{width:18,height:18,borderRadius:4,border:`1.5px solid ${t.done?C.green:C.border}`,background:t.done?`${C.green}22`:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all 0.15s",boxShadow:t.done?`0 0 8px ${C.green}44`:"none"}}>
+                          {t.done&&<span style={{color:C.green,fontSize:11,fontWeight:900}}>✓</span>}
                         </div>
-                        <span style={{fontSize:12,color:t.done?"#888":C.ink,textDecoration:t.done?"line-through":"none"}}>{t.text}</span>
+                        <span style={{fontSize:12,color:t.done?C.textMute:C.text,textDecoration:t.done?"line-through":"none"}}>{t.text}</span>
                       </div>
                     ))}
                   </div>
                   <div style={{display:"flex",gap:6}}>
-                    <input value={newTask} onChange={e=>setNewTask(e.target.value)} onKeyDown={e=>e.key==="Enter"&&addTask()} placeholder="Add task…" style={{...INP,flex:1,fontSize:13}}/>
-                    <button onClick={addTask} style={BTN(C.forest)}>+</button>
+                    <input value={newTask} onChange={e=>setNewTask(e.target.value)} onKeyDown={e=>e.key==="Enter"&&addTask()} placeholder="Add task…" style={INP}/>
+                    <button onClick={addTask} style={{background:C.cyan,color:"#000",border:"none",borderRadius:8,padding:"8px 16px",cursor:"pointer",fontSize:13,fontWeight:900}}>+</button>
                   </div>
                 </div>
               </div>
@@ -501,52 +824,57 @@ export default function App(){
           {/* WEEKLY */}
           {tab===1&&(
             <div style={{display:"flex",flexDirection:"column",gap:18}}>
-              {/* Rotating quote bar — Casey style */}
-              <div style={{...card({padding:"14px 20px"}),background:`linear-gradient(135deg,${C.forest},#2d5c36)`,border:"none",textAlign:"center"}}>
-                <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:15,color:C.cream,fontStyle:"italic"}}>
+              <div style={{...glowCard(C.cyan),textAlign:"center",padding:"16px 20px"}}>
+                <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:15,color:C.text,fontStyle:"italic",textShadow:`0 0 30px ${C.cyanGlow}`}}>
                   "{AFFIRMATIONS[Math.floor(Date.now()/86400000)%AFFIRMATIONS.length]}"
                 </div>
               </div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:18}}>
                 <div style={card()}>
-                  <div style={ST}>🎯 Weekly Focus</div>
+                  <div style={ST}><span>◆</span> Weekly Focus</div>
                   <input value={data.weeklyFocus} onChange={e=>update({weeklyFocus:e.target.value})} style={INP}/>
                   <div style={{marginTop:14}}>
                     <span style={LB}>Goals This Week</span>
                     {data.weeklyGoals.map((g,i)=>(
-                      <div key={i} style={{padding:"6px 10px",borderRadius:7,background:C.cream,marginBottom:5,fontSize:13,display:"flex",alignItems:"center",gap:8}}>
-                        <span style={{color:C.gold}}>→</span>{g}
+                      <div key={i} style={{padding:"7px 10px",borderRadius:7,background:C.surface2,border:`1px solid ${C.border}`,marginBottom:5,fontSize:12,display:"flex",alignItems:"center",gap:8}}>
+                        <span style={{color:C.cyan,fontFamily:"monospace"}}>→</span>{g}
                       </div>
                     ))}
                   </div>
                 </div>
                 <div style={card()}>
-                  <div style={ST}>📚 Currently Studying</div>
+                  <div style={ST}><span>◆</span> Currently Studying</div>
                   <input value={data.currentRead} onChange={e=>update({currentRead:e.target.value})} style={INP}/>
                   <div style={{display:"flex",gap:6,marginTop:10}}>
                     {["reading","paused","completed"].map(s=>(
-                      <button key={s} onClick={()=>update({readStatus:s})} style={{...BTN(data.readStatus===s?C.forest:C.cream),color:data.readStatus===s?"#fff":C.forest,border:`1.5px solid ${C.forest}`,flex:1,fontSize:11,textTransform:"capitalize"}}>{s}</button>
+                      <button key={s} onClick={()=>update({readStatus:s})} style={{
+                        flex:1,fontSize:10,letterSpacing:"0.1em",textTransform:"uppercase",
+                        background:data.readStatus===s?`${C.cyan}22`:"transparent",
+                        color:data.readStatus===s?C.cyan:C.textMute,
+                        border:`1px solid ${data.readStatus===s?C.cyan+"44":C.border}`,
+                        borderRadius:7,padding:"7px",cursor:"pointer",fontFamily:"'Space Grotesk',monospace",fontWeight:700,
+                      }}>{s}</button>
                     ))}
                   </div>
                   <div style={{marginTop:14}}>
-                    <span style={LB}>Wins This Week 🏆</span>
-                    {data.weeklyWins.map((w,i)=>(<div key={i} style={{padding:"5px 9px",borderRadius:6,background:"#f0faf0",marginBottom:5,fontSize:12,borderLeft:`3px solid ${C.olive}`}}>🎉 {w}</div>))}
+                    <span style={LB}>Wins This Week</span>
+                    {data.weeklyWins.map((w,i)=>(<div key={i} style={{padding:"6px 10px",borderRadius:6,background:`${C.green}08`,border:`1px solid ${C.green}22`,marginBottom:5,fontSize:12,borderLeft:`3px solid ${C.green}`,color:C.text}}>🎉 {w}</div>))}
                     <div style={{display:"flex",gap:6,marginTop:7}}>
-                      <input value={newWin} onChange={e=>setNewWin(e.target.value)} onKeyDown={e=>e.key==="Enter"&&addWin()} placeholder="Log a win…" style={{...INP,flex:1,fontSize:12}}/>
-                      <button onClick={addWin} style={BTN(C.gold)}>+</button>
+                      <input value={newWin} onChange={e=>setNewWin(e.target.value)} onKeyDown={e=>e.key==="Enter"&&addWin()} placeholder="Log a win…" style={{...INP,flex:1}}/>
+                      <button onClick={addWin} style={{background:C.gold,color:"#000",border:"none",borderRadius:8,padding:"8px 14px",cursor:"pointer",fontWeight:900}}>+</button>
                     </div>
                   </div>
                 </div>
               </div>
               {/* Weekly calendar */}
               <div style={card()}>
-                <div style={ST}>📅 Week of Jun 4–10, 2026</div>
+                <div style={ST}><span>◆</span> Week of Jun 4–10, 2026</div>
                 <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:6}}>
                   {Object.keys(WEEK_EVENTS).map(day=>(
-                    <div key={day} style={{background:day===today?`${C.forest}12`:C.cream,borderRadius:9,padding:"9px 7px",border:day===today?`2px solid ${C.forest}`:`1.5px solid ${C.mist}`}}>
-                      <div style={{fontSize:10,fontWeight:700,color:day===today?C.forest:C.olive,marginBottom:5}}>{day}</div>
+                    <div key={day} style={{background:day===today?`${C.cyan}08`:C.surface2,borderRadius:8,padding:"9px 7px",border:day===today?`1px solid ${C.cyan}44`:`1px solid ${C.border}`}}>
+                      <div style={{fontSize:9,fontWeight:700,color:day===today?C.cyan:C.textMute,marginBottom:5,letterSpacing:"0.05em"}}>{day}</div>
                       {WEEK_EVENTS[day].filter(e=>e.cal!=="routine").slice(0,3).map((ev,i)=>(
-                        <div key={i} style={{fontSize:9,padding:"2px 4px",borderRadius:3,marginBottom:2,background:`${CAL_COLORS[ev.cal]||C.olive}20`,color:CAL_COLORS[ev.cal]||C.olive,fontWeight:600,lineHeight:1.3}}>
+                        <div key={i} style={{fontSize:8,padding:"2px 4px",borderRadius:3,marginBottom:2,background:`${CAL_COLORS[ev.cal]||C.cyan}15`,color:CAL_COLORS[ev.cal]||C.cyan,fontWeight:600,lineHeight:1.3}}>
                           {ev.title.length>22?ev.title.slice(0,20)+"…":ev.title}
                         </div>
                       ))}
@@ -555,8 +883,8 @@ export default function App(){
                 </div>
               </div>
               <div style={card()}>
-                <div style={ST}>💭 Reflection</div>
-                <textarea value={data.reflection} onChange={e=>update({reflection:e.target.value})} rows={4} placeholder="What's on your mind? Gratitude, wins, thoughts…" style={{...INP,resize:"vertical",lineHeight:1.7}}/>
+                <div style={ST}><span>◆</span> Reflection</div>
+                <textarea value={data.reflection} onChange={e=>update({reflection:e.target.value})} rows={4} placeholder="What's on your mind? Wins, thoughts, gratitude…" style={{...INP,resize:"vertical",lineHeight:1.7}}/>
               </div>
             </div>
           )}
@@ -564,14 +892,15 @@ export default function App(){
           {/* MONTHLY */}
           {tab===2&&(
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:18}}>
-              <div style={{...card(),gridColumn:"1/-1",background:`linear-gradient(120deg,${C.burnt},${C.gold})`,color:"#fff",border:"none"}}>
-                <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:22,fontWeight:700}}>June 2026 — Monthly Reflection</div>
-                <div style={{fontSize:13,opacity:0.85,marginTop:3}}>Consistency beats intensity. What does this month say about you?</div>
+              <div style={{...glowCard(C.gold),gridColumn:"1/-1",position:"relative",overflow:"hidden"}}>
+                <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,${C.gold},${C.amber})`}}/>
+                <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:22,fontWeight:900,color:C.text}}>June 2026 — Monthly Reflection</div>
+                <div style={{fontSize:12,color:C.textDim,marginTop:4}}>Consistency beats intensity. What does this month say about you?</div>
               </div>
-              {[["wins","🏆 Biggest Wins","What are you celebrating?"],["challenge","💪 Biggest Challenge","Be honest."],["grateful","🙏 Most Grateful For","What showed up?"],["learned","💡 Most Important Lesson","What shifted?"],["health","❤️ Your Health This Month","Body & mind."],["growth","🌱 Growth","What expanded?"],["different","🔄 Do Differently","No judgment."],["intention","🌅 Intention Next Month","One sentence."]].map(([key,title,ph])=>(
+              {[["wins","🏆 Biggest Wins","What are you celebrating?"],["challenge","⚡ Biggest Challenge","Be honest."],["grateful","🙏 Most Grateful For","What showed up?"],["learned","💡 Most Important Lesson","What shifted?"],["health","❤️ Your Health","Body & mind."],["growth","🌱 Growth","What expanded?"],["different","🔄 Do Differently","No judgment."],["intention","🎯 Next Month's Intention","One sentence."]].map(([key,title,ph])=>(
                 <div key={key} style={card()}>
-                  <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:14,color:C.forest,fontWeight:700,marginBottom:9}}>{title}</div>
-                  <textarea value={data.monthlyReflection[key]||""} onChange={e=>update({monthlyReflection:{...data.monthlyReflection,[key]:e.target.value}})} rows={3} placeholder={ph} style={{...INP,resize:"vertical",lineHeight:1.7,fontSize:13}}/>
+                  <div style={{fontSize:13,color:C.cyan,fontWeight:700,marginBottom:9,letterSpacing:"0.05em"}}>{title}</div>
+                  <textarea value={data.monthlyReflection[key]||""} onChange={e=>update({monthlyReflection:{...data.monthlyReflection,[key]:e.target.value}})} rows={3} placeholder={ph} style={{...INP,resize:"vertical",lineHeight:1.7,fontSize:12}}/>
                 </div>
               ))}
             </div>
@@ -580,53 +909,50 @@ export default function App(){
           {/* QUARTERLY */}
           {tab===3&&(
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:18}}>
-              <div style={{...card(),gridColumn:"1/-1",background:`linear-gradient(120deg,${C.forest},${C.olive})`,color:"#fff",border:"none"}}>
-                <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:22,fontWeight:700}}>Q2 2026 — Apr → Jun</div>
-                <div style={{fontSize:13,opacity:0.85,marginTop:3}}>Black Hat season. Pre-sell runway. Milwaukee transition. Build the pipeline.</div>
+              <div style={{...glowCard(C.cyan),gridColumn:"1/-1",position:"relative",overflow:"hidden"}}>
+                <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,${C.cyan},${C.gold},${C.amber})`}}/>
+                <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:22,fontWeight:900,color:C.text}}>Q2 2026 — Apr → Jun</div>
+                <div style={{fontSize:12,color:C.textDim,marginTop:4}}>Black Hat season. Pre-sell runway. Milwaukee transition. Build the pipeline.</div>
               </div>
               {Object.entries(data.quarterlyGoals).map(([cat,goals])=>(
                 <div key={cat} style={card()}>
-                  <div style={ST}>{cat==="career"?"💼 Career":cat==="health"?"❤️ Health":cat==="finance"?"💰 Finance":"🌿 Personal"}</div>
-                  {goals.map((g,i)=>(<div key={i} style={{padding:"6px 9px",borderRadius:6,background:C.cream,marginBottom:5,fontSize:12,display:"flex",alignItems:"center",gap:7}}><span style={{color:C.gold}}>◆</span>{g}</div>))}
+                  <div style={ST}><span>◆</span>{cat==="career"?"💼 CAREER":cat==="health"?"❤️ HEALTH":cat==="finance"?"💰 FINANCE":"🌿 PERSONAL"}</div>
+                  {goals.map((g,i)=>(<div key={i} style={{padding:"7px 10px",borderRadius:7,background:C.surface2,border:`1px solid ${C.border}`,marginBottom:5,fontSize:12,display:"flex",alignItems:"center",gap:7}}><span style={{color:C.gold,fontFamily:"monospace"}}>◆</span>{g}</div>))}
                 </div>
               ))}
-              {/* Finances — dollar amounts (Casey style) */}
               <div style={card()}>
-                <div style={ST}>💰 Finances — Q2 2026</div>
-                {[
-                  ["Debt Paid Off","debtPaid","debtGoal","$"],
-                  ["Savings Progress","savingsAmount","savingsGoal","$"],
-                ].map(([label,valKey,goalKey,sym])=>(
+                <div style={ST}><span>◆</span> 💰 Finances — Q2 2026</div>
+                {[["Debt Paid Off","debtPaid","debtGoal"],["Savings Progress","savingsAmount","savingsGoal"]].map(([label,valKey,goalKey])=>(
                   <div key={label} style={{marginBottom:18}}>
                     <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
-                      <span style={{fontSize:13,fontWeight:600}}>{label}</span>
-                      <span style={{fontSize:12,color:C.olive}}>{sym}{data[valKey].toLocaleString()} / {sym}{data[goalKey].toLocaleString()}</span>
+                      <span style={{fontSize:12,fontWeight:600,color:C.text}}>{label}</span>
+                      <span style={{fontSize:11,color:C.textMute,fontFamily:"monospace"}}>${data[valKey].toLocaleString()} / ${data[goalKey].toLocaleString()}</span>
                     </div>
-                    <div style={{height:8,background:C.mist,borderRadius:99,overflow:"hidden",marginBottom:5}}>
-                      <div style={{height:"100%",width:`${Math.min((data[valKey]/data[goalKey])*100,100)}%`,background:`linear-gradient(90deg,${C.olive},${C.gold})`,borderRadius:99,transition:"width 0.5s"}}/>
+                    <div style={{height:6,background:C.surface3,borderRadius:99,overflow:"hidden",marginBottom:6}}>
+                      <div style={{height:"100%",width:`${Math.min((data[valKey]/data[goalKey])*100,100)}%`,background:`linear-gradient(90deg,${C.cyan},${C.gold})`,borderRadius:99,transition:"width 0.5s",boxShadow:`0 0 8px ${C.cyanGlow}`}}/>
                     </div>
-                    <input type="number" value={data[valKey]} onChange={e=>update({[valKey]:+e.target.value})} style={{...INP,fontSize:12}} placeholder={`Enter amount…`}/>
+                    <input type="number" value={data[valKey]} onChange={e=>update({[valKey]:+e.target.value})} style={{...INP,fontSize:12}}/>
                   </div>
                 ))}
                 <div>
-                  <span style={LB}>Net Worth (savings − debt)</span>
-                  <div style={{fontSize:22,fontWeight:700,fontFamily:"'Playfair Display',Georgia,serif",color:data.netWorth>=0?C.forest:"#e05c5c"}}>${data.netWorth.toLocaleString()}</div>
-                  <input type="number" value={data.netWorth} onChange={e=>update({netWorth:+e.target.value})} style={{...INP,fontSize:12,marginTop:6}} placeholder="Net worth…"/>
+                  <span style={LB}>Net Worth</span>
+                  <div style={{fontSize:28,fontWeight:900,fontFamily:"'Space Grotesk',monospace",color:data.netWorth>=0?C.green:C.red,textShadow:data.netWorth>=0?`0 0 20px ${C.green}44`:`0 0 20px ${C.red}44`}}>${data.netWorth.toLocaleString()}</div>
+                  <input type="number" value={data.netWorth} onChange={e=>update({netWorth:+e.target.value})} style={{...INP,fontSize:12,marginTop:6}}/>
                 </div>
               </div>
               <div style={card()}>
-                <div style={ST}>💡 Ideas Parking Lot</div>
-                {data.ideasParking.length===0&&<div style={{fontSize:12,color:"#999",fontStyle:"italic",marginBottom:10}}>Drop ideas here so you don't lose them…</div>}
-                {data.ideasParking.map((idea,i)=>(<div key={i} style={{padding:"6px 9px",borderRadius:6,background:"#fffbeb",marginBottom:5,fontSize:12,borderLeft:`3px solid ${C.gold}`}}>💡 {idea}</div>))}
+                <div style={ST}><span>◆</span> 💡 Ideas Parking Lot</div>
+                {data.ideasParking.length===0&&<div style={{fontSize:12,color:C.textMute,fontStyle:"italic",marginBottom:10}}>Drop ideas here so you don't lose them…</div>}
+                {data.ideasParking.map((idea,i)=>(<div key={i} style={{padding:"6px 10px",borderRadius:6,background:`${C.gold}08`,border:`1px solid ${C.gold}22`,marginBottom:5,fontSize:12,borderLeft:`3px solid ${C.gold}`,color:C.text}}>💡 {idea}</div>))}
                 <div style={{display:"flex",gap:6,marginTop:8}}>
-                  <input value={newIdea} onChange={e=>setNewIdea(e.target.value)} onKeyDown={e=>e.key==="Enter"&&addIdea()} placeholder="Park an idea…" style={{...INP,flex:1,fontSize:12}}/>
-                  <button onClick={addIdea} style={BTN(C.gold)}>+</button>
+                  <input value={newIdea} onChange={e=>setNewIdea(e.target.value)} onKeyDown={e=>e.key==="Enter"&&addIdea()} placeholder="Park an idea…" style={{...INP,flex:1}}/>
+                  <button onClick={addIdea} style={{background:C.gold,color:"#000",border:"none",borderRadius:8,padding:"8px 14px",cursor:"pointer",fontWeight:900}}>+</button>
                 </div>
               </div>
               <div style={{...card(),gridColumn:"1/-1"}}>
-                <div style={ST}>🏆 Q2 Wins</div>
-                {data.quarterlyWins.length===0&&<div style={{fontSize:12,color:"#999",fontStyle:"italic",marginBottom:8}}>No wins logged yet — start celebrating your progress.</div>}
-                {data.quarterlyWins.map((w,i)=>(<div key={i} style={{padding:"7px 10px",borderRadius:7,background:"#f0faf0",marginBottom:6,fontSize:13,borderLeft:`3px solid ${C.olive}`}}>🎉 {w}</div>))}
+                <div style={ST}><span>◆</span> 🏆 Q2 Wins</div>
+                {data.quarterlyWins.length===0&&<div style={{fontSize:12,color:C.textMute,fontStyle:"italic",marginBottom:8}}>No wins logged yet — start celebrating.</div>}
+                {data.quarterlyWins.map((w,i)=>(<div key={i} style={{padding:"7px 10px",borderRadius:7,background:`${C.green}08`,border:`1px solid ${C.green}22`,marginBottom:6,fontSize:13,borderLeft:`3px solid ${C.green}`}}>🎉 {w}</div>))}
                 <input placeholder="Log a quarterly win… (Enter)" style={INP} onKeyDown={e=>{if(e.key==="Enter"&&e.target.value.trim()){update({quarterlyWins:[...data.quarterlyWins,e.target.value]});e.target.value="";}}}/>
               </div>
             </div>
@@ -635,33 +961,33 @@ export default function App(){
           {/* YEARLY */}
           {tab===4&&(
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:18}}>
-              <div style={{...card(),gridColumn:"1/-1",background:`linear-gradient(135deg,#0E1E12,${C.forest})`,color:C.cream,border:"none"}}>
-                <div style={{fontSize:10,letterSpacing:"0.2em",color:C.gold,textTransform:"uppercase",marginBottom:6}}>Life Vision 2026</div>
-                <textarea value={data.lifeVision} onChange={e=>update({lifeVision:e.target.value})} rows={2} style={{...INP,background:"transparent",color:C.cream,border:"none",fontSize:16,fontFamily:"'Playfair Display',Georgia,serif",fontWeight:700,lineHeight:1.55,padding:"4px 0",resize:"none",width:"100%"}}/>
+              <div style={{...glowCard(C.cyan),gridColumn:"1/-1",position:"relative",overflow:"hidden"}}>
+                <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,${C.cyan},${C.gold},${C.magenta})`}}/>
+                <div style={{fontSize:9,letterSpacing:"0.3em",color:C.cyan,marginBottom:6}}>LIFE VISION 2026</div>
+                <textarea value={data.lifeVision} onChange={e=>update({lifeVision:e.target.value})} rows={2} style={{...INP,background:"transparent",color:C.text,border:"none",fontSize:16,fontFamily:"'Playfair Display',Georgia,serif",fontWeight:700,lineHeight:1.55,padding:"4px 0",resize:"none",width:"100%",textShadow:`0 0 30px ${C.cyanGlow}`}}/>
               </div>
               <div style={card()}>
-                <div style={ST}>🔒 Non-Negotiables</div>
-                {data.nonNegotiables.map((n,i)=>(<div key={i} style={{padding:"7px 10px",borderRadius:7,background:C.cream,marginBottom:6,fontSize:13,display:"flex",alignItems:"center",gap:8}}><span style={{color:C.burnt,fontSize:15}}>✦</span>{n}</div>))}
+                <div style={ST}><span>◆</span> NON-NEGOTIABLES</div>
+                {data.nonNegotiables.map((n,i)=>(<div key={i} style={{padding:"8px 10px",borderRadius:7,background:C.surface2,border:`1px solid ${C.border}`,marginBottom:6,fontSize:13,display:"flex",alignItems:"center",gap:8}}><span style={{color:C.gold,fontSize:14}}>✦</span>{n}</div>))}
               </div>
               <div style={card()}>
-                <div style={ST}>🎯 2026 Focus</div>
+                <div style={ST}><span>◆</span> 2026 FOCUS</div>
                 {["Land remote healthcare cyber role","Walk the Black Hat red carpet","HCISPP certification","WOSB certification complete","Support Mom's care transition","Build DFR into recognizable IP"].map((f,i)=>(
-                  <div key={i} style={{padding:"6px 9px",borderRadius:6,background:C.cream,marginBottom:5,fontSize:12,display:"flex",alignItems:"center",gap:7}}><span style={{color:C.gold}}>→</span>{f}</div>
+                  <div key={i} style={{padding:"7px 10px",borderRadius:6,background:C.surface2,border:`1px solid ${C.border}`,marginBottom:5,fontSize:12,display:"flex",alignItems:"center",gap:7}}><span style={{color:C.cyan,fontFamily:"monospace"}}>→</span>{f}</div>
                 ))}
               </div>
               {data.focusBuckets.map((bucket,i)=>(
                 <div key={i} style={card()}>
-                  <div style={ST}>{bucket.title}</div>
-                  {bucket.items.map((item,j)=>(<div key={j} style={{padding:"6px 9px",borderRadius:6,background:C.cream,marginBottom:5,fontSize:12,display:"flex",alignItems:"center",gap:7}}><span style={{color:[C.olive,C.gold,C.burnt,C.forest][i%4]}}>◆</span>{item}</div>))}
+                  <div style={ST}><span>◆</span>{bucket.title.toUpperCase()}</div>
+                  {bucket.items.map((item,j)=>(<div key={j} style={{padding:"6px 10px",borderRadius:6,background:C.surface2,border:`1px solid ${C.border}`,marginBottom:5,fontSize:12,display:"flex",alignItems:"center",gap:7}}><span style={{color:[C.cyan,C.gold,C.amber,C.magenta][i%4],fontFamily:"monospace"}}>◆</span>{item}</div>))}
                 </div>
               ))}
-              {/* + New Bucket button (Casey style) */}
-              <div onClick={()=>{const t=prompt("Bucket title?");if(t)update({focusBuckets:[...data.focusBuckets,{title:t,items:[]}]});}} style={{...card({padding:"20px"}),cursor:"pointer",border:`2px dashed ${C.gold}`,background:"transparent",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:120,transition:"all 0.2s"}}
-                onMouseEnter={e=>e.currentTarget.style.background=`${C.gold}10`}
+              <div onClick={()=>{const t=prompt("Bucket title?");if(t)update({focusBuckets:[...data.focusBuckets,{title:t,items:[]}]});}} style={{cursor:"pointer",border:`1px dashed ${C.cyan}44`,borderRadius:12,background:"transparent",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:120,transition:"all 0.2s"}}
+                onMouseEnter={e=>e.currentTarget.style.background=`${C.cyan}05`}
                 onMouseLeave={e=>e.currentTarget.style.background="transparent"}
               >
-                <div style={{fontSize:28,color:C.gold}}>+</div>
-                <div style={{fontSize:12,color:C.gold,fontWeight:700,marginTop:4}}>New Bucket</div>
+                <div style={{fontSize:28,color:C.cyan}}>+</div>
+                <div style={{fontSize:11,color:C.cyan,fontWeight:700,marginTop:4,letterSpacing:"0.1em"}}>NEW BUCKET</div>
               </div>
             </div>
           )}
@@ -672,39 +998,40 @@ export default function App(){
           {/* VISION BOARD */}
           {tab===6&&(
             <div>
-              <div style={{...card(),background:`linear-gradient(135deg,${C.burnt},${C.gold})`,color:"#fff",border:"none",marginBottom:18}}>
-                <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:22,fontWeight:700}}>✨ Vision Board — I Already Have This</div>
-                <div style={{fontSize:13,opacity:0.85,marginTop:3}}>Not wishes. Declarations. Things you KNOW are coming.</div>
+              <div style={{...glowCard(C.gold),marginBottom:18,position:"relative",overflow:"hidden"}}>
+                <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,${C.gold},${C.amber})`}}/>
+                <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:22,fontWeight:900,color:C.text}}>✨ Vision Board — I Already Have This</div>
+                <div style={{fontSize:12,color:C.textDim,marginTop:4}}>Not wishes. Declarations. Things you KNOW are coming.</div>
               </div>
               <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:14}}>
                 {data.visionBoard.map((item,i)=>(
-                  <div key={i} style={{...card(),textAlign:"center",transition:"transform 0.2s,box-shadow 0.2s"}}
-                    onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-4px) scale(1.02)";e.currentTarget.style.boxShadow=`0 12px 32px ${C.shadow}`;}}
-                    onMouseLeave={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow=`0 2px 16px ${C.shadow}`;}}
+                  <div key={i} style={{...glowCard([C.cyan,C.gold,C.amber,C.magenta,C.green,C.cyan,C.gold,C.amber][i%8]),textAlign:"center",transition:"transform 0.2s,box-shadow 0.2s",cursor:"default"}}
+                    onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-4px) scale(1.02)";}}
+                    onMouseLeave={e=>{e.currentTarget.style.transform="none";}}
                   >
                     <div style={{fontSize:44,marginBottom:8}}>{item.emoji}</div>
-                    <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:15,fontWeight:700,color:C.forest,marginBottom:5}}>{item.label}</div>
-                    <div style={{fontSize:12,color:"#666",lineHeight:1.6,fontStyle:"italic"}}>{item.desc}</div>
+                    <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:15,fontWeight:700,color:C.text,marginBottom:5}}>{item.label}</div>
+                    <div style={{fontSize:11,color:C.textMute,lineHeight:1.6,fontStyle:"italic"}}>{item.desc}</div>
                   </div>
                 ))}
-                <div onClick={()=>setShowVAdd(true)} style={{...card(),textAlign:"center",cursor:"pointer",border:`2px dashed ${C.gold}`,background:"transparent",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:150,transition:"all 0.2s"}}
-                  onMouseEnter={e=>e.currentTarget.style.background=`${C.gold}10`}
+                <div onClick={()=>setShowVAdd(true)} style={{cursor:"pointer",border:`1px dashed ${C.cyan}44`,borderRadius:12,background:"transparent",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:150,transition:"all 0.2s"}}
+                  onMouseEnter={e=>e.currentTarget.style.background=`${C.cyan}05`}
                   onMouseLeave={e=>e.currentTarget.style.background="transparent"}
                 >
-                  <div style={{fontSize:28,color:C.gold}}>+</div>
-                  <div style={{fontSize:12,color:C.gold,fontWeight:700,marginTop:4}}>Add Vision Card</div>
+                  <div style={{fontSize:28,color:C.cyan}}>+</div>
+                  <div style={{fontSize:11,color:C.cyan,fontWeight:700,marginTop:4,letterSpacing:"0.1em"}}>ADD VISION CARD</div>
                 </div>
               </div>
               {showVAdd&&(
-                <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.6)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:100}}>
-                  <div style={{...card(),width:320,maxWidth:"90vw"}}>
-                    <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:17,color:C.forest,fontWeight:700,marginBottom:14}}>Add Vision Card</div>
+                <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.8)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:100,backdropFilter:"blur(4px)"}}>
+                  <div style={{...glowCard(C.cyan),width:340,maxWidth:"90vw"}}>
+                    <div style={{fontSize:9,letterSpacing:"0.3em",color:C.cyan,marginBottom:14}}>NEW VISION CARD</div>
                     <span style={LB}>Emoji</span><input value={newVision.emoji} onChange={e=>setNewVision({...newVision,emoji:e.target.value})} style={{...INP,marginBottom:9}}/>
-                    <span style={LB}>Title</span><input value={newVision.label} onChange={e=>setNewVision({...newVision,label:e.target.value})} style={{...INP,marginBottom:9}} placeholder="Dream Car"/>
+                    <span style={LB}>Title</span><input value={newVision.label} onChange={e=>setNewVision({...newVision,label:e.target.value})} style={{...INP,marginBottom:9}} placeholder="Dream Role"/>
                     <span style={LB}>Declaration</span><input value={newVision.desc} onChange={e=>setNewVision({...newVision,desc:e.target.value})} style={{...INP,marginBottom:14}} placeholder="It's already mine because…"/>
                     <div style={{display:"flex",gap:7}}>
-                      <button onClick={addVision} style={{...BTN(C.forest),flex:1}}>Add to Board</button>
-                      <button onClick={()=>setShowVAdd(false)} style={{...BTN(C.cream),flex:1,color:C.forest,border:`1.5px solid ${C.mist}`}}>Cancel</button>
+                      <button onClick={addVision} style={{background:C.cyan,color:"#000",border:"none",borderRadius:8,padding:"9px",cursor:"pointer",flex:1,fontWeight:900,fontSize:12}}>ADD TO BOARD</button>
+                      <button onClick={()=>setShowVAdd(false)} style={{background:"transparent",color:C.textMute,border:`1px solid ${C.border}`,borderRadius:8,padding:"9px",cursor:"pointer",flex:1,fontSize:12}}>CANCEL</button>
                     </div>
                   </div>
                 </div>
@@ -715,44 +1042,48 @@ export default function App(){
           {/* BUCKET LIST */}
           {tab===7&&(
             <div style={{maxWidth:680}}>
-              <div style={{...card(),background:`linear-gradient(120deg,${C.forest},#2a5a35)`,color:C.cream,border:"none",marginBottom:18}}>
-                <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:22,fontWeight:700}}>🪣 Life Bucket List</div>
-                <div style={{fontSize:12,opacity:0.8,marginTop:3}}>Things to do before you kick the bucket. Check them off as you LIVE.</div>
-                <div style={{fontSize:13,color:C.gold,marginTop:7,fontWeight:700}}>{data.bucketList.filter(b=>b.done).length} / {data.bucketList.length} complete</div>
+              <div style={{...glowCard(C.cyan),marginBottom:18,position:"relative",overflow:"hidden"}}>
+                <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,${C.cyan},${C.magenta})`}}/>
+                <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:22,fontWeight:900,color:C.text}}>🎯 Life Bucket List</div>
+                <div style={{fontSize:12,color:C.textDim,marginTop:3}}>Things to do before you kick the bucket. Check them off as you LIVE.</div>
+                <div style={{fontSize:13,color:C.cyan,marginTop:7,fontWeight:700,fontFamily:"monospace"}}>{data.bucketList.filter(b=>b.done).length} / {data.bucketList.length} COMPLETE</div>
               </div>
-              <div style={{display:"flex",flexDirection:"column",gap:9,marginBottom:14}}>
+              <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:14}}>
                 {data.bucketList.map((item,i)=>(
-                  <div key={i} onClick={()=>toggleBucket(i)} style={{...card({padding:"13px 16px"}),display:"flex",alignItems:"center",gap:12,cursor:"pointer",background:item.done?"linear-gradient(120deg,#f0faf0,#e8f5e8)":C.paper,borderLeft:`4px solid ${item.done?C.olive:C.gold}`,transition:"all 0.18s"}}>
-                    <div style={{width:24,height:24,borderRadius:7,border:`2px solid ${item.done?C.olive:C.gold}`,background:item.done?C.olive:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all 0.18s"}}>
-                      {item.done&&<span style={{color:"#fff",fontSize:13}}>✓</span>}
+                  <div key={i} onClick={()=>toggleBucket(i)} style={{...card({padding:"12px 16px"}),display:"flex",alignItems:"center",gap:12,cursor:"pointer",background:item.done?`${C.green}08`:C.surface,border:`1px solid ${item.done?C.green+"33":C.border}`,borderLeft:`4px solid ${item.done?C.green:C.cyan}`,transition:"all 0.18s"}}>
+                    <div style={{width:22,height:22,borderRadius:6,border:`1.5px solid ${item.done?C.green:C.border}`,background:item.done?`${C.green}22`:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all 0.18s",boxShadow:item.done?`0 0 8px ${C.green}44`:"none"}}>
+                      {item.done&&<span style={{color:C.green,fontSize:12,fontWeight:900}}>✓</span>}
                     </div>
-                    <span style={{fontSize:14,color:item.done?"#888":C.ink,textDecoration:item.done?"line-through":"none",lineHeight:1.5}}>{item.text}</span>
+                    <span style={{fontSize:13,color:item.done?C.textMute:C.text,textDecoration:item.done?"line-through":"none",lineHeight:1.5}}>{item.text}</span>
                   </div>
                 ))}
               </div>
               <div style={{display:"flex",gap:6}}>
                 <input value={newBucket} onChange={e=>setNewBucket(e.target.value)} onKeyDown={e=>e.key==="Enter"&&addBucketItem()} placeholder="Add a bucket list item…" style={{...INP,flex:1}}/>
-                <button onClick={addBucketItem} style={BTN(C.gold)}>+</button>
+                <button onClick={addBucketItem} style={{background:C.cyan,color:"#000",border:"none",borderRadius:8,padding:"8px 16px",cursor:"pointer",fontWeight:900,fontSize:14}}>+</button>
               </div>
             </div>
           )}
+
+          {/* STUDY */}
+          {tab===8&&<StudyTab/>}
 
         </div>
       </div>
 
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Lora:ital,wght@0,400;0,600;1,400&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
         *{box-sizing:border-box;}
         ::-webkit-scrollbar{width:5px;height:5px;}
-        ::-webkit-scrollbar-track{background:${C.mist};}
-        ::-webkit-scrollbar-thumb{background:${C.olive};border-radius:99px;}
-        textarea:focus,input:focus{border-color:${C.gold}!important;box-shadow:0 0 0 3px ${C.gold}22;}
-        button:hover{opacity:0.88;transform:translateY(-1px);}
+        ::-webkit-scrollbar-track{background:${C.surface};}
+        ::-webkit-scrollbar-thumb{background:${C.cyan}44;border-radius:99px;}
+        textarea:focus,input:focus{border-color:${C.cyan}!important;box-shadow:0 0 0 3px ${C.cyanGlow}!important;outline:none;}
+        button:active{transform:scale(0.97)!important;}
         @keyframes spin{to{transform:rotate(360deg);}}
         @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
         @media(max-width:640px){
           h1{font-size:20px!important;}
-          .grid-2{grid-template-columns:1fr!important;}
         }
       `}</style>
     </div>
