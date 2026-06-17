@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import OutreachTracker from "./OutreachTracker.jsx";
+
 const C = {
   forest:"#1A3F22", olive:"#58761B", gold:"#D99201",
   burnt:"#905A01", cream:"#F5EDD6", paper:"#FFFDF7",
@@ -13,14 +14,14 @@ const AFFIRMATIONS = [
   "I am not a non-traditional candidate. I am the candidate they didn't know they needed.",
   "Every closed door redirected me closer to my purpose. I trust the process.",
   "I protect patients from threats they never see coming. That is sacred work.",
-  "My 28 years are not a detour. They are my competitive advantage.",
-  "I am building something that will outlast me — for my family, my family, my family, and every generation after.",
+  "My experience is not a detour. It is my competitive advantage.",
+  "I am building something that will outlast me — for my family and every generation after.",
   "The red carpet on August 5th is not an arrival. It is a beginning.",
   "I am a woman of faith, a grandmother, a clinician, a defender. All of it counts. All of it matters.",
   "Remote, flexible, and fully compensated — the right role already exists and is looking for me.",
   "I do not shrink to fit job descriptions. I expand organizations to fit my vision.",
   "Caregiving and career excellence are not in conflict. I am proof that both can coexist.",
-  "My mother's care is covered. My children are thriving. My work is meaningful. This is the life I built.",
+  "My mother's care is covered. My family is thriving. My work is meaningful. This is the life I built.",
   "I walk into every room — virtual or in-person — as the most prepared person there.",
   "Black Hat. DEF CON. WiCyS. FBI Citizens Academy. I move in rooms that matter.",
   "My expertise is rare. My story is powerful. My time is now.",
@@ -34,107 +35,219 @@ const AFFIRMATIONS = [
   "The organization that hires me will wonder how they ever operated without me.",
   "I am healthy, protected, purposeful, and covered. This is my declaration.",
   "Setbacks are data. I analyze them, adjust, and keep moving forward.",
-  "I am the kind of woman who builds a lab, walks a red carpet, and tucks in her grandkids — all in the same week.",
+  "I am the kind of woman who builds a lab, walks a red carpet, and shows up for her family — all in the same week.",
   "Every cert I earn, every scenario I build, every person I mentor — it compounds.",
   "I am a Digital First Responder. I assess. I contain. I treat. I recover. Always.",
 ];
 
-const WEEK_EVENTS = {
-  "Thu Jun 4":[
-    {time:"6:30 AM",title:"Hot Tea #1 ☕",cal:"routine"},
-    {time:"7:30 AM",title:"Daily Affirmation + Tea 📖",cal:"routine"},
-    {time:"3:30 PM",title:"Digest + Light Walk 🚶‍♀️",cal:"health"},
-    {time:"3:45 PM",title:"Grandkids Pickup 👧🏽",cal:"family"},
-    {time:"4:00 PM",title:"LEARNING — AWS/TryHackMe 💻",cal:"growth"},
-    {time:"6:00 PM",title:"EXERCISE 30 min 🏃‍♀️",cal:"health"},
-    {time:"9:30 PM",title:"Bedtime Routine (CPAP) 😴",cal:"health"},
-  ],
-  "Fri Jun 5":[
-    {time:"All Day",title:"💸 Ignite Payday",cal:"finance"},
-    {time:"6:30 AM",title:"Hot Tea #1 ☕",cal:"routine"},
-    {time:"7:30 AM",title:"Daily Affirmation + Tea 📖",cal:"routine"},
-    {time:"3:30 PM",title:"Digest + Light Walk 🚶‍♀️",cal:"health"},
-    {time:"3:45 PM",title:"Grandkids Pickup 👧🏽",cal:"family"},
-    {time:"4:00 PM",title:"LEARNING — AWS/TryHackMe 💻",cal:"growth"},
-    {time:"6:00 PM",title:"EXERCISE 30 min 🏃‍♀️",cal:"health"},
-  ],
-  "Sat Jun 6":[
-    {time:"6:00 PM",title:"EXERCISE 30 min 🏃‍♀️",cal:"health"},
-    {time:"9:30 PM",title:"LIGHTS OUT 🌙",cal:"routine"},
-  ],
-  "Sun Jun 7":[
-    {time:"6:00 PM",title:"EXERCISE 30 min 🏃‍♀️",cal:"health"},
-    {time:"9:30 PM",title:"LIGHTS OUT 🌙",cal:"routine"},
-  ],
-  "Mon Jun 8":[
-    {time:"6:30 AM",title:"Hot Tea #1 ☕",cal:"routine"},
-    {time:"7:30 AM",title:"Daily Affirmation + Tea 📖",cal:"routine"},
-    {time:"3:30 PM",title:"Digest + Light Walk 🚶‍♀️",cal:"health"},
-    {time:"3:45 PM",title:"Grandkids Pickup 👧🏽",cal:"family"},
-    {time:"4:00 PM",title:"LEARNING — AWS/TryHackMe 💻",cal:"growth"},
-    {time:"6:00 PM",title:"EXERCISE 30 min 🏃‍♀️",cal:"health"},
-  ],
-  "Tue Jun 9":[
-    {time:"6:30 AM",title:"Hot Tea #1 ☕",cal:"routine"},
-    {time:"7:30 AM",title:"Daily Affirmation + Tea 📖",cal:"routine"},
-    {time:"3:30 PM",title:"Digest + Light Walk 🚶‍♀️",cal:"health"},
-    {time:"3:45 PM",title:"Grandkids Pickup 👧🏽",cal:"family"},
-    {time:"4:00 PM",title:"LEARNING — AWS/TryHackMe 💻",cal:"growth"},
-    {time:"6:00 PM",title:"EXERCISE 30 min 🏃‍♀️",cal:"health"},
-  ],
-  "Wed Jun 10":[
-    {time:"6:30 AM",title:"Hot Tea #1 ☕",cal:"routine"},
-    {time:"7:30 AM",title:"Daily Affirmation + Tea 📖",cal:"routine"},
-    {time:"3:30 PM",title:"Digest + Light Walk 🚶‍♀️",cal:"health"},
-    {time:"3:45 PM",title:"Grandkids Pickup 👧🏽",cal:"family"},
-    {time:"4:00 PM",title:"LEARNING — AWS/TryHackMe 💻",cal:"growth"},
-    {time:"6:00 PM",title:"FBI Atlanta Citizens Academy 🏛️",cal:"special",note:"3000 Flowers Rd S"},
-    {time:"🎂",title:"Lexi's 33rd Birthday",cal:"birthday"},
-  ],
+const CAL_COLORS = {
+  routine:C.olive, health:"#e05c5c", family:C.gold, growth:C.forest,
+  finance:"#10b981", special:C.burnt, birthday:"#ec4899",
+  wicys:"#7c3aed", paid:"#0ea5e9", study:"#1A3F22",
 };
 
-const CAL_COLORS={routine:C.olive,health:"#e05c5c",family:C.gold,growth:C.forest,finance:"#10b981",special:C.burnt,birthday:"#ec4899",wicys:"#7c3aed",paid:"#0ea5e9",study:"#1A3F22"};
-const BLACK_HAT=new Date("2026-08-05T09:00:00");
-const STORE="ccd_hq_v3";
+const BLACK_HAT = new Date("2026-08-05T09:00:00");
+const STORE = "ccd_hq_v3";
+
+// ── DYNAMIC CALENDAR ──────────────────────────────────────────────
+function getDaySchedule(date) {
+  const dow = date.getDay();
+  const base = [
+    { time:"6:30 AM", title:"Hot Tea ☕", cal:"routine" },
+    { time:"7:30 AM", title:"Daily Affirmation 📖", cal:"routine" },
+  ];
+  const byDay = {
+    0: [
+      { time:"8:00 AM", title:"Security+ Core — Gibson/Messer 📚", cal:"study" },
+      { time:"9:00 AM", title:"TryHackMe: HealthHackHer 💻", cal:"growth" },
+      { time:"10:00 AM", title:"AWS Study Main Block ☁️", cal:"study" },
+      { time:"11:30 AM", title:"Active Recall — Claude Quiz 🧠", cal:"study" },
+      { time:"1:00 PM", title:"Security+ Deep Dive — GRC/Compliance", cal:"study" },
+      { time:"3:00 PM", title:"Specialty — HCISPP Free Resources", cal:"study" },
+      { time:"5:00 PM", title:"🏃 Cardio 30 min", cal:"health" },
+      { time:"Evening", title:"DFR Lab or LinkedIn Content", cal:"growth" },
+    ],
+    1: [
+      { time:"8:00 AM", title:"Security+ Core — Gibson/Messer 📚", cal:"study" },
+      { time:"9:00 AM", title:"TryHackMe: HealthHackHer 💻", cal:"growth" },
+      { time:"10:00 AM", title:"AWS Study Main Block ☁️", cal:"study" },
+      { time:"11:30 AM", title:"Active Recall — Claude Quiz 🧠", cal:"study" },
+      { time:"1:00 PM", title:"Security+ Deep Dive — GRC/Compliance", cal:"study" },
+      { time:"3:00 PM", title:"Specialty — HCISPP Free Resources", cal:"study" },
+      { time:"5:00 PM", title:"🏃 Cardio 30 min", cal:"health" },
+      { time:"Evening", title:"DFR Lab or LinkedIn Content", cal:"growth" },
+    ],
+    2: [
+      { time:"8:00 AM", title:"Security+ Core 📚", cal:"study" },
+      { time:"9:00 AM", title:"AWS Early Block ☁️", cal:"study" },
+      { time:"10:00 AM", title:"▣ WiCyS Office Hours", cal:"wicys" },
+      { time:"11:00 AM", title:"AWS Main Block ☁️", cal:"study" },
+      { time:"12:30 PM", title:"Active Recall 🧠", cal:"study" },
+      { time:"1:00 PM", title:"▣ PAID CLIENTS 💼", cal:"paid" },
+      { time:"5:00 PM", title:"💪 Strength 30 min", cal:"health" },
+      { time:"Evening", title:"Security+ Deep Dive — Network/Crypto/Cloud", cal:"study" },
+      { time:"Late", title:"DFR Lab or LinkedIn", cal:"growth" },
+    ],
+    3: [
+      { time:"8:00 AM", title:"Security+ Core — Gibson/Messer 📚", cal:"study" },
+      { time:"9:00 AM", title:"TryHackMe: HealthHackHer 💻", cal:"growth" },
+      { time:"10:00 AM", title:"AWS Study Main Block ☁️", cal:"study" },
+      { time:"11:30 AM", title:"Active Recall — Claude Quiz 🧠", cal:"study" },
+      { time:"1:00 PM", title:"Security+ Deep Dive — GRC/Compliance", cal:"study" },
+      { time:"3:00 PM", title:"Specialty — HCISPP Free Resources", cal:"study" },
+      { time:"5:00 PM", title:"🏃 Cardio 30 min", cal:"health" },
+      { time:"Evening", title:"DFR Lab or LinkedIn Content", cal:"growth" },
+    ],
+    4: [
+      { time:"8:00 AM", title:"Security+ Core 📚", cal:"study" },
+      { time:"9:00 AM", title:"AWS Early Block ☁️", cal:"study" },
+      { time:"10:00 AM", title:"▣ WiCyS Office Hours", cal:"wicys" },
+      { time:"11:00 AM", title:"AWS Main Block ☁️", cal:"study" },
+      { time:"12:30 PM", title:"Active Recall 🧠", cal:"study" },
+      { time:"1:00 PM", title:"▣ PAID CLIENTS 💼", cal:"paid" },
+      { time:"5:00 PM", title:"💪 Strength 30 min", cal:"health" },
+      { time:"Evening", title:"Security+ Deep Dive — IoMT/Healthcare", cal:"study" },
+      { time:"Late", title:"DFR Lab or LinkedIn", cal:"growth" },
+    ],
+    5: [
+      { time:"8:00 AM", title:"Security+ Core 📚", cal:"study" },
+      { time:"9:00 AM", title:"TryHackMe: HealthHackHer 💻", cal:"growth" },
+      { time:"10:00 AM", title:"AWS Study Main Block ☁️", cal:"study" },
+      { time:"11:30 AM", title:"Active Recall 🧠", cal:"study" },
+      { time:"1:00 PM", title:"Security+ Deep Dive — GRC/Compliance", cal:"study" },
+      { time:"3:00 PM", title:"Specialty — HCISPP Free Resources", cal:"study" },
+      { time:"5:00 PM", title:"🏃 Cardio 30 min", cal:"health" },
+      { time:"Evening", title:"Outreach — 5 touches minimum 📨", cal:"growth" },
+    ],
+    6: [
+      { time:"8:00 AM", title:"Security+ Core 📚", cal:"study" },
+      { time:"10:00 AM", title:"AWS Study Block ☁️", cal:"study" },
+      { time:"1:00 PM", title:"▣ WiCyS Study Hall / AMA", cal:"wicys" },
+      { time:"2:00 PM", title:"G-Ma on the Field — content block 🏟️", cal:"growth" },
+      { time:"5:00 PM", title:"💪 Strength 30 min", cal:"health" },
+      { time:"Evening", title:"LinkedIn / TikTok content", cal:"growth" },
+      { time:"9:30 PM", title:"LIGHTS OUT 🌙", cal:"routine" },
+    ],
+  };
+  return [...base, ...(byDay[dow] || [])];
+}
+
+function getWeekDays() {
+  const now = new Date();
+  const dow = now.getDay();
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - ((dow + 6) % 7));
+  monday.setHours(0,0,0,0);
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return d;
+  });
+}
+
+function isToday(date) {
+  const now = new Date();
+  return date.getDate() === now.getDate() &&
+    date.getMonth() === now.getMonth() &&
+    date.getFullYear() === now.getFullYear();
+}
+
+function formatWeekRange(days) {
+  const s = days[0].toLocaleDateString("en-US",{month:"short",day:"numeric"});
+  const e = days[6].toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+  return `${s} – ${e}`;
+}
+
+function TodayCalendar() {
+  const schedule = getDaySchedule(new Date());
+  const dayLabel = new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
+  return (
+    <div>
+      <div style={{fontSize:11,letterSpacing:"0.12em",textTransform:"uppercase",color:C.olive,fontWeight:700,marginBottom:10}}>{dayLabel}</div>
+      <div style={{display:"flex",flexDirection:"column",gap:7}}>
+        {schedule.map((ev,i) => (
+          <div key={i} style={{display:"flex",gap:8,alignItems:"flex-start",padding:"7px 9px",borderRadius:7,
+            background:ev.cal==="paid"?"#eff9ff":ev.cal==="wicys"?"#f5f3ff":C.cream,
+            borderLeft:`3px solid ${CAL_COLORS[ev.cal]||C.olive}`}}>
+            <div style={{fontSize:10,color:C.olive,fontWeight:700,minWidth:64,paddingTop:1}}>{ev.time}</div>
+            <div style={{fontSize:12,color:C.ink,lineHeight:1.4}}>{ev.title}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function WeeklyCalendarGrid() {
+  const days = getWeekDays();
+  return (
+    <div>
+      <div style={{fontSize:11,letterSpacing:"0.12em",textTransform:"uppercase",color:C.olive,fontWeight:700,marginBottom:12}}>
+        Week of {formatWeekRange(days)}
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:6}}>
+        {days.map((day,i) => {
+          const schedule = getDaySchedule(day);
+          const today = isToday(day);
+          const highlights = schedule.filter(e => e.cal !== "routine").slice(0,3);
+          return (
+            <div key={i} style={{
+              background:today?`${C.forest}12`:C.cream,
+              borderRadius:9,padding:"9px 7px",
+              border:today?`2px solid ${C.forest}`:`1.5px solid ${C.mist}`
+            }}>
+              <div style={{fontSize:10,fontWeight:700,color:today?C.forest:C.olive,marginBottom:5}}>
+                {day.toLocaleDateString("en-US",{weekday:"short"})} {day.getDate()}
+              </div>
+              {highlights.map((ev,j) => (
+                <div key={j} style={{fontSize:9,padding:"2px 4px",borderRadius:3,marginBottom:2,
+                  background:`${CAL_COLORS[ev.cal]||C.olive}20`,
+                  color:CAL_COLORS[ev.cal]||C.olive,
+                  fontWeight:600,lineHeight:1.3}}>
+                  {ev.title.length>20?ev.title.slice(0,18)+"…":ev.title}
+                </div>
+              ))}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+// ── END DYNAMIC CALENDAR ──────────────────────────────────────────
 
 const defaultData=()=>({
-  weeklyFocus:"Land remote healthcare cyber role before Milwaukee move",
-  weeklyGoals:["Send 5 Black Hat outreach messages","Complete WiCyS mentor onboarding Jun 8–9","AWS or TryHackMe every day"],
+  weeklyFocus:"Land remote healthcare cyber role — 5 outreach touches minimum this week",
+  weeklyGoals:["Send outreach to Optiv + ScanTech AI today","Complete ISA/IEC 62443 first module","Post G-Ma on the Field launch content"],
   tasks:[
-    {id:1,text:"Send Philips intro via Aví D.",done:false},
-    {id:2,text:"Update DFR Lab with new IoMT scenario",done:false},
+    {id:1,text:"Send Philips intro via Aví D. — WARM PRIORITY",done:false},
+    {id:2,text:"Log outreach in tracker — 5 minimum this week",done:false},
     {id:3,text:"Confirm Black Hat travel + hotel",done:false},
-    {id:4,text:"Pack & prep for Milwaukee mid-June",done:false},
-    {id:5,text:"File WOSB certification follow-up",done:false},
+    {id:4,text:"File WOSB certification follow-up",done:false},
+    {id:5,text:"Update DFR Lab sports tech bridge scenario",done:false},
   ],
-  currentRead:"HCISPP Study Guide + ISA/IEC 62443 Foundational",
+  currentRead:"Security+ (Gibson/Messer) · AWS Cloud Practitioner · ISA/IEC 62443 Foundational",
   readStatus:"reading",
-  weeklyWins:["Advisory council → full outreach playbook built","DFR Lab live on GitHub Pages"],
+  weeklyWins:["G-Ma on the Field challenge launched","Outreach tracker live in CCD HQ"],
   reflection:"",
   habits:{
     exercise:{label:"Exercise (30 min)",icon:"🏃‍♀️",days:[false,false,false,false,false,false,false]},
     affirmation:{label:"Daily Affirmation",icon:"📖",days:[false,false,false,false,false,false,false]},
-    learning:{label:"AWS / TryHackMe",icon:"💻",days:[false,false,false,false,false,false,false]},
-    water:{label:"Water Goal",icon:"💧",days:[false,false,false,false,false,false,false]},
+    secplus:{label:"Security+ Study",icon:"📚",days:[false,false,false,false,false,false,false]},
+    aws:{label:"AWS Study",icon:"☁️",days:[false,false,false,false,false,false,false]},
     bedtime:{label:"Bedtime Routine (CPAP)",icon:"😴",days:[false,false,false,false,false,false,false]},
   },
   quarterlyGoals:{
     career:["Land FTE or contract remote role with benefits","Send 25 targeted org outreach messages","Black Hat red carpet Aug 5"],
     health:["Exercise 4x/week","CPAP compliance every night","O2 monitoring daily"],
     finance:["Purchase own health benefits if no FTE","Track every dollar Jun–Aug","Build 1-month emergency buffer"],
-    personal:["Support Mom's dementia care transition","Milwaukee move early-August","my family & my family quality time"],
+    personal:["Support Mom's dementia care transition","Milwaukee move post-Black Hat","Quality time with family"],
   },
   quarterlyWins:[],
-  debtPaid:0, debtGoal:5000,
-  savingsAmount:0, savingsGoal:3000,
+  debtPaid:0,debtGoal:5000,
+  savingsAmount:0,savingsGoal:3000,
   netWorth:0,
-  accounts:{
-    marcus:0, marcusGoal:5000,
-    appleSavings:0, appleGoal:2000,
-    rothIRA:0, rothGoal:7000,
-    llcChecking:0,
-    vanguard:0,
-  },
+  accounts:{marcus:0,marcusGoal:5000,appleSavings:0,appleGoal:2000,rothIRA:0,rothGoal:7000,llcChecking:0,vanguard:0},
   monthlyReflection:{wins:"",challenge:"",grateful:"",learned:"",health:"",growth:"",different:"",intention:""},
   lifeVision:"To become the most recognized Digital First Responder in healthcare cybersecurity — protecting patients, empowering clinicians, and building generational wealth that blesses my family for decades.",
   nonNegotiables:["God First — always","Family is the mission","Health is wealth","Build something that outlasts me"],
@@ -142,29 +255,30 @@ const defaultData=()=>({
     {title:"Wellness — Mind, Body & Soul",items:["Daily affirmation","30 min exercise","CPAP + O2 every night","Water goal daily"]},
     {title:"Wealth ERA",items:["Remote role with benefits","Federal sub-contracting pipeline","3-tier consulting services live","Savings buffer growing"]},
     {title:"Personal Power",items:["Black Hat red carpet Aug 5","WiCyS mentor cohort 3","HCISPP study plan","DFR Lab expanding"]},
-    {title:"Legacy & Love",items:["Mom's care covered","my family & my family thriving","WOSB certified","PhD deferred — not abandoned"]},
+    {title:"Legacy & Love",items:["Mom's care covered","Family thriving","WOSB certified","PhD deferred — not abandoned"]},
   ],
   bucketList:[
     {text:"Walk the Black Hat red carpet 🎬",done:true},
     {text:"Keynote a major cybersecurity conference",done:false},
     {text:"Publish a book on Digital First Response methodology",done:false},
-    {text:"Take my family to her first college campus tour",done:false},
     {text:"Travel to West Africa (Ghana / Senegal)",done:false},
     {text:"Own a home outright",done:false},
-    {text:"See my family go viral for something he built",done:false},
     {text:"Launch a healthcare cybersecurity nonprofit",done:false},
     {text:"Get on stage at DEF CON as a speaker",done:false},
     {text:"Retire my mother comfortably",done:false},
+    {text:"See G-Ma on the Field become a recognized brand",done:false},
+    {text:"Publish The G-Ma Playbook — sports tech security framework",done:false},
   ],
   visionBoard:[
     {emoji:"🏠",label:"Dream Home",desc:"Paid off. Peaceful. Space for family."},
     {emoji:"🎤",label:"Keynote Stage",desc:"DEF CON. Black Hat. TEDx."},
-    {emoji:"✈️",label:"Ghana / Senegal",desc:"Heritage trip with the grandkids."},
+    {emoji:"✈️",label:"Ghana / Senegal",desc:"Heritage trip with the family."},
     {emoji:"📚",label:"Published Author",desc:"Digital First Responder: The Book"},
     {emoji:"💼",label:"Remote Dream Role",desc:"Healthcare Cyber SME. Benefits. Flexibility."},
     {emoji:"🎓",label:"PhD Complete",desc:"Capitol Technology University."},
     {emoji:"👑",label:"Generational Wealth",desc:"Building something that outlasts me."},
     {emoji:"🏥",label:"Nonprofit Launched",desc:"Healthcare Cybersecurity for underserved orgs."},
+    {emoji:"🏟️",label:"G-Ma on the Field",desc:"The sports tech security brand nobody owned — until now."},
   ],
   ideasParking:[],
   savedBriefing:"",
@@ -192,7 +306,7 @@ const BTN=(bg=C.forest,x={})=>({background:bg,color:bg===C.cream?C.forest:"#fff"
 
 const TABS=["🌿 Today","📅 Weekly","🌙 Monthly","🌾 Quarterly","🦅 Yearly","✅ Habits","🗺️ Vision Board","🪣 Bucket List","📊 Outreach"];
 
-// ── COUNTDOWN ─────────────────────────────────────────────────────────────────
+// ── COUNTDOWN ─────────────────────────────────────────────────────
 function Countdown(){
   const [t,setT]=useState({d:0,h:0,m:0,s:0});
   useEffect(()=>{
@@ -219,7 +333,7 @@ function Countdown(){
   );
 }
 
-// ── AFFIRMATION ────────────────────────────────────────────────────────────────
+// ── AFFIRMATION ────────────────────────────────────────────────────
 function Affirmation(){
   const base=Math.floor(Date.now()/86400000)%AFFIRMATIONS.length;
   const [idx,setIdx]=useState(base);
@@ -240,7 +354,7 @@ function Affirmation(){
   );
 }
 
-// ── AI BRIEFING ────────────────────────────────────────────────────────────────
+// ── AI BRIEFING ────────────────────────────────────────────────────
 function Briefing({data,onSave}){
   const [text,setText]=useState(data.savedBriefing||"");
   const [loading,setLoading]=useState(false);
@@ -255,15 +369,15 @@ function Briefing({data,onSave}){
       const prompt=`You are the personal AI assistant for Chaunda C. Dallas — healthcare cybersecurity strategist, Digital First Responder, grandmother, woman of faith. Generate her personalized morning briefing for today.
 
 Context:
-- 28 years clinical emergency medicine, now cybersecurity
+- Clinical emergency medicine background spanning decades, now cybersecurity
 - Featured Defender in Semperis "Midnight in the War Room" premiering Black Hat Aug 5 — ${days} days away
-- WiCyS Technical Mentor Cohort 3 starts Jun 8-9
-- Relocating to Milwaukee mid-June for mother's dementia care  
-- Grandsons my family and my family, granddaughter my family (7th grade multi-sport athlete)
+- WiCyS Technical Mentor Cohort 3 — active
+- Milwaukee move post-Black Hat for mother's dementia care
 - Weekly focus: "${data.weeklyFocus}"
 - Pending tasks (${pending.length}): ${pending.map(t=>t.text).join(", ")||"all clear"}
 - Currently studying: ${data.currentRead}
-- Today's routine: Tea 6:30am, Affirmation 7:30am, Grandkids pickup 3:45pm, Learning 4pm, Exercise 6pm, Lights out 9:30pm
+- G-Ma on the Field 90-day sports tech security challenge — active
+- Today's schedule: Security+ 8am, AWS study, WiCyS if Tue/Thu, Paid clients 1-4pm Tue/Thu, Exercise 5pm, Outreach daily
 
 Write her morning briefing in exactly 4 sections:
 1. 🌅 GOOD MORNING — faith-forward personal greeting (2 sentences max)
@@ -315,10 +429,13 @@ Tone: warm, direct, faith-informed, no fluff. Every word earns its place.`;
   );
 }
 
-// ── HABIT TRACKER (Casey-style) ────────────────────────────────────────────────
+// ── HABIT TRACKER ──────────────────────────────────────────────────
 function HabitTracker({data,update}){
-  const dayLabels=["T","F","Sa","Su","M","T","W"];
-  const todayIdx=0;
+  const weekDays = getWeekDays();
+  const dayLabels = weekDays.map(d => d.toLocaleDateString("en-US",{weekday:"short"}).slice(0,2));
+  const dayNums = weekDays.map(d => d.getDate());
+  const todayIdx = weekDays.findIndex(d => isToday(d));
+
   const allChecks=Object.values(data.habits).reduce((a,h)=>a+h.days.filter(Boolean).length,0);
   const totalChecks=Object.keys(data.habits).length*7;
   const score=Math.round((allChecks/totalChecks)*100);
@@ -335,7 +452,7 @@ function HabitTracker({data,update}){
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
           <div>
             <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:20,fontWeight:700}}>Habit Tracker</div>
-            <div style={{fontSize:12,opacity:0.75,marginTop:2}}>Week of Jun 4 · {allChecks}/{totalChecks} completions</div>
+            <div style={{fontSize:12,opacity:0.75,marginTop:2}}>Week of {formatWeekRange(weekDays)} · {allChecks}/{totalChecks} completions</div>
           </div>
           <div style={{textAlign:"right"}}>
             <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:32,fontWeight:900,color:C.gold}}>{score}%</div>
@@ -349,17 +466,16 @@ function HabitTracker({data,update}){
 
       <div style={card()}>
         <div style={{fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",color:"#999",fontWeight:700,marginBottom:14}}>Daily Habits</div>
-        {/* Date row */}
         <div style={{display:"flex",alignItems:"center",marginBottom:10}}>
           <div style={{flex:1}}/>
           <div style={{display:"flex",gap:6,marginRight:4}}>
-            {[4,5,6,7,8,9,10].map((d,i)=>(
+            {dayNums.map((d,i)=>(
               <div key={i} style={{width:34,height:34,borderRadius:8,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
-                background:i===0?C.forest:"transparent",
-                border:i===0?`none`:`1.5px solid ${C.mist}`,
+                background:i===todayIdx?C.forest:"transparent",
+                border:i===todayIdx?`none`:`1.5px solid ${C.mist}`,
               }}>
-                <div style={{fontSize:9,color:i===0?"#fff":"#aaa",letterSpacing:"0.05em"}}>{dayLabels[i]}</div>
-                <div style={{fontSize:12,fontWeight:700,color:i===0?"#fff":C.ink}}>{d}</div>
+                <div style={{fontSize:9,color:i===todayIdx?"#fff":"#aaa",letterSpacing:"0.05em"}}>{dayLabels[i]}</div>
+                <div style={{fontSize:12,fontWeight:700,color:i===todayIdx?"#fff":C.ink}}>{d}</div>
               </div>
             ))}
           </div>
@@ -376,7 +492,7 @@ function HabitTracker({data,update}){
                     <div style={{height:"100%",width:`${(done/7)*100}%`,background:`linear-gradient(90deg,${C.olive},${C.gold})`,borderRadius:99,transition:"width 0.4s ease"}}/>
                   </div>
                 </div>
-                <div style={{fontSize:12,color:C.olive,fontWeight:700,minWidth:28,textAlign:"right"}}>{done}/5</div>
+                <div style={{fontSize:12,color:C.olive,fontWeight:700,minWidth:28,textAlign:"right"}}>{done}/7</div>
               </div>
               <div style={{display:"flex",gap:6,justifyContent:"flex-end"}}>
                 {habit.days.map((checked,i)=>(
@@ -397,41 +513,18 @@ function HabitTracker({data,update}){
   );
 }
 
-// ── MONEY ROUTER ──────────────────────────────────────────────────────────────
+// ── MONEY ROUTER ──────────────────────────────────────────────────
 function MoneyRouter({data,update}){
   const acc=data.accounts||{marcus:0,marcusGoal:5000,appleSavings:0,appleGoal:2000,rothIRA:0,rothGoal:7000,llcChecking:0,vanguard:0};
   const set=(key,val)=>update({accounts:{...acc,[key]:+val}});
-
   const tiers=[
-    {
-      tier:"T1",label:"Operating Base",icon:"🏦",color:C.ink,bg:"#e8f0e0",
-      accounts:[{key:"llcChecking",label:"LLC Business Checking",goal:null,note:"Business income lands here first. Pay yourself from this."}],
-      rule:"Bills, daily expenses, operating money",
-    },
-    {
-      tier:"T2",label:"Protection",icon:"🛡️",color:"#0f6e56",bg:"#e1f5ee",
-      accounts:[{key:"marcus",label:"Marcus High-Yield Savings",goal:"marcusGoal",note:"Emergency + job transition buffer. Fund this first."}],
-      rule:"3 months expenses. Do not touch.",
-    },
-    {
-      tier:"T3",label:"Opportunity",icon:"✨",color:"#854f0b",bg:"#faeeda",
-      accounts:[{key:"appleSavings",label:"Apple Card High-Yield Savings",goal:"appleGoal",note:"Black Hat · certs · conferences · family trips"}],
-      rule:"Intentional spending that invests in you.",
-    },
-    {
-      tier:"T4",label:"Future You",icon:"🌱",color:"#533ab7",bg:"#eeedfe",
-      accounts:[{key:"rothIRA",label:"Roth IRA · Navy Federal",goal:"rothGoal",note:"Even $50/mo builds the habit and keeps it alive"}],
-      rule:"Consistent beats maximum. Start small.",
-    },
-    {
-      tier:"T5",label:"Wealth Building",icon:"📈",color:C.forest,bg:"#eaf3de",
-      accounts:[{key:"vanguard",label:"Vanguard Individual Brokerage",goal:null,note:"Open it now. Fund after T2 & T4 are consistent."}],
-      rule:"Index funds (VTI). Long-term. Hands off.",
-    },
+    {tier:"T1",label:"Operating Base",icon:"🏦",color:C.ink,bg:"#e8f0e0",accounts:[{key:"llcChecking",label:"LLC Business Checking",goal:null,note:"Business income lands here first. Pay yourself from this."}],rule:"Bills, daily expenses, operating money"},
+    {tier:"T2",label:"Protection",icon:"🛡️",color:"#0f6e56",bg:"#e1f5ee",accounts:[{key:"marcus",label:"Marcus High-Yield Savings",goal:"marcusGoal",note:"Emergency + job transition buffer. Fund this first."}],rule:"3 months expenses. Do not touch."},
+    {tier:"T3",label:"Opportunity",icon:"✨",color:"#854f0b",bg:"#faeeda",accounts:[{key:"appleSavings",label:"Apple Card High-Yield Savings",goal:"appleGoal",note:"Black Hat · certs · conferences · family trips"}],rule:"Intentional spending that invests in you."},
+    {tier:"T4",label:"Future You",icon:"🌱",color:"#533ab7",bg:"#eeedfe",accounts:[{key:"rothIRA",label:"Roth IRA · Navy Federal",goal:"rothGoal",note:"Even $50/mo builds the habit and keeps it alive"}],rule:"Consistent beats maximum. Start small."},
+    {tier:"T5",label:"Wealth Building",icon:"📈",color:C.forest,bg:"#eaf3de",accounts:[{key:"vanguard",label:"Vanguard Individual Brokerage",goal:null,note:"Open it now. Fund after T2 & T4 are consistent."}],rule:"Index funds (VTI). Long-term. Hands off."},
   ];
-
   const totalAssets=(acc.marcus||0)+(acc.appleSavings||0)+(acc.rothIRA||0)+(acc.llcChecking||0)+(acc.vanguard||0);
-
   return(
     <div style={{...card(),gridColumn:"1/-1"}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:10,marginBottom:20}}>
@@ -444,7 +537,6 @@ function MoneyRouter({data,update}){
           <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:26,fontWeight:900,color:C.forest}}>${totalAssets.toLocaleString()}</div>
         </div>
       </div>
-
       <div style={{display:"flex",flexDirection:"column",gap:10}}>
         {tiers.map((t,i)=>{
           const mainAcc=t.accounts[0];
@@ -462,39 +554,17 @@ function MoneyRouter({data,update}){
                 <div style={{flex:1,minWidth:160}}>
                   <div style={{fontSize:12,fontWeight:600,color:t.color,marginBottom:2}}>{mainAcc.label}</div>
                   <div style={{fontSize:11,color:"#888",marginBottom:g?6:0}}>{mainAcc.note}</div>
-                  {g&&(
-                    <div>
-                      <div style={{height:5,background:"rgba(0,0,0,0.08)",borderRadius:99,overflow:"hidden"}}>
-                        <div style={{height:"100%",width:`${p}%`,background:t.color,borderRadius:99,transition:"width 0.5s",opacity:0.85}}/>
-                      </div>
-                      <div style={{fontSize:10,color:t.color,marginTop:3,fontWeight:700}}>${v.toLocaleString()} of ${g.toLocaleString()} goal · {Math.round(p||0)}%</div>
-                    </div>
-                  )}
+                  {g&&(<div><div style={{height:5,background:"rgba(0,0,0,0.08)",borderRadius:99,overflow:"hidden"}}><div style={{height:"100%",width:`${p}%`,background:t.color,borderRadius:99,transition:"width 0.5s",opacity:0.85}}/></div><div style={{fontSize:10,color:t.color,marginTop:3,fontWeight:700}}>${v.toLocaleString()} of ${g.toLocaleString()} goal · {Math.round(p||0)}%</div></div>)}
                 </div>
                 <div style={{display:"flex",flexDirection:"column",gap:5,minWidth:150}}>
-                  <input
-                    type="number"
-                    value={v||""}
-                    onChange={e=>set(mainAcc.key,e.target.value)}
-                    placeholder="Current balance $"
-                    style={{...INP,fontSize:12,background:"rgba(255,255,255,0.75)",border:`1.5px solid ${t.color}44`}}
-                  />
-                  {mainAcc.goal&&(
-                    <input
-                      type="number"
-                      value={acc[mainAcc.goal]||""}
-                      onChange={e=>set(mainAcc.goal,e.target.value)}
-                      placeholder="My goal $"
-                      style={{...INP,fontSize:11,background:"rgba(255,255,255,0.5)",border:`1.5px solid ${t.color}33`}}
-                    />
-                  )}
+                  <input type="number" value={v||""} onChange={e=>set(mainAcc.key,e.target.value)} placeholder="Current balance $" style={{...INP,fontSize:12,background:"rgba(255,255,255,0.75)",border:`1.5px solid ${t.color}44`}}/>
+                  {mainAcc.goal&&(<input type="number" value={acc[mainAcc.goal]||""} onChange={e=>set(mainAcc.goal,e.target.value)} placeholder="My goal $" style={{...INP,fontSize:11,background:"rgba(255,255,255,0.5)",border:`1.5px solid ${t.color}33`}}/>)}
                 </div>
               </div>
             </div>
           );
         })}
       </div>
-
       <div style={{marginTop:14,padding:"11px 14px",borderRadius:8,background:`${C.gold}18`,border:`1px solid ${C.gold}44`,fontSize:12,color:C.ink,lineHeight:1.8}}>
         <span style={{fontWeight:700,color:C.burnt}}>The one rule:</span> When income comes in — T2 protection first, then T3 opportunity, then T4 future. T5 opens after T2 and T4 are consistent. LLC checking runs parallel to everything personal.
       </div>
@@ -502,7 +572,7 @@ function MoneyRouter({data,update}){
   );
 }
 
-// ── MAIN APP ──────────────────────────────────────────────────────────────────
+// ── MAIN APP ──────────────────────────────────────────────────────
 export default function App(){
   const [tab,setTab]=useState(0);
   const [data,setData]=useState(loadData);
@@ -527,8 +597,6 @@ export default function App(){
   const addVision=()=>{if(!newVision.label)return;update({visionBoard:[...data.visionBoard,{...newVision}]});setNewVision({emoji:"✨",label:"",desc:""});setShowVAdd(false);};
   const saveBriefing=(t,d)=>update({savedBriefing:t,lastBriefingDate:d});
 
-  const today="Thu Jun 4";
-
   return(
     <div style={{minHeight:"100vh",background:`linear-gradient(160deg,${C.forest} 0%,#0E2415 40%,#0a1a0d 100%)`,fontFamily:"'Lora',Georgia,serif",color:C.ink}}>
 
@@ -541,7 +609,7 @@ export default function App(){
             <div style={{fontSize:11,color:"#a0b890"}}>{new Date().toLocaleDateString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}</div>
           </div>
           <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-            {[["🎬","Aug 5","Black Hat"],["🎓","Jun 8","WiCyS"],["✈️","Mid-Jun","Milwaukee"]].map(([em,d,l])=>(
+            {[["🎬","Aug 5","Black Hat"],["🎓","Cohort 3","WiCyS"],["🏟️","Active","G-Ma on Field"]].map(([em,d,l])=>(
               <div key={l} style={{background:"rgba(217,146,1,0.15)",border:`1px solid ${C.gold}40`,borderRadius:10,padding:"7px 12px",textAlign:"center"}}>
                 <div style={{fontSize:15}}>{em}</div>
                 <div style={{fontSize:12,color:C.gold,fontWeight:700}}>{d}</div>
@@ -550,8 +618,6 @@ export default function App(){
             ))}
           </div>
         </div>
-
-        {/* TABS */}
         <div style={{display:"flex",gap:2,marginTop:16,overflowX:"auto",paddingBottom:2,scrollbarWidth:"none"}}>
           {TABS.map((t,i)=>(
             <button key={i} onClick={()=>setTab(i)} style={{
@@ -579,15 +645,8 @@ export default function App(){
               <Briefing data={data} onSave={saveBriefing}/>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:18}}>
                 <div style={card()}>
-                  <div style={ST}>📅 Today's Calendar</div>
-                  <div style={{display:"flex",flexDirection:"column",gap:7}}>
-                    {WEEK_EVENTS[today].map((ev,i)=>(
-                      <div key={i} style={{display:"flex",gap:8,alignItems:"flex-start",padding:"7px 9px",borderRadius:7,background:C.cream,borderLeft:`3px solid ${CAL_COLORS[ev.cal]||C.olive}`}}>
-                        <div style={{fontSize:10,color:C.olive,fontWeight:700,minWidth:60}}>{ev.time}</div>
-                        <div style={{fontSize:12,color:C.ink}}>{ev.title}</div>
-                      </div>
-                    ))}
-                  </div>
+                  <div style={ST}>📅 Today's Schedule</div>
+                  <TodayCalendar/>
                 </div>
                 <div style={card()}>
                   <div style={ST}>✅ Tasks</div>
@@ -613,7 +672,6 @@ export default function App(){
           {/* WEEKLY */}
           {tab===1&&(
             <div style={{display:"flex",flexDirection:"column",gap:18}}>
-              {/* Rotating quote bar — Casey style */}
               <div style={{...card({padding:"14px 20px"}),background:`linear-gradient(135deg,${C.forest},#2d5c36)`,border:"none",textAlign:"center"}}>
                 <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:15,color:C.cream,fontStyle:"italic"}}>
                   "{AFFIRMATIONS[Math.floor(Date.now()/86400000)%AFFIRMATIONS.length]}"
@@ -650,21 +708,9 @@ export default function App(){
                   </div>
                 </div>
               </div>
-              {/* Weekly calendar */}
               <div style={card()}>
-                <div style={ST}>📅 Week of Jun 4–10, 2026</div>
-                <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:6}}>
-                  {Object.keys(WEEK_EVENTS).map(day=>(
-                    <div key={day} style={{background:day===today?`${C.forest}12`:C.cream,borderRadius:9,padding:"9px 7px",border:day===today?`2px solid ${C.forest}`:`1.5px solid ${C.mist}`}}>
-                      <div style={{fontSize:10,fontWeight:700,color:day===today?C.forest:C.olive,marginBottom:5}}>{day}</div>
-                      {WEEK_EVENTS[day].filter(e=>e.cal!=="routine").slice(0,3).map((ev,i)=>(
-                        <div key={i} style={{fontSize:9,padding:"2px 4px",borderRadius:3,marginBottom:2,background:`${CAL_COLORS[ev.cal]||C.olive}20`,color:CAL_COLORS[ev.cal]||C.olive,fontWeight:600,lineHeight:1.3}}>
-                          {ev.title.length>22?ev.title.slice(0,20)+"…":ev.title}
-                        </div>
-                      ))}
-                    </div>
-                  ))}
-                </div>
+                <div style={ST}>📅 This Week</div>
+                <WeeklyCalendarGrid/>
               </div>
               <div style={card()}>
                 <div style={ST}>💭 Reflection</div>
@@ -693,8 +739,8 @@ export default function App(){
           {tab===3&&(
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:18}}>
               <div style={{...card(),gridColumn:"1/-1",background:`linear-gradient(120deg,${C.forest},${C.olive})`,color:"#fff",border:"none"}}>
-                <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:22,fontWeight:700}}>Q2 2026 — Apr → Jun</div>
-                <div style={{fontSize:13,opacity:0.85,marginTop:3}}>Black Hat season. Pre-sell runway. Milwaukee transition. Build the pipeline.</div>
+                <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:22,fontWeight:700}}>Q3 2026 — Jul → Sep</div>
+                <div style={{fontSize:13,opacity:0.85,marginTop:3}}>Black Hat red carpet. G-Ma on the Field. G-Ma Playbook ships Sep 12.</div>
               </div>
               {Object.entries(data.quarterlyGoals).map(([cat,goals])=>(
                 <div key={cat} style={card()}>
@@ -703,13 +749,9 @@ export default function App(){
                 </div>
               ))}
               <MoneyRouter data={data} update={update}/>
-              {/* Finances — dollar amounts (Casey style) */}
               <div style={card()}>
-                <div style={ST}>💰 Finances — Q2 2026</div>
-                {[
-                  ["Debt Paid Off","debtPaid","debtGoal","$"],
-                  ["Savings Progress","savingsAmount","savingsGoal","$"],
-                ].map(([label,valKey,goalKey,sym])=>(
+                <div style={ST}>💰 Finances — Q3 2026</div>
+                {[["Debt Paid Off","debtPaid","debtGoal","$"],["Savings Progress","savingsAmount","savingsGoal","$"]].map(([label,valKey,goalKey,sym])=>(
                   <div key={label} style={{marginBottom:18}}>
                     <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
                       <span style={{fontSize:13,fontWeight:600}}>{label}</span>
@@ -718,7 +760,7 @@ export default function App(){
                     <div style={{height:8,background:C.mist,borderRadius:99,overflow:"hidden",marginBottom:5}}>
                       <div style={{height:"100%",width:`${Math.min((data[valKey]/data[goalKey])*100,100)}%`,background:`linear-gradient(90deg,${C.olive},${C.gold})`,borderRadius:99,transition:"width 0.5s"}}/>
                     </div>
-                    <input type="number" value={data[valKey]} onChange={e=>update({[valKey]:+e.target.value})} style={{...INP,fontSize:12}} placeholder={`Enter amount…`}/>
+                    <input type="number" value={data[valKey]} onChange={e=>update({[valKey]:+e.target.value})} style={{...INP,fontSize:12}} placeholder="Enter amount…"/>
                   </div>
                 ))}
                 <div>
@@ -737,7 +779,7 @@ export default function App(){
                 </div>
               </div>
               <div style={{...card(),gridColumn:"1/-1"}}>
-                <div style={ST}>🏆 Q2 Wins</div>
+                <div style={ST}>🏆 Q3 Wins</div>
                 {data.quarterlyWins.length===0&&<div style={{fontSize:12,color:"#999",fontStyle:"italic",marginBottom:8}}>No wins logged yet — start celebrating your progress.</div>}
                 {data.quarterlyWins.map((w,i)=>(<div key={i} style={{padding:"7px 10px",borderRadius:7,background:"#f0faf0",marginBottom:6,fontSize:13,borderLeft:`3px solid ${C.olive}`}}>🎉 {w}</div>))}
                 <input placeholder="Log a quarterly win… (Enter)" style={INP} onKeyDown={e=>{if(e.key==="Enter"&&e.target.value.trim()){update({quarterlyWins:[...data.quarterlyWins,e.target.value]});e.target.value="";}}}/>
@@ -758,7 +800,7 @@ export default function App(){
               </div>
               <div style={card()}>
                 <div style={ST}>🎯 2026 Focus</div>
-                {["Land remote healthcare cyber role","Walk the Black Hat red carpet","HCISPP certification","WOSB certification complete","Support Mom's care transition","Build DFR into recognizable IP"].map((f,i)=>(
+                {["Land remote healthcare cyber role","Walk the Black Hat red carpet Aug 5","HCISPP certification Q4","WOSB certification complete","Support Mom's care transition","G-Ma on the Field — publish The Playbook Sep 12"].map((f,i)=>(
                   <div key={i} style={{padding:"6px 9px",borderRadius:6,background:C.cream,marginBottom:5,fontSize:12,display:"flex",alignItems:"center",gap:7}}><span style={{color:C.gold}}>→</span>{f}</div>
                 ))}
               </div>
@@ -768,18 +810,15 @@ export default function App(){
                   {bucket.items.map((item,j)=>(<div key={j} style={{padding:"6px 9px",borderRadius:6,background:C.cream,marginBottom:5,fontSize:12,display:"flex",alignItems:"center",gap:7}}><span style={{color:[C.olive,C.gold,C.burnt,C.forest][i%4]}}>◆</span>{item}</div>))}
                 </div>
               ))}
-              {/* + New Bucket button (Casey style) */}
               <div onClick={()=>{const t=prompt("Bucket title?");if(t)update({focusBuckets:[...data.focusBuckets,{title:t,items:[]}]});}} style={{...card({padding:"20px"}),cursor:"pointer",border:`2px dashed ${C.gold}`,background:"transparent",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:120,transition:"all 0.2s"}}
                 onMouseEnter={e=>e.currentTarget.style.background=`${C.gold}10`}
-                onMouseLeave={e=>e.currentTarget.style.background="transparent"}
-              >
+                onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
                 <div style={{fontSize:28,color:C.gold}}>+</div>
                 <div style={{fontSize:12,color:C.gold,fontWeight:700,marginTop:4}}>New Bucket</div>
               </div>
             </div>
           )}
 
-          {/* HABITS */}
           {tab===5&&<HabitTracker data={data} update={update}/>}
 
           {/* VISION BOARD */}
@@ -802,8 +841,7 @@ export default function App(){
                 ))}
                 <div onClick={()=>setShowVAdd(true)} style={{...card(),textAlign:"center",cursor:"pointer",border:`2px dashed ${C.gold}`,background:"transparent",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:150,transition:"all 0.2s"}}
                   onMouseEnter={e=>e.currentTarget.style.background=`${C.gold}10`}
-                  onMouseLeave={e=>e.currentTarget.style.background="transparent"}
-                >
+                  onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
                   <div style={{fontSize:28,color:C.gold}}>+</div>
                   <div style={{fontSize:12,color:C.gold,fontWeight:700,marginTop:4}}>Add Vision Card</div>
                 </div>
@@ -849,7 +887,9 @@ export default function App(){
               </div>
             </div>
           )}
+
           {tab===8&&<OutreachTracker/>}
+
         </div>
       </div>
 
@@ -863,10 +903,7 @@ export default function App(){
         button:hover{opacity:0.88;transform:translateY(-1px);}
         @keyframes spin{to{transform:rotate(360deg);}}
         @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
-        @media(max-width:640px){
-          h1{font-size:20px!important;}
-          .grid-2{grid-template-columns:1fr!important;}
-        }
+        @media(max-width:640px){h1{font-size:20px!important;}}
       `}</style>
     </div>
   );
