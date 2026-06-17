@@ -93,7 +93,7 @@ const WEEK_EVENTS = {
   ],
 };
 
-const CAL_COLORS={routine:C.olive,health:"#e05c5c",family:C.gold,growth:C.forest,finance:"#10b981",special:C.burnt,birthday:"#ec4899"};
+const CAL_COLORS={routine:C.olive,health:"#e05c5c",family:C.gold,growth:C.forest,finance:"#10b981",special:C.burnt,birthday:"#ec4899",wicys:"#7c3aed",paid:"#0ea5e9",study:"#1A3F22"};
 const BLACK_HAT=new Date("2026-08-05T09:00:00");
 const STORE="ccd_hq_v3";
 
