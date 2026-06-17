@@ -120,9 +120,9 @@ const defaultData=()=>({
   },
   quarterlyGoals:{
     career:["Land FTE or contract remote role with benefits","Send 25 targeted org outreach messages","Black Hat red carpet Aug 5"],
-    health:["Exercise 5x/week","CPAP compliance every night","O2 monitoring daily"],
+    health:["Exercise 4x/week","CPAP compliance every night","O2 monitoring daily"],
     finance:["Purchase own health benefits if no FTE","Track every dollar Jun–Aug","Build 1-month emergency buffer"],
-    personal:["Support Mom's dementia care transition","Milwaukee move mid-June","my family, my family & my family quality time"],
+    personal:["Support Mom's dementia care transition","Milwaukee move early-August","my family & my family quality time"],
   },
   quarterlyWins:[],
   debtPaid:0, debtGoal:5000,
@@ -142,7 +142,7 @@ const defaultData=()=>({
     {title:"Wellness — Mind, Body & Soul",items:["Daily affirmation","30 min exercise","CPAP + O2 every night","Water goal daily"]},
     {title:"Wealth ERA",items:["Remote role with benefits","Federal sub-contracting pipeline","3-tier consulting services live","Savings buffer growing"]},
     {title:"Personal Power",items:["Black Hat red carpet Aug 5","WiCyS mentor cohort 3","HCISPP study plan","DFR Lab expanding"]},
-    {title:"Legacy & Love",items:["Mom's care covered","my family, my family & my family thriving","WOSB certified","PhD deferred — not abandoned"]},
+    {title:"Legacy & Love",items:["Mom's care covered","my family & my family thriving","WOSB certified","PhD deferred — not abandoned"]},
   ],
   bucketList:[
     {text:"Walk the Black Hat red carpet 🎬",done:true},
@@ -275,7 +275,7 @@ Tone: warm, direct, faith-informed, no fluff. Every word earns its place.`;
 
       const res=await fetch("https://api.anthropic.com/v1/messages",{
         method:"POST",headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:800,messages:[{role:"user",content:prompt}]}),
+        body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:800,messages:[{role:"user",content:prompt}]}),
       });
       const json=await res.json();
       const t=json.content?.[0]?.text||"Unable to generate.";
@@ -849,7 +849,7 @@ export default function App(){
               </div>
             </div>
           )}
-
+          {tab===8&&<OutreachTracker/>}
         </div>
       </div>
 
