@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-
+import OutreachTracker from "./OutreachTracker.jsx";
 const C = {
   forest:"#1A3F22", olive:"#58761B", gold:"#D99201",
   burnt:"#905A01", cream:"#F5EDD6", paper:"#FFFDF7",
@@ -190,7 +190,7 @@ const LB={fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",color:C.o
 const INP={width:"100%",padding:"8px 12px",border:`1.5px solid ${C.mist}`,borderRadius:8,fontFamily:"'Lora',Georgia,serif",fontSize:14,color:C.ink,background:C.cream,outline:"none",boxSizing:"border-box"};
 const BTN=(bg=C.forest,x={})=>({background:bg,color:bg===C.cream?C.forest:"#fff",border:"none",borderRadius:8,padding:"7px 16px",cursor:"pointer",fontSize:13,fontFamily:"'Lora',Georgia,serif",fontWeight:600,transition:"all 0.18s",...x});
 
-const TABS=["🌿 Today","📅 Weekly","🌙 Monthly","🌾 Quarterly","🦅 Yearly","✅ Habits","🗺️ Vision Board","🪣 Bucket List"];
+const TABS=["🌿 Today","📅 Weekly","🌙 Monthly","🌾 Quarterly","🦅 Yearly","✅ Habits","🗺️ Vision Board","🪣 Bucket List","📊 Outreach"];
 
 // ── COUNTDOWN ─────────────────────────────────────────────────────────────────
 function Countdown(){
