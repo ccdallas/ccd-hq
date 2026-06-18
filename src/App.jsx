@@ -355,76 +355,108 @@ function Affirmation(){
 }
 
 // ── AI BRIEFING ────────────────────────────────────────────────────
-function Briefing({data,onSave}){
-  const [text,setText]=useState(data.savedBriefing||"");
-  const [loading,setLoading]=useState(false);
-  const [err,setErr]=useState("");
-  const today=new Date().toDateString();
-  const days=Math.floor((BLACK_HAT-new Date())/86400000);
-  const pending=data.tasks.filter(t=>!t.done);
+function Briefing({data}){
+  const days = Math.floor((BLACK_HAT - new Date()) / 86400000);
+  const pending = data.tasks.filter(t => !t.done);
+  const hour = new Date().getHours();
+  const todayName = new Date().toLocaleDateString("en-US",{weekday:"long"});
+  const dow = new Date().getDay();
+  const isTueOrThu = [2,4].includes(dow);
+  const isSat = dow === 6;
 
-  const gen=useCallback(async()=>{
-    setLoading(true);setErr("");
-    try{
-      const prompt=`You are the personal AI assistant for Chaunda C. Dallas — healthcare cybersecurity strategist, Digital First Responder, grandmother, woman of faith. Generate her personalized morning briefing for today.
+  const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
 
-Context:
-- Clinical emergency medicine background spanning decades, now cybersecurity
-- Featured Defender in Semperis "Midnight in the War Room" premiering Black Hat Aug 5 — ${days} days away
-- WiCyS Technical Mentor Cohort 3 — active
-- Milwaukee move post-Black Hat for mother's dementia care
-- Weekly focus: "${data.weeklyFocus}"
-- Pending tasks (${pending.length}): ${pending.map(t=>t.text).join(", ")||"all clear"}
-- Currently studying: ${data.currentRead}
-- G-Ma on the Field 90-day sports tech security challenge — active
-- Today's schedule: Security+ 8am, AWS study, WiCyS if Tue/Thu, Paid clients 1-4pm Tue/Thu, Exercise 5pm, Outreach daily
+  const faithLines = [
+    "God placed this calling on your life long before you understood it.",
+    "You are covered, protected, and walking in purpose.",
+    "Every step forward is ordered. Trust the process.",
+    "You didn't come this far to only come this far.",
+    "The work you're doing today is building something that will outlast you.",
+    "He who began a good work in you will carry it to completion.",
+    "Your story is not finished. The best chapter is still being written.",
+  ];
+  const faithLine = faithLines[dow % faithLines.length];
 
-Write her morning briefing in exactly 4 sections:
-1. 🌅 GOOD MORNING — faith-forward personal greeting (2 sentences max)
-2. 🎯 TODAY'S MISSION — top 3 specific priorities for today
-3. 📅 ON YOUR RADAR — 2-3 upcoming milestones (Black Hat countdown, Milwaukee, WiCyS)
-4. 💪 YOUR WORD TODAY — one powerful sentence that speaks to where she is right now
+  const mission = [];
+  if (isTueOrThu) {
+    mission.push("▣ WiCyS Office Hours 10–11am — show up fully");
+    mission.push("▣ Paid client sessions 1–4pm — this is your funding engine");
+  } else if (isSat) {
+    mission.push("▣ WiCyS Study Hall 1–2pm — lead with generosity");
+    mission.push("▣ G-Ma on the Field content block — document the journey");
+  } else {
+    mission.push("📚 Security+ core study block — Gibson/Messer + ExamCompass");
+    mission.push("☁️ AWS main study block — stay consistent");
+  }
+  if (pending.length > 0) {
+    mission.push(`✅ Priority task: ${pending[0].text}`);
+  } else {
+    mission.push("✅ All tasks clear — log 5 outreach touches today");
+  }
 
-Tone: warm, direct, faith-informed, no fluff. Every word earns its place.`;
+  const radar = [];
+  radar.push(`🎬 Black Hat red carpet — ${days} days away. You are a Featured Defender.`);
+  if (days <= 30) radar.push("🔴 Final stretch to Black Hat — every action compounds now.");
+  radar.push("🏟️ G-Ma on the Field — document something today, even one sentence.");
+  if (isTueOrThu) radar.push("💼 Paid slots protected today — guard that time.");
 
-      const res=await fetch("https://api.anthropic.com/v1/messages",{
-        method:"POST",headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:800,messages:[{role:"user",content:prompt}]}),
-      });
-      const json=await res.json();
-      const t=json.content?.[0]?.text||"Unable to generate.";
-      setText(t);onSave(t,today);
-    }catch(e){setErr("Connection error. Try again.");}
-    setLoading(false);
-  },[data,days,pending]);
+  const wordOptions = [
+    "You are not waiting for your moment — you are building it, one day at a time.",
+    "The gap between clinical floors and the SOC exists because nobody like you stepped in yet. You stepped in.",
+    "Every open door required a you that kept showing up. Keep showing up.",
+    "The credential no certification can replicate is the one you already carry.",
+    "I didn't leave healthcare. I learned to defend it. Say it like you mean it today.",
+    "G-Ma on the Field isn't just a challenge. It's a declaration.",
+    "The right role is looking for you while you're looking for it. Keep moving.",
+  ];
+  const wordToday = wordOptions[new Date().getDate() % wordOptions.length];
 
-  return(
-    <div style={{...card(),background:`linear-gradient(160deg,#0e1e12,${C.forest})`,border:`1px solid ${C.gold}30`,color:C.cream}}>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14,flexWrap:"wrap",gap:10}}>
-        <div>
-          <div style={{fontSize:10,letterSpacing:"0.25em",color:C.gold,textTransform:"uppercase",fontWeight:700}}>☀️ AI Morning Briefing</div>
-          <div style={{fontSize:12,color:"#a0b890",marginTop:2}}>Powered by Claude · Personal to you</div>
-        </div>
-        <button onClick={gen} disabled={loading} style={{...BTN(C.gold),opacity:loading?0.7:1,display:"flex",alignItems:"center",gap:6}}>
-          {loading?<><span style={{display:"inline-block",animation:"spin 1s linear infinite"}}>⟳</span> Generating…</>:(text?"🔄 Regenerate":"✨ Generate My Briefing")}
-        </button>
+  return (
+    <div style={{...card(), background:`linear-gradient(160deg,#0e1e12,${C.forest})`, border:`1px solid ${C.gold}30`, color:C.cream}}>
+      <div style={{fontSize:10, letterSpacing:"0.25em", color:C.gold, textTransform:"uppercase", fontWeight:700, marginBottom:16}}>
+        ☀️ Morning Briefing · {new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})}
       </div>
-      {err&&<div style={{background:"rgba(224,92,92,0.2)",borderRadius:8,padding:"10px 14px",fontSize:13,color:"#ffaaaa",marginBottom:12}}>{err}</div>}
-      {!text&&!loading&&(
-        <div style={{textAlign:"center",padding:"24px",opacity:0.5}}>
-          <div style={{fontSize:28,marginBottom:6}}>☀️</div>
-          <div style={{fontSize:13,fontStyle:"italic",color:"#a0b890"}}>Hit Generate to start your day with intention.</div>
+
+      <div style={{marginBottom:16, paddingBottom:16, borderBottom:"1px solid rgba(255,255,255,0.1)"}}>
+        <div style={{fontSize:10, letterSpacing:"0.15em", color:C.gold, textTransform:"uppercase", fontWeight:700, marginBottom:8}}>🌅 Good Morning</div>
+        <div style={{fontFamily:"'Lora',Georgia,serif", fontSize:14, lineHeight:1.8, color:C.cream}}>
+          {greeting}, Chaunda. {faithLine}
         </div>
-      )}
-      {loading&&(
-        <div style={{textAlign:"center",padding:"24px"}}>
-          <div style={{display:"flex",justifyContent:"center",gap:6}}>
-            {[0,1,2].map(i=><div key={i} style={{width:8,height:8,borderRadius:"50%",background:C.gold,animation:`bounce 1.2s ease-in-out ${i*0.2}s infinite`}}/>)}
+      </div>
+
+      <div style={{marginBottom:16, paddingBottom:16, borderBottom:"1px solid rgba(255,255,255,0.1)"}}>
+        <div style={{fontSize:10, letterSpacing:"0.15em", color:C.gold, textTransform:"uppercase", fontWeight:700, marginBottom:10}}>🎯 Today's Mission — {todayName}</div>
+        {mission.map((m,i) => (
+          <div key={i} style={{fontFamily:"'Lora',Georgia,serif", fontSize:13, color:C.cream, lineHeight:1.7, marginBottom:6, paddingLeft:8, borderLeft:`2px solid ${C.gold}60`}}>
+            {m}
           </div>
-          <div style={{fontSize:12,color:"#a0b890",marginTop:10,fontStyle:"italic"}}>Preparing your briefing…</div>
+        ))}
+      </div>
+
+      <div style={{marginBottom:16, paddingBottom:16, borderBottom:"1px solid rgba(255,255,255,0.1)"}}>
+        <div style={{fontSize:10, letterSpacing:"0.15em", color:C.gold, textTransform:"uppercase", fontWeight:700, marginBottom:10}}>📅 On Your Radar</div>
+        {radar.map((r,i) => (
+          <div key={i} style={{fontFamily:"'Lora',Georgia,serif", fontSize:13, color:"#a0b890", lineHeight:1.7, marginBottom:5}}>
+            {r}
+          </div>
+        ))}
+      </div>
+
+      <div style={{marginBottom: pending.length > 0 ? 16 : 0}}>
+        <div style={{fontSize:10, letterSpacing:"0.15em", color:C.gold, textTransform:"uppercase", fontWeight:700, marginBottom:8}}>💪 Your Word Today</div>
+        <div style={{fontFamily:"'Playfair Display',Georgia,serif", fontSize:15, color:C.cream, lineHeight:1.75, fontStyle:"italic"}}>
+          "{wordToday}"
+        </div>
+      </div>
+
+      {pending.length > 0 && (
+        <div style={{marginTop:16, padding:"10px 14px", borderRadius:8, background:"rgba(217,146,1,0.12)", border:`1px solid ${C.gold}30`}}>
+          <div style={{fontSize:11, color:C.gold, fontWeight:700, marginBottom:6}}>⚡ {pending.length} task{pending.length>1?"s":""} pending</div>
+          {pending.slice(0,3).map((t,i) => (
+            <div key={i} style={{fontSize:12, color:"#a0b890", marginBottom:3}}>→ {t.text}</div>
+          ))}
         </div>
       )}
-      {text&&!loading&&<div style={{fontFamily:"'Lora',Georgia,serif",fontSize:14,lineHeight:1.85,color:C.cream,whiteSpace:"pre-wrap",borderTop:`1px solid rgba(255,255,255,0.1)`,paddingTop:14}}>{text}</div>}
     </div>
   );
 }
@@ -642,7 +674,7 @@ export default function App(){
                 <Countdown/>
                 <Affirmation/>
               </div>
-              <Briefing data={data} onSave={saveBriefing}/>
+              <Briefing data={data}/>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:18}}>
                 <div style={card()}>
                   <div style={ST}>📅 Today's Schedule</div>
