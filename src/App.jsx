@@ -5,6 +5,7 @@ const C = {
   forest:"#1A3F22", olive:"#58761B", gold:"#D99201",
   burnt:"#905A01", cream:"#F5EDD6", paper:"#FFFDF7",
   ink:"#0E1E12", mist:"#E8F0E0", shadow:"rgba(26,63,34,0.18)",
+  cyan:"#0ea5e9", purple:"#7c3aed",
 };
 
 const AFFIRMATIONS = [
@@ -47,7 +48,8 @@ const CAL_COLORS = {
 };
 
 const BLACK_HAT = new Date("2026-08-05T09:00:00");
-const STORE = "ccd_hq_v3";
+const STORE = "ccd_hq_v4";
+const BH_STORE = "ccd_bh_events_v1";
 
 // ── DYNAMIC CALENDAR ──────────────────────────────────────────────
 function getDaySchedule(date) {
@@ -214,7 +216,203 @@ function WeeklyCalendarGrid() {
     </div>
   );
 }
-// ── END DYNAMIC CALENDAR ──────────────────────────────────────────
+
+// ── BLACK HAT EVENT TRACKER ───────────────────────────────────────
+const BH_EVENTS_DEFAULT = [
+  { id:1,  day:"Mon Aug 4",  time:"5:00–7:00 PM",  name:"Security Leaders Happy Hour",        host:"B Capital · DCVC · Khosla",     venue:"TBD on approval",                        status:"waitlist",  notes:"",  lane:"networking" },
+  { id:2,  day:"Mon Aug 4",  time:"5:00 PM–12:30 AM", name:"SecOps Leaders @ Caesars Palace", host:"Cypienta",                      venue:"Caesars Palace, Paradise NV",            status:"pending",   notes:"",  lane:"networking" },
+  { id:3,  day:"Mon Aug 4",  time:"6:00–8:30 PM",  name:"Picture Capital Private Dinner",     host:"Picture Capital",               venue:"TBD on approval",                        status:"pending",   notes:"",  lane:"vip" },
+  { id:4,  day:"Mon Aug 4",  time:"7:00–10:00 PM", name:"Guidepoint Black Hat Happy Hour",    host:"Guidepoint Security",           venue:"Swingers, 3950 S Las Vegas Blvd",        status:"confirmed", notes:"Registration confirmed.",  lane:"networking" },
+  { id:5,  day:"Mon Aug 4",  time:"8:15–10:30 PM", name:"Agentic Cloud Security Cocktail",    host:"Cyber Conferences",             venue:"S Bar, Las Vegas",                       status:"pending",   notes:"",  lane:"networking" },
+  { id:6,  day:"Tue Aug 5",  time:"All Day",        name:"🎬 Midnight in the War Room — Premiere", host:"Semperis · Featured Defender", venue:"Black Hat USA · Mandalay Bay",       status:"premiere",  notes:"Red carpet. You are a Featured Defender.", lane:"premiere" },
+  { id:7,  day:"Tue Aug 5",  time:"3:30–8:30 PM",  name:"SIEM Savings on the Race Track",    host:"Cypienta",                      venue:"TBD on approval",                        status:"pending",   notes:"",  lane:"networking" },
+  { id:8,  day:"Tue Aug 5",  time:"6:00–10:00 PM", name:"GreyNoise NoiseFest",               host:"GreyNoise",                     venue:"Mandalay Bay area",                      status:"confirmed", notes:"Confirmed.",  lane:"networking" },
+  { id:9,  day:"Tue Aug 5",  time:"6:30–10:00 PM", name:"THREATCON1 Party",                  host:"VulnCheck",                     venue:"TBD on approval",                        status:"pending",   notes:"",  lane:"networking" },
+  { id:10, day:"Tue–Wed Aug 5–6", time:"Aug 5–6",  name:"The Cyber Lounge",                  host:"Arcova",                        venue:"House of Blues, Mandalay Bay",           status:"confirmed", notes:"Confirmed both days.",  lane:"networking" },
+  { id:11, day:"Wed Aug 6",  time:"4:00–7:00 PM",  name:"\"Lock It Down\" Networking Reception", host:"Maurice Stebila",           venue:"1923 Prohibition Bar, Mandalay Bay",     status:"pending",   notes:"",  lane:"networking" },
+  { id:12, day:"Wed Aug 6",  time:"TBD",            name:"Pentera HACKasan After Party",      host:"Pentera · Lyla Krol",           venue:"Hakkasan, MGM Grand",                    status:"waitlist",  notes:"Contact Lyla to move off waitlist + confirm booth visit.", lane:"vip" },
+  { id:13, day:"Sat Aug 8",  time:"6:00–9:00 PM",  name:"VulnCheck Exclusive Cocktail Party",host:"VulnCheck",                     venue:"TBD on approval",                        status:"pending",   notes:"DEF CON event.",  lane:"networking" },
+];
+
+const BH_STATUS = {
+  premiere:  { label:"Featured Defender 🎬", color:"#7c3aed", bg:"#f5f3ff" },
+  confirmed: { label:"Confirmed ✓",          color:"#10b981", bg:"#f0fdf4" },
+  waitlist:  { label:"Waitlist",             color:"#f59e0b", bg:"#fffbeb" },
+  pending:   { label:"Pending approval",     color:"#3b82f6", bg:"#eff6ff" },
+  approved:  { label:"Approved ✓",           color:"#10b981", bg:"#f0fdf4" },
+  declined:  { label:"Declined",             color:"#9ca3af", bg:"#f9fafb" },
+};
+
+function loadBHEvents() {
+  try {
+    const r = localStorage.getItem(BH_STORE);
+    if (r) return JSON.parse(r);
+  } catch {}
+  return BH_EVENTS_DEFAULT;
+}
+
+function saveBHEvents(ev) {
+  try { localStorage.setItem(BH_STORE, JSON.stringify(ev)); } catch {}
+}
+
+function BlackHatTracker() {
+  const [events, setEvents] = useState(loadBHEvents);
+  const [editId, setEditId] = useState(null);
+  const [editNotes, setEditNotes] = useState("");
+
+  useEffect(() => { saveBHEvents(events); }, [events]);
+
+  const updateStatus = (id, status) => {
+    setEvents(prev => prev.map(e => e.id === id ? {...e, status} : e));
+  };
+
+  const saveNote = (id) => {
+    setEvents(prev => prev.map(e => e.id === id ? {...e, notes: editNotes} : e));
+    setEditId(null);
+  };
+
+  const days = Math.floor((BLACK_HAT - new Date()) / 86400000);
+  const confirmed = events.filter(e => e.status === "confirmed" || e.status === "approved" || e.status === "premiere").length;
+  const waitlist  = events.filter(e => e.status === "waitlist").length;
+  const pending   = events.filter(e => e.status === "pending").length;
+
+  const grouped = events.reduce((acc, ev) => {
+    if (!acc[ev.day]) acc[ev.day] = [];
+    acc[ev.day].push(ev);
+    return acc;
+  }, {});
+
+  const card = (extra={}) => ({
+    background:C.paper, border:`1.5px solid ${C.mist}`,
+    borderRadius:14, padding:20, boxShadow:`0 2px 16px ${C.shadow}`, ...extra
+  });
+
+  const INP_S = {
+    padding:"5px 8px", border:`1.5px solid ${C.mist}`,
+    borderRadius:6, fontFamily:"'Lora',Georgia,serif",
+    fontSize:11, color:C.ink, background:C.cream,
+    outline:"none", boxSizing:"border-box",
+  };
+
+  return (
+    <div style={{display:"flex",flexDirection:"column",gap:16}}>
+
+      {/* Header */}
+      <div style={{background:`linear-gradient(135deg,${C.ink},#1a1040)`,borderRadius:14,padding:"18px 20px",border:`1px solid ${C.gold}40`}}>
+        <div style={{fontSize:10,letterSpacing:"0.25em",color:C.gold,textTransform:"uppercase",fontWeight:700,marginBottom:6}}>
+          🎬 Black Hat USA + DEF CON 2026 · Las Vegas · Aug 4–8
+        </div>
+        <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:18,color:C.cream,fontWeight:700,marginBottom:10}}>
+          You are a Featured Defender. {days} days to the red carpet.
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10}}>
+          {[
+            [String(events.length),"Total events","#a0b890"],
+            [String(confirmed),"Locked in",C.gold],
+            [String(waitlist),"On waitlist","#f59e0b"],
+            [String(pending),"Pending","#3b82f6"],
+          ].map(([val,lbl,col])=>(
+            <div key={lbl} style={{textAlign:"center",background:"rgba(255,255,255,0.06)",borderRadius:10,padding:"10px 6px"}}>
+              <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:22,fontWeight:900,color:col}}>{val}</div>
+              <div style={{fontSize:10,color:"#a0b890",marginTop:2,letterSpacing:"0.05em"}}>{lbl}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Events by day */}
+      {Object.entries(grouped).map(([day, dayEvents]) => (
+        <div key={day}>
+          <div style={{fontSize:11,letterSpacing:"0.14em",textTransform:"uppercase",color:C.olive,fontWeight:700,marginBottom:8,paddingLeft:2}}>
+            {day}
+          </div>
+          <div style={{display:"flex",flexDirection:"column",gap:8}}>
+            {dayEvents.map(ev => {
+              const s = BH_STATUS[ev.status] || BH_STATUS.pending;
+              const isPremiere = ev.status === "premiere";
+              return (
+                <div key={ev.id} style={{
+                  background:isPremiere?`linear-gradient(135deg,#1a0a3020,#0f0a2020)`:C.paper,
+                  border:isPremiere?`2px solid ${C.purple}60`:`1.5px solid ${C.mist}`,
+                  borderRadius:12, padding:"13px 16px",
+                  boxShadow:`0 2px 12px ${C.shadow}`,
+                  borderLeft:`4px solid ${s.color}`,
+                }}>
+                  <div style={{display:"flex",alignItems:"flex-start",gap:12,flexWrap:"wrap"}}>
+                    {/* Main info */}
+                    <div style={{flex:1,minWidth:180}}>
+                      <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap",marginBottom:4}}>
+                        <span style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:14,fontWeight:700,color:isPremiere?C.purple:C.ink}}>
+                          {ev.name}
+                        </span>
+                        <span style={{fontSize:10,padding:"2px 8px",borderRadius:20,background:s.bg,color:s.color,fontWeight:700}}>
+                          {s.label}
+                        </span>
+                      </div>
+                      <div style={{fontSize:11,color:"#666",marginBottom:ev.venue?3:0}}>
+                        {ev.host} · <span style={{color:"#999"}}>{ev.time}</span>
+                      </div>
+                      {ev.venue && (
+                        <div style={{fontSize:11,color:"#888",marginBottom:ev.notes?4:0}}>
+                          📍 {ev.venue}
+                        </div>
+                      )}
+                      {ev.notes && (
+                        <div style={{fontSize:11,color:isPremiere?C.purple:"#777",fontStyle:"italic",marginBottom:4}}>
+                          💬 {ev.notes}
+                        </div>
+                      )}
+                      {/* Note editor */}
+                      {editId === ev.id && (
+                        <div style={{display:"flex",gap:6,marginTop:6}}>
+                          <input
+                            value={editNotes}
+                            onChange={e=>setEditNotes(e.target.value)}
+                            onKeyDown={e=>e.key==="Enter"&&saveNote(ev.id)}
+                            placeholder="Add a note…"
+                            style={{...INP_S,flex:1}}
+                            autoFocus
+                          />
+                          <button onClick={()=>saveNote(ev.id)} style={{padding:"4px 10px",background:C.forest,color:"#fff",border:"none",borderRadius:6,fontSize:11,cursor:"pointer",fontFamily:"'Lora',Georgia,serif"}}>Save</button>
+                          <button onClick={()=>setEditId(null)} style={{padding:"4px 8px",background:C.cream,border:`1.5px solid ${C.mist}`,borderRadius:6,fontSize:11,cursor:"pointer",color:"#888"}}>✕</button>
+                        </div>
+                      )}
+                    </div>
+                    {/* Controls */}
+                    <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
+                      <select
+                        value={ev.status}
+                        onChange={e=>updateStatus(ev.id,e.target.value)}
+                        style={{...INP_S,width:"auto",padding:"4px 8px",background:s.bg,color:s.color,border:`1.5px solid ${s.color}44`,fontWeight:700}}
+                      >
+                        {Object.entries(BH_STATUS).map(([k,v])=>(
+                          <option key={k} value={k}>{v.label}</option>
+                        ))}
+                      </select>
+                      <button
+                        onClick={()=>{setEditId(ev.id);setEditNotes(ev.notes||"");}}
+                        style={{background:C.cream,border:`1.5px solid ${C.mist}`,borderRadius:6,padding:"4px 10px",cursor:"pointer",fontSize:11,color:C.olive,fontWeight:700,fontFamily:"'Lora',Georgia,serif"}}
+                      >
+                        Note
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+
+      {/* Footer tip */}
+      <div style={{padding:"12px 16px",borderRadius:10,background:`${C.gold}18`,border:`1px solid ${C.gold}44`,fontSize:12,color:C.ink,lineHeight:1.8}}>
+        <span style={{fontWeight:700,color:C.burnt}}>Waitlist strategy:</span> RSVP approvals often come in waves 2–3 weeks before the event. Check pending statuses weekly and update here as approvals land. Your premiere slot on Aug 5 is locked — build everything else around it.
+      </div>
+    </div>
+  );
+}
+
+// ── END BLACK HAT TRACKER ─────────────────────────────────────────
 
 const defaultData=()=>({
   weeklyFocus:"Land remote healthcare cyber role — 5 outreach touches minimum this week",
@@ -247,7 +445,7 @@ const defaultData=()=>({
   debtPaid:0,debtGoal:5000,
   savingsAmount:0,savingsGoal:3000,
   netWorth:0,
-  accounts:{marcus:0,marcusGoal:5000,appleSavings:0,appleGoal:2000,rothIRA:0,rothGoal:7000,llcChecking:0,vanguard:0},
+  accounts:{marcus:0,marcusGoal:5000,appleSavings:0,appleGoal:2000,rothIRA:0,rothGoal:7000,llcChecking:0,fidelity:0},
   monthlyReflection:{wins:"",challenge:"",grateful:"",learned:"",health:"",growth:"",different:"",intention:""},
   lifeVision:"To become the most recognized Digital First Responder in healthcare cybersecurity — protecting patients, empowering clinicians, and building generational wealth that blesses my family for decades.",
   nonNegotiables:["God First — always","Family is the mission","Health is wealth","Build something that outlasts me"],
@@ -281,8 +479,6 @@ const defaultData=()=>({
     {emoji:"🏟️",label:"G-Ma on the Field",desc:"The sports tech security brand nobody owned — until now."},
   ],
   ideasParking:[],
-  savedBriefing:"",
-  lastBriefingDate:"",
   gymLog:[],
 });
 
@@ -304,7 +500,7 @@ const LB={fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",color:C.o
 const INP={width:"100%",padding:"8px 12px",border:`1.5px solid ${C.mist}`,borderRadius:8,fontFamily:"'Lora',Georgia,serif",fontSize:14,color:C.ink,background:C.cream,outline:"none",boxSizing:"border-box"};
 const BTN=(bg=C.forest,x={})=>({background:bg,color:bg===C.cream?C.forest:"#fff",border:"none",borderRadius:8,padding:"7px 16px",cursor:"pointer",fontSize:13,fontFamily:"'Lora',Georgia,serif",fontWeight:600,transition:"all 0.18s",...x});
 
-const TABS=["🌿 Today","📅 Weekly","🌙 Monthly","🌾 Quarterly","🦅 Yearly","✅ Habits","🗺️ Vision Board","🪣 Bucket List","📊 Outreach"];
+const TABS=["🌿 Today","📅 Weekly","🌙 Monthly","🌾 Quarterly","🦅 Yearly","✅ Habits","🗺️ Vision Board","🪣 Bucket List","📊 Outreach","🎬 Black Hat"];
 
 // ── COUNTDOWN ─────────────────────────────────────────────────────
 function Countdown(){
@@ -354,7 +550,7 @@ function Affirmation(){
   );
 }
 
-// ── AI BRIEFING ────────────────────────────────────────────────────
+// ── AI BRIEFING (no API call — fully local) ────────────────────────
 function Briefing({data}){
   const days = Math.floor((BLACK_HAT - new Date()) / 86400000);
   const pending = data.tasks.filter(t => !t.done);
@@ -416,14 +612,12 @@ function Briefing({data}){
       <div style={{fontSize:10, letterSpacing:"0.25em", color:C.gold, textTransform:"uppercase", fontWeight:700, marginBottom:16}}>
         ☀️ Morning Briefing · {new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})}
       </div>
-
       <div style={{marginBottom:16, paddingBottom:16, borderBottom:"1px solid rgba(255,255,255,0.1)"}}>
         <div style={{fontSize:10, letterSpacing:"0.15em", color:C.gold, textTransform:"uppercase", fontWeight:700, marginBottom:8}}>🌅 Good Morning</div>
         <div style={{fontFamily:"'Lora',Georgia,serif", fontSize:14, lineHeight:1.8, color:C.cream}}>
           {greeting}, Chaunda. {faithLine}
         </div>
       </div>
-
       <div style={{marginBottom:16, paddingBottom:16, borderBottom:"1px solid rgba(255,255,255,0.1)"}}>
         <div style={{fontSize:10, letterSpacing:"0.15em", color:C.gold, textTransform:"uppercase", fontWeight:700, marginBottom:10}}>🎯 Today's Mission — {todayName}</div>
         {mission.map((m,i) => (
@@ -432,7 +626,6 @@ function Briefing({data}){
           </div>
         ))}
       </div>
-
       <div style={{marginBottom:16, paddingBottom:16, borderBottom:"1px solid rgba(255,255,255,0.1)"}}>
         <div style={{fontSize:10, letterSpacing:"0.15em", color:C.gold, textTransform:"uppercase", fontWeight:700, marginBottom:10}}>📅 On Your Radar</div>
         {radar.map((r,i) => (
@@ -441,14 +634,12 @@ function Briefing({data}){
           </div>
         ))}
       </div>
-
       <div style={{marginBottom: pending.length > 0 ? 16 : 0}}>
         <div style={{fontSize:10, letterSpacing:"0.15em", color:C.gold, textTransform:"uppercase", fontWeight:700, marginBottom:8}}>💪 Your Word Today</div>
         <div style={{fontFamily:"'Playfair Display',Georgia,serif", fontSize:15, color:C.cream, lineHeight:1.75, fontStyle:"italic"}}>
           "{wordToday}"
         </div>
       </div>
-
       {pending.length > 0 && (
         <div style={{marginTop:16, padding:"10px 14px", borderRadius:8, background:"rgba(217,146,1,0.12)", border:`1px solid ${C.gold}30`}}>
           <div style={{fontSize:11, color:C.gold, fontWeight:700, marginBottom:6}}>⚡ {pending.length} task{pending.length>1?"s":""} pending</div>
@@ -463,6 +654,7 @@ function Briefing({data}){
 
 // ── HABIT TRACKER ──────────────────────────────────────────────────
 function HabitTracker({data,update}){
+  // FIX: derive week days and today index from real dates
   const weekDays = getWeekDays();
   const dayLabels = weekDays.map(d => d.toLocaleDateString("en-US",{weekday:"short"}).slice(0,2));
   const dayNums = weekDays.map(d => d.getDate());
@@ -498,6 +690,7 @@ function HabitTracker({data,update}){
 
       <div style={card()}>
         <div style={{fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",color:"#999",fontWeight:700,marginBottom:14}}>Daily Habits</div>
+        {/* Date header row */}
         <div style={{display:"flex",alignItems:"center",marginBottom:10}}>
           <div style={{flex:1}}/>
           <div style={{display:"flex",gap:6,marginRight:4}}>
@@ -528,13 +721,25 @@ function HabitTracker({data,update}){
               </div>
               <div style={{display:"flex",gap:6,justifyContent:"flex-end"}}>
                 {habit.days.map((checked,i)=>(
-                  <div key={i} onClick={()=>toggle(key,i)} style={{
-                    width:34,height:34,borderRadius:8,cursor:"pointer",
-                    background:checked?`linear-gradient(135deg,${C.olive},${C.gold})`:"transparent",
-                    border:`1.5px solid ${checked?C.olive:C.mist}`,
-                    display:"flex",alignItems:"center",justifyContent:"center",
-                    fontSize:14,transition:"all 0.18s",transform:checked?"scale(1.05)":"scale(1)",
-                  }}>{checked&&<span style={{color:"#fff",fontSize:13,fontWeight:700}}>✓</span>}</div>
+                  <div
+                    key={i}
+                    onClick={()=>toggle(key,i)}
+                    role="checkbox"
+                    aria-checked={checked}
+                    aria-label={`${habit.label} ${dayLabels[i]} ${dayNums[i]}`}
+                    tabIndex={0}
+                    onKeyDown={e=>(e.key===" "||e.key==="Enter")&&toggle(key,i)}
+                    style={{
+                      width:34,height:34,borderRadius:8,cursor:"pointer",
+                      background:checked?`linear-gradient(135deg,${C.olive},${C.gold})`:"transparent",
+                      border:`1.5px solid ${checked?C.olive:C.mist}`,
+                      display:"flex",alignItems:"center",justifyContent:"center",
+                      fontSize:14,transition:"all 0.18s",transform:checked?"scale(1.05)":"scale(1)",
+                      outline:"none",
+                    }}
+                  >
+                    {checked&&<span style={{color:"#fff",fontSize:13,fontWeight:700}}>✓</span>}
+                  </div>
                 ))}
               </div>
             </div>
@@ -547,16 +752,16 @@ function HabitTracker({data,update}){
 
 // ── MONEY ROUTER ──────────────────────────────────────────────────
 function MoneyRouter({data,update}){
-  const acc=data.accounts||{marcus:0,marcusGoal:5000,appleSavings:0,appleGoal:2000,rothIRA:0,rothGoal:7000,llcChecking:0,vanguard:0};
+  const acc=data.accounts||{marcus:0,marcusGoal:5000,appleSavings:0,appleGoal:2000,rothIRA:0,rothGoal:7000,llcChecking:0,fidelity:0};
   const set=(key,val)=>update({accounts:{...acc,[key]:+val}});
   const tiers=[
     {tier:"T1",label:"Operating Base",icon:"🏦",color:C.ink,bg:"#e8f0e0",accounts:[{key:"llcChecking",label:"LLC Business Checking",goal:null,note:"Business income lands here first. Pay yourself from this."}],rule:"Bills, daily expenses, operating money"},
     {tier:"T2",label:"Protection",icon:"🛡️",color:"#0f6e56",bg:"#e1f5ee",accounts:[{key:"marcus",label:"Marcus High-Yield Savings",goal:"marcusGoal",note:"Emergency + job transition buffer. Fund this first."}],rule:"3 months expenses. Do not touch."},
     {tier:"T3",label:"Opportunity",icon:"✨",color:"#854f0b",bg:"#faeeda",accounts:[{key:"appleSavings",label:"Apple Card High-Yield Savings",goal:"appleGoal",note:"Black Hat · certs · conferences · family trips"}],rule:"Intentional spending that invests in you."},
     {tier:"T4",label:"Future You",icon:"🌱",color:"#533ab7",bg:"#eeedfe",accounts:[{key:"rothIRA",label:"Roth IRA · Navy Federal",goal:"rothGoal",note:"Even $50/mo builds the habit and keeps it alive"}],rule:"Consistent beats maximum. Start small."},
-    {tier:"T5",label:"Wealth Building",icon:"📈",color:C.forest,bg:"#eaf3de",accounts:[{key:"vanguard",label:"Vanguard Individual Brokerage",goal:null,note:"Open it now. Fund after T2 & T4 are consistent."}],rule:"Index funds (VTI). Long-term. Hands off."},
+    {tier:"T5",label:"Wealth Building",icon:"📈",color:C.forest,bg:"#eaf3de",accounts:[{key:"fidelity",label:"Fidelity Individual Brokerage",goal:null,note:"Index funds (VTI). Long-term. Hands off."}],rule:"Open it now. Fund after T2 & T4 are consistent."},
   ];
-  const totalAssets=(acc.marcus||0)+(acc.appleSavings||0)+(acc.rothIRA||0)+(acc.llcChecking||0)+(acc.vanguard||0);
+  const totalAssets=(acc.marcus||0)+(acc.appleSavings||0)+(acc.rothIRA||0)+(acc.llcChecking||0)+(acc.fidelity||0);
   return(
     <div style={{...card(),gridColumn:"1/-1"}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:10,marginBottom:20}}>
@@ -627,7 +832,6 @@ export default function App(){
   const addBucketItem=()=>{if(!newBucket.trim())return;update({bucketList:[...data.bucketList,{text:newBucket,done:false}]});setNewBucket("");};
   const addIdea=()=>{if(!newIdea.trim())return;update({ideasParking:[...data.ideasParking,newIdea]});setNewIdea("");};
   const addVision=()=>{if(!newVision.label)return;update({visionBoard:[...data.visionBoard,{...newVision}]});setNewVision({emoji:"✨",label:"",desc:""});setShowVAdd(false);};
-  const saveBriefing=(t,d)=>update({savedBriefing:t,lastBriefingDate:d});
 
   return(
     <div style={{minHeight:"100vh",background:`linear-gradient(160deg,${C.forest} 0%,#0E2415 40%,#0a1a0d 100%)`,fontFamily:"'Lora',Georgia,serif",color:C.ink}}>
@@ -650,6 +854,8 @@ export default function App(){
             ))}
           </div>
         </div>
+
+        {/* TABS */}
         <div style={{display:"flex",gap:2,marginTop:16,overflowX:"auto",paddingBottom:2,scrollbarWidth:"none"}}>
           {TABS.map((t,i)=>(
             <button key={i} onClick={()=>setTab(i)} style={{
@@ -755,7 +961,7 @@ export default function App(){
           {tab===2&&(
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:18}}>
               <div style={{...card(),gridColumn:"1/-1",background:`linear-gradient(120deg,${C.burnt},${C.gold})`,color:"#fff",border:"none"}}>
-                <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:22,fontWeight:700}}>June 2026 — Monthly Reflection</div>
+                <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:22,fontWeight:700}}>{new Date().toLocaleDateString("en-US",{month:"long",year:"numeric"})} — Monthly Reflection</div>
                 <div style={{fontSize:13,opacity:0.85,marginTop:3}}>Consistency beats intensity. What does this month say about you?</div>
               </div>
               {[["wins","🏆 Biggest Wins","What are you celebrating?"],["challenge","💪 Biggest Challenge","Be honest."],["grateful","🙏 Most Grateful For","What showed up?"],["learned","💡 Most Important Lesson","What shifted?"],["health","❤️ Your Health This Month","Body & mind."],["growth","🌱 Growth","What expanded?"],["different","🔄 Do Differently","No judgment."],["intention","🌅 Intention Next Month","One sentence."]].map(([key,title,ph])=>(
@@ -772,7 +978,7 @@ export default function App(){
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:18}}>
               <div style={{...card(),gridColumn:"1/-1",background:`linear-gradient(120deg,${C.forest},${C.olive})`,color:"#fff",border:"none"}}>
                 <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:22,fontWeight:700}}>Q3 2026 — Jul → Sep</div>
-                <div style={{fontSize:13,opacity:0.85,marginTop:3}}>Black Hat red carpet. G-Ma on the Field. G-Ma Playbook ships Sep 12.</div>
+                <div style={{fontSize:13,opacity:0.85,marginTop:3}}>Black Hat red carpet. G-Ma on the Field. Build the pipeline.</div>
               </div>
               {Object.entries(data.quarterlyGoals).map(([cat,goals])=>(
                 <div key={cat} style={card()}>
@@ -921,6 +1127,9 @@ export default function App(){
           )}
 
           {tab===8&&<OutreachTracker/>}
+
+          {/* BLACK HAT TRACKER */}
+          {tab===9&&<BlackHatTracker/>}
 
         </div>
       </div>
