@@ -419,7 +419,7 @@ const SCHED_STORE = "ccd_schedule_v1";
 
 function loadSched() {
   try { const r = localStorage.getItem(SCHED_STORE); if (r) return JSON.parse(r); } catch {}
-  return { bhv:null, wisp:null };
+  return { bhv:"jul6", wisp:"jul22" };
 }
 function saveSched(s) {
   try { localStorage.setItem(SCHED_STORE, JSON.stringify(s)); } catch {}
@@ -431,7 +431,7 @@ const SCHED_DECISIONS = [
     label:"Biohacking Village — Volunteer Meeting",
     sub:"Attend ONE · same content both times · optional",
     options:[
-      { id:"jul6",  date:"Mon Jul 6",  time:"2:00 PM ET · 11:00 AM PT", link:"meet.google.com/fon-urnd-fwi", flag:"Day before Security+ — heads up" },
+      { id:"jul6",  date:"Mon Jul 6",  time:"2:00–2:30 PM ET", link:"meet.google.com/fon-urnd-fwi", flag:"Confirmed — invite set · exam is next morning" },
       { id:"jul17", date:"Fri Jul 17", time:"12:00 PM ET · 9:00 AM PT", link:"meet.google.com/fct-mkto-ogn", flag:"Recommended — clear of the exam" },
     ],
   },
@@ -440,7 +440,7 @@ const SCHED_DECISIONS = [
     label:"WISP — DEF CON Volunteer Training",
     sub:"Register for ONE · required · you're the Shift Lead",
     options:[
-      { id:"jul22", date:"Tue Jul 22", time:"6:00 PM ET · 3:00 PM PT", link:"Zoom — register in advance", flag:"" },
+      { id:"jul22", date:"Tue Jul 22", time:"6:00–7:00 PM ET · 3:00 PM PT", link:"Zoom — register in advance", flag:"" },
       { id:"jul25", date:"Sat Jul 25", time:"3:00 PM ET · 12:00 PM PT", link:"Zoom — register in advance", flag:"" },
     ],
   },
@@ -551,6 +551,7 @@ function ScheduleCommand() {
             : <Row dot={C.gold} date="Jul 6 / 17" time="pick above" title="Biohacking Village — Volunteer Meeting" note="⏳ Awaiting your pick — see Decisions Pending." />
           }
           <Row dot={C.purple} date="Tue Jul 7" time="Exam Day" title="⭐ Security+ SY0-701 — EXAM" note="The hinge of the whole month. Clear the deck." strong />
+          <Row dot="#7c3aed" date="Mondays" time="4 PM CT · 5 PM ET" title="WiCyS × JHT — AI Cyber Defense Ops (5 wks)" note="Optional live sessions Jul 6 → Aug 3. Self-paced course via CourseStack / learn.justhacking.com." />
           {wispOpt
             ? <Row dot="#10b981" date={wispOpt.date} time={wispOpt.time} title="WISP — DEF CON Volunteer Training" note="Locked in above. Register on Zoom." />
             : <Row dot={C.gold} date="Jul 22 / 25" time="pick above" title="WISP — DEF CON Volunteer Training" note="⏳ Awaiting your pick — required. See Decisions Pending." />
@@ -566,7 +567,8 @@ function ScheduleCommand() {
           <Row dot={C.olive} date="Sun Aug 2" time="Arrival" title="Land in Las Vegas" note="Trip window opens. Settle in." />
           <Row dot="#10b981" date="Tue Aug 4" time="Day + eve" title="Black Hat events begin" note="Arcova Cyber Lounge + Guidepoint confirmed. Full list in the 🎬 Black Hat tab." />
           <Row dot={C.purple} date="Wed Aug 5" time="Anchor day" title="⭐ Midnight in the War Room — Premiere" note="Red carpet. Featured Defender. Build everything around this." strong />
-          <Row dot={C.burnt} date="Thu–Sat Aug 6–8" time="DEF CON 34" title="DEF CON 34 — WISP shifts + Biohacking Village" note="Shift schedules land later. Send WISP the hours you can't cover." />
+          <Row dot="#7c3aed" date="Thu Aug 6" time="1:00–2:00 PM" title="✍️ Midnight in the War Room — Signing Booth" note="Your booth shift. Featured Defender, signing swag. Confirmed." strong />
+          <Row dot={C.burnt} date="Thu–Sat Aug 6–8" time="DEF CON 34" title="DEF CON 34 — WISP shifts + Biohacking Village" note="Shift schedules land later. Send WISP the hours you can't cover (note the 1–2pm booth on the 6th)." />
           <Row dot={C.gold} date="Sat Aug 8" time="Late flight" title="Hotel checkout → late flight home" note="Wheels up late. Trip closes." />
         </div>
       </div>
@@ -576,9 +578,10 @@ function ScheduleCommand() {
         <div style={STl}>📨 Replies You Owe</div>
         <div style={{display:"flex",flexDirection:"column",gap:8}}>
           {[
-            "WISP — register for your chosen training, then send Selena the hours you're NOT available to volunteer Aug 6–8.",
+            "WISP — Jul 22 training locked; register on Zoom. Then send Selena the hours you're NOT available Aug 6–8 (flag the 1–2pm signing booth on the 6th).",
             "Black Hat — confirm travel + hotel (still open on your task list).",
-            "BHV — once you pick a meeting above, nothing to send; just show up.",
+            "JHT — watch for the CourseStack invite (by Wed); course lives at learn.justhacking.com.",
+            "BHV Jul 6 — locked and on your calendar. Nothing to send; just show up.",
           ].map((t,i)=>(
             <div key={i} style={{display:"flex",gap:8,alignItems:"flex-start",fontSize:12,color:C.ink,lineHeight:1.6}}>
               <span style={{color:C.burnt,fontWeight:700}}>→</span><span>{t}</span>
@@ -589,7 +592,7 @@ function ScheduleCommand() {
 
       {/* Footnotes */}
       <div style={{fontSize:11,color:"#9aa893",lineHeight:1.7,padding:"0 4px"}}>
-        Times shown ET · PT as the invites were sent. On Milwaukee <strong>Central</strong> time, subtract 1 hour from every ET stamp.
+        Times shown in ET (your Atlanta zone) unless marked. You move to Milwaukee / Central on Jul 17 — after that, ET stamps run one hour ahead of your local clock, so the JHT Mondays read 4 PM your time once you're there.
         This view reflects one inbox (connect@chaundacdallas.com); anything booked from your second Gmail won't appear here automatically.
       </div>
 
