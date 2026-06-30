@@ -414,6 +414,190 @@ function BlackHatTracker() {
 
 // ── END BLACK HAT TRACKER ─────────────────────────────────────────
 
+// ── COMMAND SCHEDULE ──────────────────────────────────────────────
+const SCHED_STORE = "ccd_schedule_v1";
+
+function loadSched() {
+  try { const r = localStorage.getItem(SCHED_STORE); if (r) return JSON.parse(r); } catch {}
+  return { bhv:null, wisp:null };
+}
+function saveSched(s) {
+  try { localStorage.setItem(SCHED_STORE, JSON.stringify(s)); } catch {}
+}
+
+const SCHED_DECISIONS = [
+  {
+    id:"bhv",
+    label:"Biohacking Village — Volunteer Meeting",
+    sub:"Attend ONE · same content both times · optional",
+    options:[
+      { id:"jul6",  date:"Mon Jul 6",  time:"2:00 PM ET · 11:00 AM PT", link:"meet.google.com/fon-urnd-fwi", flag:"Day before Security+ — heads up" },
+      { id:"jul17", date:"Fri Jul 17", time:"12:00 PM ET · 9:00 AM PT", link:"meet.google.com/fct-mkto-ogn", flag:"Recommended — clear of the exam" },
+    ],
+  },
+  {
+    id:"wisp",
+    label:"WISP — DEF CON Volunteer Training",
+    sub:"Register for ONE · required · you're the Shift Lead",
+    options:[
+      { id:"jul22", date:"Tue Jul 22", time:"6:00 PM ET · 3:00 PM PT", link:"Zoom — register in advance", flag:"" },
+      { id:"jul25", date:"Sat Jul 25", time:"3:00 PM ET · 12:00 PM PT", link:"Zoom — register in advance", flag:"" },
+    ],
+  },
+];
+
+function ScheduleCommand() {
+  const [choices, setChoices] = useState(loadSched);
+  useEffect(() => { saveSched(choices); }, [choices]);
+
+  const pick = (decId, optId) => {
+    setChoices(prev => ({ ...prev, [decId]: prev[decId] === optId ? null : optId }));
+  };
+
+  const secPlus = new Date("2026-07-07T09:00:00");
+  const vegas   = new Date("2026-08-02T00:00:00");
+  const dSec   = Math.max(0, Math.ceil((secPlus - new Date()) / 86400000));
+  const dVegas = Math.max(0, Math.ceil((vegas   - new Date()) / 86400000));
+
+  const cardL = (extra={}) => ({ background:C.paper, border:`1.5px solid ${C.mist}`, borderRadius:14, padding:20, boxShadow:`0 2px 16px ${C.shadow}`, ...extra });
+  const STl = { fontFamily:"'Playfair Display',Georgia,serif", fontSize:18, color:C.forest, fontWeight:700, marginBottom:14 };
+  const eyebrow = (txt) => (
+    <div style={{fontSize:10,letterSpacing:"0.16em",textTransform:"uppercase",color:C.olive,fontWeight:700,marginBottom:10}}>{txt}</div>
+  );
+
+  const Row = ({ dot, date, time, title, note, strong }) => (
+    <div style={{display:"flex",gap:12,alignItems:"flex-start",padding:"11px 14px",borderRadius:10,background:C.cream,borderLeft:`4px solid ${dot}`}}>
+      <div style={{minWidth:84}}>
+        <div style={{fontSize:12,fontWeight:700,color:C.ink}}>{date}</div>
+        <div style={{fontSize:10,color:C.olive,fontWeight:600,marginTop:2}}>{time}</div>
+      </div>
+      <div style={{flex:1}}>
+        <div style={{fontSize:13,fontWeight:strong?700:600,color:strong?C.forest:C.ink,fontFamily:strong?"'Playfair Display',Georgia,serif":"inherit"}}>{title}</div>
+        {note && <div style={{fontSize:11,color:"#777",marginTop:2,fontStyle:"italic"}}>{note}</div>}
+      </div>
+    </div>
+  );
+
+  const bhvOpt  = SCHED_DECISIONS[0].options.find(o => o.id === choices.bhv);
+  const wispOpt = SCHED_DECISIONS[1].options.find(o => o.id === choices.wisp);
+
+  return (
+    <div style={{display:"flex",flexDirection:"column",gap:18}}>
+
+      {/* Header + countdowns */}
+      <div style={{background:`linear-gradient(135deg,${C.ink},#1a3020)`,borderRadius:14,padding:"18px 20px",border:`1px solid ${C.gold}40`}}>
+        <div style={{fontSize:10,letterSpacing:"0.25em",color:C.gold,textTransform:"uppercase",fontWeight:700,marginBottom:6}}>🗓️ Command Schedule</div>
+        <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:18,color:C.cream,fontWeight:700,marginBottom:12}}>
+          Everything between now and Vegas — one view.
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+          {[["Security+ Exam · Jul 7", dSec], ["Land in Vegas · Aug 2", dVegas]].map(([lbl,v])=>(
+            <div key={lbl} style={{textAlign:"center",background:"rgba(217,146,1,0.12)",border:`1px solid ${C.gold}30`,borderRadius:10,padding:"10px 8px"}}>
+              <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:24,fontWeight:900,color:C.gold,lineHeight:1}}>{v}</div>
+              <div style={{fontSize:9,letterSpacing:"0.06em",color:"#a0b890",marginTop:4}}>{lbl} · days</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Decisions pending */}
+      <div style={cardL()}>
+        <div style={STl}>⚡ Decisions Pending</div>
+        <div style={{display:"flex",flexDirection:"column",gap:16}}>
+          {SCHED_DECISIONS.map(dec => {
+            const chosen = choices[dec.id];
+            return (
+              <div key={dec.id} style={{padding:"14px 16px",borderRadius:12,background:chosen?"#f0faf0":"#fffbeb",border:`1.5px solid ${chosen?"#10b98144":`${C.gold}44`}`}}>
+                <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap",marginBottom:3}}>
+                  <span style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:14,fontWeight:700,color:C.ink}}>{dec.label}</span>
+                  <span style={{fontSize:9,padding:"2px 8px",borderRadius:20,fontWeight:700,background:chosen?"#10b981":C.gold,color:"#fff"}}>
+                    {chosen ? "LOCKED ✓" : "ACTION NEEDED"}
+                  </span>
+                </div>
+                <div style={{fontSize:11,color:"#888",marginBottom:10}}>{dec.sub}</div>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+                  {dec.options.map(opt => {
+                    const isOn = chosen === opt.id;
+                    return (
+                      <div key={opt.id} onClick={()=>pick(dec.id, opt.id)} style={{
+                        cursor:"pointer",padding:"10px 12px",borderRadius:9,
+                        background:isOn?`linear-gradient(135deg,${C.forest},${C.olive})`:C.paper,
+                        border:`1.5px solid ${isOn?C.forest:C.mist}`,
+                        transition:"all 0.18s",
+                      }}>
+                        <div style={{fontSize:12,fontWeight:700,color:isOn?C.cream:C.ink}}>{opt.date}</div>
+                        <div style={{fontSize:10,color:isOn?"#cfe0c4":C.olive,fontWeight:600,marginTop:2}}>{opt.time}</div>
+                        <div style={{fontSize:10,color:isOn?"#cfe0c4":"#999",marginTop:4,wordBreak:"break-all"}}>{opt.link}</div>
+                        {opt.flag && <div style={{fontSize:9,marginTop:5,color:isOn?C.cream:C.burnt,fontStyle:"italic"}}>{opt.flag}</div>}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div style={{marginTop:12,fontSize:11,color:"#999",fontStyle:"italic"}}>Tap a date to lock it in. Tap again to clear.</div>
+      </div>
+
+      {/* July runway */}
+      <div style={cardL()}>
+        <div style={STl}>📋 The Runway · July</div>
+        {eyebrow("Milwaukee season · remote")}
+        <div style={{display:"flex",flexDirection:"column",gap:8}}>
+          <Row dot={C.cyan} date="Thu Jul 2" time="1:30p ET · 10:30a PT" title="Raven — 1:1 Mentee Session" note="Rescheduled & confirmed. Sits in your Thursday mentor window." />
+          {bhvOpt
+            ? <Row dot="#10b981" date={bhvOpt.date} time={bhvOpt.time} title="Biohacking Village — Volunteer Meeting" note="Locked in above." />
+            : <Row dot={C.gold} date="Jul 6 / 17" time="pick above" title="Biohacking Village — Volunteer Meeting" note="⏳ Awaiting your pick — see Decisions Pending." />
+          }
+          <Row dot={C.purple} date="Tue Jul 7" time="Exam Day" title="⭐ Security+ SY0-701 — EXAM" note="The hinge of the whole month. Clear the deck." strong />
+          {wispOpt
+            ? <Row dot="#10b981" date={wispOpt.date} time={wispOpt.time} title="WISP — DEF CON Volunteer Training" note="Locked in above. Register on Zoom." />
+            : <Row dot={C.gold} date="Jul 22 / 25" time="pick above" title="WISP — DEF CON Volunteer Training" note="⏳ Awaiting your pick — required. See Decisions Pending." />
+          }
+        </div>
+      </div>
+
+      {/* Vegas week */}
+      <div style={cardL()}>
+        <div style={STl}>🎬 Vegas Week · Aug 2–8</div>
+        {eyebrow("Black Hat USA + DEF CON 34 · Las Vegas")}
+        <div style={{display:"flex",flexDirection:"column",gap:8}}>
+          <Row dot={C.olive} date="Sun Aug 2" time="Arrival" title="Land in Las Vegas" note="Trip window opens. Settle in." />
+          <Row dot="#10b981" date="Tue Aug 4" time="Day + eve" title="Black Hat events begin" note="Arcova Cyber Lounge + Guidepoint confirmed. Full list in the 🎬 Black Hat tab." />
+          <Row dot={C.purple} date="Wed Aug 5" time="Anchor day" title="⭐ Midnight in the War Room — Premiere" note="Red carpet. Featured Defender. Build everything around this." strong />
+          <Row dot={C.burnt} date="Thu–Sat Aug 6–8" time="DEF CON 34" title="DEF CON 34 — WISP shifts + Biohacking Village" note="Shift schedules land later. Send WISP the hours you can't cover." />
+          <Row dot={C.gold} date="Sat Aug 8" time="Late flight" title="Hotel checkout → late flight home" note="Wheels up late. Trip closes." />
+        </div>
+      </div>
+
+      {/* Replies you owe */}
+      <div style={{...cardL(),background:`${C.gold}12`,border:`1px solid ${C.gold}44`}}>
+        <div style={STl}>📨 Replies You Owe</div>
+        <div style={{display:"flex",flexDirection:"column",gap:8}}>
+          {[
+            "WISP — register for your chosen training, then send Selena the hours you're NOT available to volunteer Aug 6–8.",
+            "Black Hat — confirm travel + hotel (still open on your task list).",
+            "BHV — once you pick a meeting above, nothing to send; just show up.",
+          ].map((t,i)=>(
+            <div key={i} style={{display:"flex",gap:8,alignItems:"flex-start",fontSize:12,color:C.ink,lineHeight:1.6}}>
+              <span style={{color:C.burnt,fontWeight:700}}>→</span><span>{t}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Footnotes */}
+      <div style={{fontSize:11,color:"#9aa893",lineHeight:1.7,padding:"0 4px"}}>
+        Times shown ET · PT as the invites were sent. On Milwaukee <strong>Central</strong> time, subtract 1 hour from every ET stamp.
+        This view reflects one inbox (connect@chaundacdallas.com); anything booked from your second Gmail won't appear here automatically.
+      </div>
+
+    </div>
+  );
+}
+// ── END COMMAND SCHEDULE ──────────────────────────────────────────
+
 const defaultData=()=>({
   weeklyFocus:"Land remote healthcare cyber role — 5 outreach touches minimum this week",
   weeklyGoals:["Send outreach to Optiv + ScanTech AI today","Complete ISA/IEC 62443 first module","Post G-Ma on the Field launch content"],
@@ -500,7 +684,7 @@ const LB={fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",color:C.o
 const INP={width:"100%",padding:"8px 12px",border:`1.5px solid ${C.mist}`,borderRadius:8,fontFamily:"'Lora',Georgia,serif",fontSize:14,color:C.ink,background:C.cream,outline:"none",boxSizing:"border-box"};
 const BTN=(bg=C.forest,x={})=>({background:bg,color:bg===C.cream?C.forest:"#fff",border:"none",borderRadius:8,padding:"7px 16px",cursor:"pointer",fontSize:13,fontFamily:"'Lora',Georgia,serif",fontWeight:600,transition:"all 0.18s",...x});
 
-const TABS=["🌿 Today","📅 Weekly","🌙 Monthly","🌾 Quarterly","🦅 Yearly","✅ Habits","🗺️ Vision Board","🪣 Bucket List","📊 Outreach","🎬 Black Hat"];
+const TABS=["🌿 Today","📅 Weekly","🌙 Monthly","🌾 Quarterly","🦅 Yearly","✅ Habits","🗺️ Vision Board","🪣 Bucket List","📊 Outreach","🎬 Black Hat","🗓️ Schedule"];
 
 // ── COUNTDOWN ─────────────────────────────────────────────────────
 function Countdown(){
@@ -1130,6 +1314,9 @@ export default function App(){
 
           {/* BLACK HAT TRACKER */}
           {tab===9&&<BlackHatTracker/>}
+
+          {/* COMMAND SCHEDULE */}
+          {tab===10&&<ScheduleCommand/>}
 
         </div>
       </div>
