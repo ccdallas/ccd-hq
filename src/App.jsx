@@ -83,6 +83,7 @@ function getDaySchedule(date) {
       { time:"8:00 AM", title:"Security+ Core 📚", cal:"study" },
       { time:"9:00 AM", title:"AWS Early Block ☁️", cal:"study" },
       { time:"10:00 AM", title:"▣ WiCyS Office Hours", cal:"wicys" },
+      { time:"10–11 · 1–4", title:"▣ WiCyS Chatter — post & answer in open slots 📣", cal:"wicys" },
       { time:"11:00 AM", title:"AWS Main Block ☁️", cal:"study" },
       { time:"12:30 PM", title:"Active Recall 🧠", cal:"study" },
       { time:"1:00 PM", title:"▣ PAID CLIENTS 💼", cal:"paid" },
@@ -104,6 +105,7 @@ function getDaySchedule(date) {
       { time:"8:00 AM", title:"Security+ Core 📚", cal:"study" },
       { time:"9:00 AM", title:"AWS Early Block ☁️", cal:"study" },
       { time:"10:00 AM", title:"▣ WiCyS Office Hours", cal:"wicys" },
+      { time:"10–11 · 1–4", title:"▣ WiCyS Chatter — post & answer in open slots 📣", cal:"wicys" },
       { time:"11:00 AM", title:"AWS Main Block ☁️", cal:"study" },
       { time:"12:30 PM", title:"Active Recall 🧠", cal:"study" },
       { time:"1:00 PM", title:"▣ PAID CLIENTS 💼", cal:"paid" },
@@ -546,6 +548,7 @@ function ScheduleCommand() {
         {eyebrow("Milwaukee season · remote")}
         <div style={{display:"flex",flexDirection:"column",gap:8}}>
           <Row dot={C.cyan} date="Thu Jul 2" time="1:30p ET · 10:30a PT" title="Raven — 1:1 Mentee Session" note="Rescheduled & confirmed. Sits in your Thursday mentor window." />
+          <Row dot="#7c3aed" date="Tue & Thu" time="Open office-hrs / 1:1 slots" title="WiCyS Chatter — post & answer in open windows" note="If no one's booked, be in the cohort group. Turn on notifications so you catch posts same-day." />
           {bhvOpt
             ? <Row dot="#10b981" date={bhvOpt.date} time={bhvOpt.time} title="Biohacking Village — Volunteer Meeting" note="Locked in above." />
             : <Row dot={C.gold} date="Jul 6 / 17" time="pick above" title="Biohacking Village — Volunteer Meeting" note="⏳ Awaiting your pick — see Decisions Pending." />
@@ -581,6 +584,7 @@ function ScheduleCommand() {
             "WISP — Jul 22 training locked; register on Zoom. Then send Selena the hours you're NOT available Aug 6–8 (flag the 1–2pm signing booth on the 6th).",
             "Black Hat — confirm travel + hotel (still open on your task list).",
             "JHT — watch for the CourseStack invite (by Wed); course lives at learn.justhacking.com.",
+            "WiCyS — turn on chatter-group notifications so posts hit your phone; reply same-day in open office-hours / 1:1 windows.",
             "BHV Jul 6 — locked and on your calendar. Nothing to send; just show up.",
           ].map((t,i)=>(
             <div key={i} style={{display:"flex",gap:8,alignItems:"flex-start",fontSize:12,color:C.ink,lineHeight:1.6}}>
