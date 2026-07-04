@@ -1,11 +1,19 @@
-import { useState, useEffect, useCallback } from "react";
-import OutreachTracker from "./OutreachTracker.jsx";
+import { useState, useEffect, useCallback, useRef } from "react";
 
+// ── Brand spine v2 — Green / Amber / Crimson(pulse-only) / Cream / Slate ──
+// Token names kept identical to v1 so every existing reference below
+// (C.forest, C.gold, etc.) automatically inherits the new brand palette.
 const C = {
-  forest:"#1A3F22", olive:"#58761B", gold:"#D99201",
-  burnt:"#905A01", cream:"#F5EDD6", paper:"#FFFDF7",
-  ink:"#0E1E12", mist:"#E8F0E0", shadow:"rgba(26,63,34,0.18)",
-  cyan:"#0ea5e9", purple:"#7c3aed",
+  forest:"#1E5040",   // brand Green — identity: headers, nav, primary UI
+  olive:"#2C6B52",    // Green tint — secondary accents, progress gradients
+  gold:"#E0A83E",     // brand Amber — CTAs, highlights, hover states
+  burnt:"#B9862A",    // Amber-deep — secondary CTA / pressed states
+  cream:"#F3ECDD",    // brand Cream — backgrounds, negative space
+  paper:"#FFFDF8",    // near-white card surface
+  ink:"#3D4142",       // brand Slate — body text, secondary UI
+  mist:"#E4DCC8",      // divider / tint derived from Cream
+  crimson:"#8B1E24",  // brand Crimson — PULSE ONLY, never decorative
+  shadow:"rgba(30,80,64,0.16)",
 };
 
 const AFFIRMATIONS = [
@@ -15,14 +23,14 @@ const AFFIRMATIONS = [
   "I am not a non-traditional candidate. I am the candidate they didn't know they needed.",
   "Every closed door redirected me closer to my purpose. I trust the process.",
   "I protect patients from threats they never see coming. That is sacred work.",
-  "My experience is not a detour. It is my competitive advantage.",
-  "I am building something that will outlast me — for my family and every generation after.",
+  "My 28 years are not a detour. They are my competitive advantage.",
+  "I am building something that will outlast me — for my family, my family, my family, and every generation after.",
   "The red carpet on August 5th is not an arrival. It is a beginning.",
   "I am a woman of faith, a grandmother, a clinician, a defender. All of it counts. All of it matters.",
   "Remote, flexible, and fully compensated — the right role already exists and is looking for me.",
   "I do not shrink to fit job descriptions. I expand organizations to fit my vision.",
   "Caregiving and career excellence are not in conflict. I am proof that both can coexist.",
-  "My mother's care is covered. My family is thriving. My work is meaningful. This is the life I built.",
+  "My mother's care is covered. My children are thriving. My work is meaningful. This is the life I built.",
   "I walk into every room — virtual or in-person — as the most prepared person there.",
   "Black Hat. DEF CON. WiCyS. FBI Citizens Academy. I move in rooms that matter.",
   "My expertise is rare. My story is powerful. My time is now.",
@@ -36,648 +44,228 @@ const AFFIRMATIONS = [
   "The organization that hires me will wonder how they ever operated without me.",
   "I am healthy, protected, purposeful, and covered. This is my declaration.",
   "Setbacks are data. I analyze them, adjust, and keep moving forward.",
-  "I am the kind of woman who builds a lab, walks a red carpet, and shows up for her family — all in the same week.",
+  "I am the kind of woman who builds a lab, walks a red carpet, and tucks in her grandkids — all in the same week.",
   "Every cert I earn, every scenario I build, every person I mentor — it compounds.",
   "I am a Digital First Responder. I assess. I contain. I treat. I recover. Always.",
 ];
 
-const CAL_COLORS = {
-  routine:C.olive, health:"#e05c5c", family:C.gold, growth:C.forest,
-  finance:"#10b981", special:C.burnt, birthday:"#ec4899",
-  wicys:"#7c3aed", paid:"#0ea5e9", study:"#1A3F22",
+const ROUTINE_DEFAULT = {
+  Mon:[
+    {time:"",title:"Morning Tea + Affirmation ☕📖",cal:"routine"},
+    {time:"3:45 PM",title:"Grandkids Pickup 👧🏽",cal:"family"},
+    {time:"4:00 PM",title:"Learning — HackTheBox / TryHackMe 💻",cal:"growth"},
+    {time:"6:00 PM",title:"Exercise 30 min 🏃‍♀️",cal:"health"},
+    {time:"",title:"Bedtime Routine (CPAP) 😴",cal:"health"},
+  ],
+  Tue:[
+    {time:"",title:"Morning Tea + Affirmation ☕📖",cal:"routine"},
+    {time:"3:45 PM",title:"Grandkids Pickup 👧🏽",cal:"family"},
+    {time:"4:00 PM",title:"Learning — HackTheBox / TryHackMe 💻",cal:"growth"},
+    {time:"6:00 PM",title:"Exercise 30 min 🏃‍♀️",cal:"health"},
+    {time:"",title:"Bedtime Routine (CPAP) 😴",cal:"health"},
+  ],
+  Wed:[
+    {time:"",title:"Morning Tea + Affirmation ☕📖",cal:"routine"},
+    {time:"3:45 PM",title:"Grandkids Pickup 👧🏽",cal:"family"},
+    {time:"4:00 PM",title:"Learning — HackTheBox / TryHackMe 💻",cal:"growth"},
+    {time:"6:00 PM",title:"Exercise 30 min 🏃‍♀️",cal:"health"},
+    {time:"",title:"Bedtime Routine (CPAP) 😴",cal:"health"},
+  ],
+  Thu:[
+    {time:"",title:"Morning Tea + Affirmation ☕📖",cal:"routine"},
+    {time:"3:45 PM",title:"Grandkids Pickup 👧🏽",cal:"family"},
+    {time:"4:00 PM",title:"Learning — HackTheBox / TryHackMe 💻",cal:"growth"},
+    {time:"6:00 PM",title:"Exercise 30 min 🏃‍♀️",cal:"health"},
+    {time:"",title:"Bedtime Routine (CPAP) 😴",cal:"health"},
+  ],
+  Fri:[
+    {time:"",title:"Morning Tea + Affirmation ☕📖",cal:"routine"},
+    {time:"3:45 PM",title:"Grandkids Pickup 👧🏽",cal:"family"},
+    {time:"4:00 PM",title:"Learning — HackTheBox / TryHackMe 💻",cal:"growth"},
+    {time:"6:00 PM",title:"Exercise 30 min 🏃‍♀️",cal:"health"},
+    {time:"",title:"Bedtime Routine (CPAP) 😴",cal:"health"},
+  ],
+  Sat:[
+    {time:"6:00 PM",title:"Exercise 30 min 🏃‍♀️",cal:"health"},
+    {time:"",title:"Bedtime Routine (CPAP) 😴",cal:"health"},
+  ],
+  Sun:[
+    {time:"6:00 PM",title:"Exercise 30 min 🏃‍♀️",cal:"health"},
+    {time:"",title:"Bedtime Routine (CPAP) 😴",cal:"health"},
+  ],
 };
 
-const BLACK_HAT = new Date("2026-08-05T09:00:00");
-const STORE = "ccd_hq_v4";
-const BH_STORE = "ccd_bh_events_v1";
-
-// ── DYNAMIC CALENDAR ──────────────────────────────────────────────
-function getDaySchedule(date) {
-  const dow = date.getDay();
-  const base = [
-    { time:"6:30 AM", title:"Hot Tea ☕", cal:"routine" },
-    { time:"7:30 AM", title:"Daily Affirmation 📖", cal:"routine" },
-  ];
-  const byDay = {
-    0: [
-      { time:"8:00 AM", title:"Security+ Core — Gibson/Messer 📚", cal:"study" },
-      { time:"9:00 AM", title:"TryHackMe: HealthHackHer 💻", cal:"growth" },
-      { time:"10:00 AM", title:"AWS Study Main Block ☁️", cal:"study" },
-      { time:"11:30 AM", title:"Active Recall — Claude Quiz 🧠", cal:"study" },
-      { time:"1:00 PM", title:"Security+ Deep Dive — GRC/Compliance", cal:"study" },
-      { time:"3:00 PM", title:"Specialty — HCISPP Free Resources", cal:"study" },
-      { time:"5:00 PM", title:"🏃 Cardio 30 min", cal:"health" },
-      { time:"Evening", title:"DFR Lab or LinkedIn Content", cal:"growth" },
-    ],
-    1: [
-      { time:"8:00 AM", title:"Security+ Core — Gibson/Messer 📚", cal:"study" },
-      { time:"9:00 AM", title:"TryHackMe: HealthHackHer 💻", cal:"growth" },
-      { time:"10:00 AM", title:"AWS Study Main Block ☁️", cal:"study" },
-      { time:"11:30 AM", title:"Active Recall — Claude Quiz 🧠", cal:"study" },
-      { time:"1:00 PM", title:"Security+ Deep Dive — GRC/Compliance", cal:"study" },
-      { time:"3:00 PM", title:"Specialty — HCISPP Free Resources", cal:"study" },
-      { time:"5:00 PM", title:"🏃 Cardio 30 min", cal:"health" },
-      { time:"Evening", title:"DFR Lab or LinkedIn Content", cal:"growth" },
-    ],
-    2: [
-      { time:"8:00 AM", title:"Security+ Core 📚", cal:"study" },
-      { time:"9:00 AM", title:"AWS Early Block ☁️", cal:"study" },
-      { time:"10:00 AM", title:"▣ WiCyS Office Hours", cal:"wicys" },
-      { time:"10–11 · 1–4", title:"▣ WiCyS Chatter — post & answer in open slots 📣", cal:"wicys" },
-      { time:"11:00 AM", title:"AWS Main Block ☁️", cal:"study" },
-      { time:"12:30 PM", title:"Active Recall 🧠", cal:"study" },
-      { time:"1:00 PM", title:"▣ PAID CLIENTS 💼", cal:"paid" },
-      { time:"5:00 PM", title:"💪 Strength 30 min", cal:"health" },
-      { time:"Evening", title:"Security+ Deep Dive — Network/Crypto/Cloud", cal:"study" },
-      { time:"Late", title:"DFR Lab or LinkedIn", cal:"growth" },
-    ],
-    3: [
-      { time:"8:00 AM", title:"Security+ Core — Gibson/Messer 📚", cal:"study" },
-      { time:"9:00 AM", title:"TryHackMe: HealthHackHer 💻", cal:"growth" },
-      { time:"10:00 AM", title:"AWS Study Main Block ☁️", cal:"study" },
-      { time:"11:30 AM", title:"Active Recall — Claude Quiz 🧠", cal:"study" },
-      { time:"1:00 PM", title:"Security+ Deep Dive — GRC/Compliance", cal:"study" },
-      { time:"3:00 PM", title:"Specialty — HCISPP Free Resources", cal:"study" },
-      { time:"5:00 PM", title:"🏃 Cardio 30 min", cal:"health" },
-      { time:"Evening", title:"DFR Lab or LinkedIn Content", cal:"growth" },
-    ],
-    4: [
-      { time:"8:00 AM", title:"Security+ Core 📚", cal:"study" },
-      { time:"9:00 AM", title:"AWS Early Block ☁️", cal:"study" },
-      { time:"10:00 AM", title:"▣ WiCyS Office Hours", cal:"wicys" },
-      { time:"10–11 · 1–4", title:"▣ WiCyS Chatter — post & answer in open slots 📣", cal:"wicys" },
-      { time:"11:00 AM", title:"AWS Main Block ☁️", cal:"study" },
-      { time:"12:30 PM", title:"Active Recall 🧠", cal:"study" },
-      { time:"1:00 PM", title:"▣ PAID CLIENTS 💼", cal:"paid" },
-      { time:"5:00 PM", title:"💪 Strength 30 min", cal:"health" },
-      { time:"Evening", title:"Security+ Deep Dive — IoMT/Healthcare", cal:"study" },
-      { time:"Late", title:"DFR Lab or LinkedIn", cal:"growth" },
-    ],
-    5: [
-      { time:"8:00 AM", title:"Security+ Core 📚", cal:"study" },
-      { time:"9:00 AM", title:"TryHackMe: HealthHackHer 💻", cal:"growth" },
-      { time:"10:00 AM", title:"AWS Study Main Block ☁️", cal:"study" },
-      { time:"11:30 AM", title:"Active Recall 🧠", cal:"study" },
-      { time:"1:00 PM", title:"Security+ Deep Dive — GRC/Compliance", cal:"study" },
-      { time:"3:00 PM", title:"Specialty — HCISPP Free Resources", cal:"study" },
-      { time:"5:00 PM", title:"🏃 Cardio 30 min", cal:"health" },
-      { time:"Evening", title:"Outreach — 5 touches minimum 📨", cal:"growth" },
-    ],
-    6: [
-      { time:"8:00 AM", title:"Security+ Core 📚", cal:"study" },
-      { time:"10:00 AM", title:"AWS Study Block ☁️", cal:"study" },
-      { time:"1:00 PM", title:"▣ WiCyS Study Hall / AMA", cal:"wicys" },
-      { time:"2:00 PM", title:"G-Ma on the Field — content block 🏟️", cal:"growth" },
-      { time:"5:00 PM", title:"💪 Strength 30 min", cal:"health" },
-      { time:"Evening", title:"LinkedIn / TikTok content", cal:"growth" },
-      { time:"9:30 PM", title:"LIGHTS OUT 🌙", cal:"routine" },
-    ],
-  };
-  return [...base, ...(byDay[dow] || [])];
+// Real date helpers — everything below reads the ACTUAL current date,
+// never a pinned snapshot, so Today/Weekly never go stale again.
+function todayKey(){ return new Date().toLocaleDateString("en-US",{weekday:"short"}); }
+function weekDates(){
+  // Monday-start week containing today, as real Date objects.
+  const now=new Date();
+  const dow=now.getDay(); // 0=Sun..6=Sat
+  const mondayOffset=dow===0?-6:1-dow;
+  const monday=new Date(now);
+  monday.setDate(now.getDate()+mondayOffset);
+  return DAY_LABELS_7.map((_,i)=>{const d=new Date(monday);d.setDate(monday.getDate()+i);return d;});
 }
+function fmtShortDate(d){ return d.toLocaleDateString("en-US",{month:"short",day:"numeric"}); }
 
-function getWeekDays() {
-  const now = new Date();
-  const dow = now.getDay();
-  const monday = new Date(now);
-  monday.setDate(now.getDate() - ((dow + 6) % 7));
-  monday.setHours(0,0,0,0);
-  return Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
-    return d;
-  });
-}
-
-function isToday(date) {
-  const now = new Date();
-  return date.getDate() === now.getDate() &&
-    date.getMonth() === now.getMonth() &&
-    date.getFullYear() === now.getFullYear();
-}
-
-function formatWeekRange(days) {
-  const s = days[0].toLocaleDateString("en-US",{month:"short",day:"numeric"});
-  const e = days[6].toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
-  return `${s} – ${e}`;
-}
-
-function TodayCalendar() {
-  const schedule = getDaySchedule(new Date());
-  const dayLabel = new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
-  return (
-    <div>
-      <div style={{fontSize:11,letterSpacing:"0.12em",textTransform:"uppercase",color:C.olive,fontWeight:700,marginBottom:10}}>{dayLabel}</div>
-      <div style={{display:"flex",flexDirection:"column",gap:7}}>
-        {schedule.map((ev,i) => (
-          <div key={i} style={{display:"flex",gap:8,alignItems:"flex-start",padding:"7px 9px",borderRadius:7,
-            background:ev.cal==="paid"?"#eff9ff":ev.cal==="wicys"?"#f5f3ff":C.cream,
-            borderLeft:`3px solid ${CAL_COLORS[ev.cal]||C.olive}`}}>
-            <div style={{fontSize:10,color:C.olive,fontWeight:700,minWidth:64,paddingTop:1}}>{ev.time}</div>
-            <div style={{fontSize:12,color:C.ink,lineHeight:1.4}}>{ev.title}</div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function WeeklyCalendarGrid() {
-  const days = getWeekDays();
-  return (
-    <div>
-      <div style={{fontSize:11,letterSpacing:"0.12em",textTransform:"uppercase",color:C.olive,fontWeight:700,marginBottom:12}}>
-        Week of {formatWeekRange(days)}
-      </div>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:6}}>
-        {days.map((day,i) => {
-          const schedule = getDaySchedule(day);
-          const today = isToday(day);
-          const highlights = schedule.filter(e => e.cal !== "routine").slice(0,3);
-          return (
-            <div key={i} style={{
-              background:today?`${C.forest}12`:C.cream,
-              borderRadius:9,padding:"9px 7px",
-              border:today?`2px solid ${C.forest}`:`1.5px solid ${C.mist}`
-            }}>
-              <div style={{fontSize:10,fontWeight:700,color:today?C.forest:C.olive,marginBottom:5}}>
-                {day.toLocaleDateString("en-US",{weekday:"short"})} {day.getDate()}
-              </div>
-              {highlights.map((ev,j) => (
-                <div key={j} style={{fontSize:9,padding:"2px 4px",borderRadius:3,marginBottom:2,
-                  background:`${CAL_COLORS[ev.cal]||C.olive}20`,
-                  color:CAL_COLORS[ev.cal]||C.olive,
-                  fontWeight:600,lineHeight:1.3}}>
-                  {ev.title.length>20?ev.title.slice(0,18)+"…":ev.title}
-                </div>
-              ))}
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-// ── BLACK HAT EVENT TRACKER ───────────────────────────────────────
-const BH_EVENTS_DEFAULT = [
-  { id:1,  day:"Mon Aug 4",  time:"5:00–7:00 PM",  name:"Security Leaders Happy Hour",        host:"B Capital · DCVC · Khosla",     venue:"TBD on approval",                        status:"waitlist",  notes:"",  lane:"networking" },
-  { id:2,  day:"Mon Aug 4",  time:"5:00 PM–12:30 AM", name:"SecOps Leaders @ Caesars Palace", host:"Cypienta",                      venue:"Caesars Palace, Paradise NV",            status:"pending",   notes:"",  lane:"networking" },
-  { id:3,  day:"Mon Aug 4",  time:"6:00–8:30 PM",  name:"Picture Capital Private Dinner",     host:"Picture Capital",               venue:"TBD on approval",                        status:"pending",   notes:"",  lane:"vip" },
-  { id:4,  day:"Mon Aug 4",  time:"7:00–10:00 PM", name:"Guidepoint Black Hat Happy Hour",    host:"Guidepoint Security",           venue:"Swingers, 3950 S Las Vegas Blvd",        status:"confirmed", notes:"Registration confirmed.",  lane:"networking" },
-  { id:5,  day:"Mon Aug 4",  time:"8:15–10:30 PM", name:"Agentic Cloud Security Cocktail",    host:"Cyber Conferences",             venue:"S Bar, Las Vegas",                       status:"pending",   notes:"",  lane:"networking" },
-  { id:6,  day:"Tue Aug 5",  time:"All Day",        name:"🎬 Midnight in the War Room — Premiere", host:"Semperis · Featured Defender", venue:"Black Hat USA · Mandalay Bay",       status:"premiere",  notes:"Red carpet. You are a Featured Defender.", lane:"premiere" },
-  { id:7,  day:"Tue Aug 5",  time:"3:30–8:30 PM",  name:"SIEM Savings on the Race Track",    host:"Cypienta",                      venue:"TBD on approval",                        status:"pending",   notes:"",  lane:"networking" },
-  { id:8,  day:"Tue Aug 5",  time:"6:00–10:00 PM", name:"GreyNoise NoiseFest",               host:"GreyNoise",                     venue:"Mandalay Bay area",                      status:"confirmed", notes:"Confirmed.",  lane:"networking" },
-  { id:9,  day:"Tue Aug 5",  time:"6:30–10:00 PM", name:"THREATCON1 Party",                  host:"VulnCheck",                     venue:"TBD on approval",                        status:"pending",   notes:"",  lane:"networking" },
-  { id:10, day:"Tue–Wed Aug 5–6", time:"Aug 5–6",  name:"The Cyber Lounge",                  host:"Arcova",                        venue:"House of Blues, Mandalay Bay",           status:"confirmed", notes:"Confirmed both days.",  lane:"networking" },
-  { id:11, day:"Wed Aug 6",  time:"4:00–7:00 PM",  name:"\"Lock It Down\" Networking Reception", host:"Maurice Stebila",           venue:"1923 Prohibition Bar, Mandalay Bay",     status:"pending",   notes:"",  lane:"networking" },
-  { id:12, day:"Wed Aug 6",  time:"TBD",            name:"Pentera HACKasan After Party",      host:"Pentera · Lyla Krol",           venue:"Hakkasan, MGM Grand",                    status:"waitlist",  notes:"Contact Lyla to move off waitlist + confirm booth visit.", lane:"vip" },
-  { id:13, day:"Sat Aug 8",  time:"6:00–9:00 PM",  name:"VulnCheck Exclusive Cocktail Party",host:"VulnCheck",                     venue:"TBD on approval",                        status:"pending",   notes:"DEF CON event.",  lane:"networking" },
-];
-
-const BH_STATUS = {
-  premiere:  { label:"Featured Defender 🎬", color:"#7c3aed", bg:"#f5f3ff" },
-  confirmed: { label:"Confirmed ✓",          color:"#10b981", bg:"#f0fdf4" },
-  waitlist:  { label:"Waitlist",             color:"#f59e0b", bg:"#fffbeb" },
-  pending:   { label:"Pending approval",     color:"#3b82f6", bg:"#eff6ff" },
-  approved:  { label:"Approved ✓",           color:"#10b981", bg:"#f0fdf4" },
-  declined:  { label:"Declined",             color:"#9ca3af", bg:"#f9fafb" },
-};
-
-function loadBHEvents() {
-  try {
-    const r = localStorage.getItem(BH_STORE);
-    if (r) return JSON.parse(r);
-  } catch {}
-  return BH_EVENTS_DEFAULT;
-}
-
-function saveBHEvents(ev) {
-  try { localStorage.setItem(BH_STORE, JSON.stringify(ev)); } catch {}
-}
-
-function BlackHatTracker() {
-  const [events, setEvents] = useState(loadBHEvents);
-  const [editId, setEditId] = useState(null);
-  const [editNotes, setEditNotes] = useState("");
-
-  useEffect(() => { saveBHEvents(events); }, [events]);
-
-  const updateStatus = (id, status) => {
-    setEvents(prev => prev.map(e => e.id === id ? {...e, status} : e));
-  };
-
-  const saveNote = (id) => {
-    setEvents(prev => prev.map(e => e.id === id ? {...e, notes: editNotes} : e));
-    setEditId(null);
-  };
-
-  const days = Math.floor((BLACK_HAT - new Date()) / 86400000);
-  const confirmed = events.filter(e => e.status === "confirmed" || e.status === "approved" || e.status === "premiere").length;
-  const waitlist  = events.filter(e => e.status === "waitlist").length;
-  const pending   = events.filter(e => e.status === "pending").length;
-
-  const grouped = events.reduce((acc, ev) => {
-    if (!acc[ev.day]) acc[ev.day] = [];
-    acc[ev.day].push(ev);
-    return acc;
-  }, {});
-
-  const card = (extra={}) => ({
-    background:C.paper, border:`1.5px solid ${C.mist}`,
-    borderRadius:14, padding:20, boxShadow:`0 2px 16px ${C.shadow}`, ...extra
-  });
-
-  const INP_S = {
-    padding:"5px 8px", border:`1.5px solid ${C.mist}`,
-    borderRadius:6, fontFamily:"'Lora',Georgia,serif",
-    fontSize:11, color:C.ink, background:C.cream,
-    outline:"none", boxSizing:"border-box",
-  };
-
-  return (
-    <div style={{display:"flex",flexDirection:"column",gap:16}}>
-
-      {/* Header */}
-      <div style={{background:`linear-gradient(135deg,${C.ink},#1a1040)`,borderRadius:14,padding:"18px 20px",border:`1px solid ${C.gold}40`}}>
-        <div style={{fontSize:10,letterSpacing:"0.25em",color:C.gold,textTransform:"uppercase",fontWeight:700,marginBottom:6}}>
-          🎬 Black Hat USA + DEF CON 2026 · Las Vegas · Aug 4–8
-        </div>
-        <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:18,color:C.cream,fontWeight:700,marginBottom:10}}>
-          You are a Featured Defender. {days} days to the red carpet.
-        </div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10}}>
-          {[
-            [String(events.length),"Total events","#a0b890"],
-            [String(confirmed),"Locked in",C.gold],
-            [String(waitlist),"On waitlist","#f59e0b"],
-            [String(pending),"Pending","#3b82f6"],
-          ].map(([val,lbl,col])=>(
-            <div key={lbl} style={{textAlign:"center",background:"rgba(255,255,255,0.06)",borderRadius:10,padding:"10px 6px"}}>
-              <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:22,fontWeight:900,color:col}}>{val}</div>
-              <div style={{fontSize:10,color:"#a0b890",marginTop:2,letterSpacing:"0.05em"}}>{lbl}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Events by day */}
-      {Object.entries(grouped).map(([day, dayEvents]) => (
-        <div key={day}>
-          <div style={{fontSize:11,letterSpacing:"0.14em",textTransform:"uppercase",color:C.olive,fontWeight:700,marginBottom:8,paddingLeft:2}}>
-            {day}
-          </div>
-          <div style={{display:"flex",flexDirection:"column",gap:8}}>
-            {dayEvents.map(ev => {
-              const s = BH_STATUS[ev.status] || BH_STATUS.pending;
-              const isPremiere = ev.status === "premiere";
-              return (
-                <div key={ev.id} style={{
-                  background:isPremiere?`linear-gradient(135deg,#1a0a3020,#0f0a2020)`:C.paper,
-                  border:isPremiere?`2px solid ${C.purple}60`:`1.5px solid ${C.mist}`,
-                  borderRadius:12, padding:"13px 16px",
-                  boxShadow:`0 2px 12px ${C.shadow}`,
-                  borderLeft:`4px solid ${s.color}`,
-                }}>
-                  <div style={{display:"flex",alignItems:"flex-start",gap:12,flexWrap:"wrap"}}>
-                    {/* Main info */}
-                    <div style={{flex:1,minWidth:180}}>
-                      <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap",marginBottom:4}}>
-                        <span style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:14,fontWeight:700,color:isPremiere?C.purple:C.ink}}>
-                          {ev.name}
-                        </span>
-                        <span style={{fontSize:10,padding:"2px 8px",borderRadius:20,background:s.bg,color:s.color,fontWeight:700}}>
-                          {s.label}
-                        </span>
-                      </div>
-                      <div style={{fontSize:11,color:"#666",marginBottom:ev.venue?3:0}}>
-                        {ev.host} · <span style={{color:"#999"}}>{ev.time}</span>
-                      </div>
-                      {ev.venue && (
-                        <div style={{fontSize:11,color:"#888",marginBottom:ev.notes?4:0}}>
-                          📍 {ev.venue}
-                        </div>
-                      )}
-                      {ev.notes && (
-                        <div style={{fontSize:11,color:isPremiere?C.purple:"#777",fontStyle:"italic",marginBottom:4}}>
-                          💬 {ev.notes}
-                        </div>
-                      )}
-                      {/* Note editor */}
-                      {editId === ev.id && (
-                        <div style={{display:"flex",gap:6,marginTop:6}}>
-                          <input
-                            value={editNotes}
-                            onChange={e=>setEditNotes(e.target.value)}
-                            onKeyDown={e=>e.key==="Enter"&&saveNote(ev.id)}
-                            placeholder="Add a note…"
-                            style={{...INP_S,flex:1}}
-                            autoFocus
-                          />
-                          <button onClick={()=>saveNote(ev.id)} style={{padding:"4px 10px",background:C.forest,color:"#fff",border:"none",borderRadius:6,fontSize:11,cursor:"pointer",fontFamily:"'Lora',Georgia,serif"}}>Save</button>
-                          <button onClick={()=>setEditId(null)} style={{padding:"4px 8px",background:C.cream,border:`1.5px solid ${C.mist}`,borderRadius:6,fontSize:11,cursor:"pointer",color:"#888"}}>✕</button>
-                        </div>
-                      )}
-                    </div>
-                    {/* Controls */}
-                    <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
-                      <select
-                        value={ev.status}
-                        onChange={e=>updateStatus(ev.id,e.target.value)}
-                        style={{...INP_S,width:"auto",padding:"4px 8px",background:s.bg,color:s.color,border:`1.5px solid ${s.color}44`,fontWeight:700}}
-                      >
-                        {Object.entries(BH_STATUS).map(([k,v])=>(
-                          <option key={k} value={k}>{v.label}</option>
-                        ))}
-                      </select>
-                      <button
-                        onClick={()=>{setEditId(ev.id);setEditNotes(ev.notes||"");}}
-                        style={{background:C.cream,border:`1.5px solid ${C.mist}`,borderRadius:6,padding:"4px 10px",cursor:"pointer",fontSize:11,color:C.olive,fontWeight:700,fontFamily:"'Lora',Georgia,serif"}}
-                      >
-                        Note
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      ))}
-
-      {/* Footer tip */}
-      <div style={{padding:"12px 16px",borderRadius:10,background:`${C.gold}18`,border:`1px solid ${C.gold}44`,fontSize:12,color:C.ink,lineHeight:1.8}}>
-        <span style={{fontWeight:700,color:C.burnt}}>Waitlist strategy:</span> RSVP approvals often come in waves 2–3 weeks before the event. Check pending statuses weekly and update here as approvals land. Your premiere slot on Aug 5 is locked — build everything else around it.
-      </div>
-    </div>
-  );
-}
-
-// ── END BLACK HAT TRACKER ─────────────────────────────────────────
-
-// ── COMMAND SCHEDULE ──────────────────────────────────────────────
-const SCHED_STORE = "ccd_schedule_v1";
-
-function loadSched() {
-  try { const r = localStorage.getItem(SCHED_STORE); if (r) return JSON.parse(r); } catch {}
-  return { bhv:"jul6", wisp:"jul22" };
-}
-function saveSched(s) {
-  try { localStorage.setItem(SCHED_STORE, JSON.stringify(s)); } catch {}
-}
-
-const SCHED_DECISIONS = [
-  {
-    id:"bhv",
-    label:"Biohacking Village — Volunteer Meeting",
-    sub:"Attend ONE · same content both times · optional",
-    options:[
-      { id:"jul6",  date:"Mon Jul 6",  time:"2:00–2:30 PM ET", link:"meet.google.com/fon-urnd-fwi", flag:"Confirmed — invite set · exam is next morning" },
-      { id:"jul17", date:"Fri Jul 17", time:"12:00 PM ET · 9:00 AM PT", link:"meet.google.com/fct-mkto-ogn", flag:"Recommended — clear of the exam" },
-    ],
-  },
-  {
-    id:"wisp",
-    label:"WISP — DEF CON Volunteer Training",
-    sub:"Register for ONE · required · you're the Shift Lead",
-    options:[
-      { id:"jul22", date:"Tue Jul 22", time:"6:00–7:00 PM ET · 3:00 PM PT", link:"Zoom — register in advance", flag:"" },
-      { id:"jul25", date:"Sat Jul 25", time:"3:00 PM ET · 12:00 PM PT", link:"Zoom — register in advance", flag:"" },
-    ],
-  },
-];
-
-function ScheduleCommand() {
-  const [choices, setChoices] = useState(loadSched);
-  useEffect(() => { saveSched(choices); }, [choices]);
-
-  const pick = (decId, optId) => {
-    setChoices(prev => ({ ...prev, [decId]: prev[decId] === optId ? null : optId }));
-  };
-
-  const secPlus = new Date("2026-07-07T09:00:00");
-  const vegas   = new Date("2026-08-02T00:00:00");
-  const dSec   = Math.max(0, Math.ceil((secPlus - new Date()) / 86400000));
-  const dVegas = Math.max(0, Math.ceil((vegas   - new Date()) / 86400000));
-
-  const cardL = (extra={}) => ({ background:C.paper, border:`1.5px solid ${C.mist}`, borderRadius:14, padding:20, boxShadow:`0 2px 16px ${C.shadow}`, ...extra });
-  const STl = { fontFamily:"'Playfair Display',Georgia,serif", fontSize:18, color:C.forest, fontWeight:700, marginBottom:14 };
-  const eyebrow = (txt) => (
-    <div style={{fontSize:10,letterSpacing:"0.16em",textTransform:"uppercase",color:C.olive,fontWeight:700,marginBottom:10}}>{txt}</div>
-  );
-
-  const Row = ({ dot, date, time, title, note, strong }) => (
-    <div style={{display:"flex",gap:12,alignItems:"flex-start",padding:"11px 14px",borderRadius:10,background:C.cream,borderLeft:`4px solid ${dot}`}}>
-      <div style={{minWidth:84}}>
-        <div style={{fontSize:12,fontWeight:700,color:C.ink}}>{date}</div>
-        <div style={{fontSize:10,color:C.olive,fontWeight:600,marginTop:2}}>{time}</div>
-      </div>
-      <div style={{flex:1}}>
-        <div style={{fontSize:13,fontWeight:strong?700:600,color:strong?C.forest:C.ink,fontFamily:strong?"'Playfair Display',Georgia,serif":"inherit"}}>{title}</div>
-        {note && <div style={{fontSize:11,color:"#777",marginTop:2,fontStyle:"italic"}}>{note}</div>}
-      </div>
-    </div>
-  );
-
-  const bhvOpt  = SCHED_DECISIONS[0].options.find(o => o.id === choices.bhv);
-  const wispOpt = SCHED_DECISIONS[1].options.find(o => o.id === choices.wisp);
-
-  return (
-    <div style={{display:"flex",flexDirection:"column",gap:18}}>
-
-      {/* Header + countdowns */}
-      <div style={{background:`linear-gradient(135deg,${C.ink},#1a3020)`,borderRadius:14,padding:"18px 20px",border:`1px solid ${C.gold}40`}}>
-        <div style={{fontSize:10,letterSpacing:"0.25em",color:C.gold,textTransform:"uppercase",fontWeight:700,marginBottom:6}}>🗓️ Command Schedule</div>
-        <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:18,color:C.cream,fontWeight:700,marginBottom:12}}>
-          Everything between now and Vegas — one view.
-        </div>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
-          {[["Security+ Exam · Jul 7", dSec], ["Land in Vegas · Aug 2", dVegas]].map(([lbl,v])=>(
-            <div key={lbl} style={{textAlign:"center",background:"rgba(217,146,1,0.12)",border:`1px solid ${C.gold}30`,borderRadius:10,padding:"10px 8px"}}>
-              <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:24,fontWeight:900,color:C.gold,lineHeight:1}}>{v}</div>
-              <div style={{fontSize:9,letterSpacing:"0.06em",color:"#a0b890",marginTop:4}}>{lbl} · days</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Decisions pending */}
-      <div style={cardL()}>
-        <div style={STl}>⚡ Decisions Pending</div>
-        <div style={{display:"flex",flexDirection:"column",gap:16}}>
-          {SCHED_DECISIONS.map(dec => {
-            const chosen = choices[dec.id];
-            return (
-              <div key={dec.id} style={{padding:"14px 16px",borderRadius:12,background:chosen?"#f0faf0":"#fffbeb",border:`1.5px solid ${chosen?"#10b98144":`${C.gold}44`}`}}>
-                <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap",marginBottom:3}}>
-                  <span style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:14,fontWeight:700,color:C.ink}}>{dec.label}</span>
-                  <span style={{fontSize:9,padding:"2px 8px",borderRadius:20,fontWeight:700,background:chosen?"#10b981":C.gold,color:"#fff"}}>
-                    {chosen ? "LOCKED ✓" : "ACTION NEEDED"}
-                  </span>
-                </div>
-                <div style={{fontSize:11,color:"#888",marginBottom:10}}>{dec.sub}</div>
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
-                  {dec.options.map(opt => {
-                    const isOn = chosen === opt.id;
-                    return (
-                      <div key={opt.id} onClick={()=>pick(dec.id, opt.id)} style={{
-                        cursor:"pointer",padding:"10px 12px",borderRadius:9,
-                        background:isOn?`linear-gradient(135deg,${C.forest},${C.olive})`:C.paper,
-                        border:`1.5px solid ${isOn?C.forest:C.mist}`,
-                        transition:"all 0.18s",
-                      }}>
-                        <div style={{fontSize:12,fontWeight:700,color:isOn?C.cream:C.ink}}>{opt.date}</div>
-                        <div style={{fontSize:10,color:isOn?"#cfe0c4":C.olive,fontWeight:600,marginTop:2}}>{opt.time}</div>
-                        <div style={{fontSize:10,color:isOn?"#cfe0c4":"#999",marginTop:4,wordBreak:"break-all"}}>{opt.link}</div>
-                        {opt.flag && <div style={{fontSize:9,marginTop:5,color:isOn?C.cream:C.burnt,fontStyle:"italic"}}>{opt.flag}</div>}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-        <div style={{marginTop:12,fontSize:11,color:"#999",fontStyle:"italic"}}>Tap a date to lock it in. Tap again to clear.</div>
-      </div>
-
-      {/* July runway */}
-      <div style={cardL()}>
-        <div style={STl}>📋 The Runway · July</div>
-        {eyebrow("Milwaukee season · remote")}
-        <div style={{display:"flex",flexDirection:"column",gap:8}}>
-          <Row dot={C.cyan} date="Thu Jul 2" time="1:30p ET · 10:30a PT" title="Raven — 1:1 Mentee Session" note="Rescheduled & confirmed. Sits in your Thursday mentor window." />
-          <Row dot="#7c3aed" date="Tue & Thu" time="Open office-hrs / 1:1 slots" title="WiCyS Chatter — post & answer in open windows" note="If no one's booked, be in the cohort group. Turn on notifications so you catch posts same-day." />
-          {bhvOpt
-            ? <Row dot="#10b981" date={bhvOpt.date} time={bhvOpt.time} title="Biohacking Village — Volunteer Meeting" note="Locked in above." />
-            : <Row dot={C.gold} date="Jul 6 / 17" time="pick above" title="Biohacking Village — Volunteer Meeting" note="⏳ Awaiting your pick — see Decisions Pending." />
-          }
-          <Row dot={C.purple} date="Tue Jul 7" time="Exam Day" title="⭐ Security+ SY0-701 — EXAM" note="The hinge of the whole month. Clear the deck." strong />
-          <Row dot="#7c3aed" date="Mondays" time="4 PM CT · 5 PM ET" title="WiCyS × JHT — AI Cyber Defense Ops (5 wks)" note="Optional live sessions Jul 6 → Aug 3. Self-paced course via CourseStack / learn.justhacking.com." />
-          {wispOpt
-            ? <Row dot="#10b981" date={wispOpt.date} time={wispOpt.time} title="WISP — DEF CON Volunteer Training" note="Locked in above. Register on Zoom." />
-            : <Row dot={C.gold} date="Jul 22 / 25" time="pick above" title="WISP — DEF CON Volunteer Training" note="⏳ Awaiting your pick — required. See Decisions Pending." />
-          }
-        </div>
-      </div>
-
-      {/* Vegas week */}
-      <div style={cardL()}>
-        <div style={STl}>🎬 Vegas Week · Aug 2–8</div>
-        {eyebrow("Black Hat USA + DEF CON 34 · Las Vegas")}
-        <div style={{display:"flex",flexDirection:"column",gap:8}}>
-          <Row dot={C.olive} date="Sun Aug 2" time="Arrival" title="Land in Las Vegas" note="Trip window opens. Settle in." />
-          <Row dot="#10b981" date="Tue Aug 4" time="Day + eve" title="Black Hat events begin" note="Arcova Cyber Lounge + Guidepoint confirmed. Full list in the 🎬 Black Hat tab." />
-          <Row dot={C.purple} date="Wed Aug 5" time="Anchor day" title="⭐ Midnight in the War Room — Premiere" note="Red carpet. Featured Defender. Build everything around this." strong />
-          <Row dot="#7c3aed" date="Thu Aug 6" time="1:00–2:00 PM" title="✍️ Midnight in the War Room — Signing Booth" note="Your booth shift. Featured Defender, signing swag. Confirmed." strong />
-          <Row dot={C.burnt} date="Thu–Sat Aug 6–8" time="DEF CON 34" title="DEF CON 34 — WISP shifts + Biohacking Village" note="Shift schedules land later. Send WISP the hours you can't cover (note the 1–2pm booth on the 6th)." />
-          <Row dot={C.gold} date="Sat Aug 8" time="Late flight" title="Hotel checkout → late flight home" note="Wheels up late. Trip closes." />
-        </div>
-      </div>
-
-      {/* Replies you owe */}
-      <div style={{...cardL(),background:`${C.gold}12`,border:`1px solid ${C.gold}44`}}>
-        <div style={STl}>📨 Replies You Owe</div>
-        <div style={{display:"flex",flexDirection:"column",gap:8}}>
-          {[
-            "WISP — Jul 22 training locked; register on Zoom. Then send Selena the hours you're NOT available Aug 6–8 (flag the 1–2pm signing booth on the 6th).",
-            "Black Hat — confirm travel + hotel (still open on your task list).",
-            "JHT — watch for the CourseStack invite (by Wed); course lives at learn.justhacking.com.",
-            "WiCyS — turn on chatter-group notifications so posts hit your phone; reply same-day in open office-hours / 1:1 windows.",
-            "BHV Jul 6 — locked and on your calendar. Nothing to send; just show up.",
-          ].map((t,i)=>(
-            <div key={i} style={{display:"flex",gap:8,alignItems:"flex-start",fontSize:12,color:C.ink,lineHeight:1.6}}>
-              <span style={{color:C.burnt,fontWeight:700}}>→</span><span>{t}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Footnotes */}
-      <div style={{fontSize:11,color:"#9aa893",lineHeight:1.7,padding:"0 4px"}}>
-        Times shown in ET (your Atlanta zone) unless marked. You move to Milwaukee / Central on Jul 17 — after that, ET stamps run one hour ahead of your local clock, so the JHT Mondays read 4 PM your time once you're there.
-        This view reflects one inbox (connect@chaundacdallas.com); anything booked from your second Gmail won't appear here automatically.
-      </div>
-
-    </div>
-  );
-}
-// ── END COMMAND SCHEDULE ──────────────────────────────────────────
+const CAL_COLORS={routine:C.olive,health:C.crimson,family:C.gold,growth:C.forest,finance:C.olive,special:C.ink,birthday:C.burnt};
+const BLACK_HAT=new Date("2026-08-05T09:00:00");
+const STORE="ccd_hq_v3";
 
 const defaultData=()=>({
-  weeklyFocus:"Land remote healthcare cyber role — 5 outreach touches minimum this week",
-  weeklyGoals:["Send outreach to Optiv + ScanTech AI today","Complete ISA/IEC 62443 first module","Post G-Ma on the Field launch content"],
+  weeklyFocus:"Land remote healthcare cyber role before Milwaukee move",
+  weeklyGoals:["Send 5 Black Hat outreach messages","Complete WiCyS mentor onboarding Jun 8–9","AWS or TryHackMe every day"],
   tasks:[
-    {id:1,text:"Send Philips intro via Aví D. — WARM PRIORITY",done:false},
-    {id:2,text:"Log outreach in tracker — 5 minimum this week",done:false},
+    {id:1,text:"Send Philips intro via Aví D.",done:false},
+    {id:2,text:"Update DFR Lab with new IoMT scenario",done:false},
     {id:3,text:"Confirm Black Hat travel + hotel",done:false},
-    {id:4,text:"File WOSB certification follow-up",done:false},
-    {id:5,text:"Update DFR Lab sports tech bridge scenario",done:false},
+    {id:4,text:"Pack & prep for Milwaukee mid-June",done:false},
+    {id:5,text:"File WOSB certification follow-up",done:false},
   ],
-  currentRead:"Security+ (Gibson/Messer) · AWS Cloud Practitioner · ISA/IEC 62443 Foundational",
+  currentRead:"Microsoft SC-900 (voucher in hand) — Security+ shelved until income allows",
   readStatus:"reading",
-  weeklyWins:["G-Ma on the Field challenge launched","Outreach tracker live in CCD HQ"],
+  weeklyWins:["Advisory council → full outreach playbook built","DFR Lab live on GitHub Pages"],
   reflection:"",
+  routine:defaultRoutine(),
   habits:{
     exercise:{label:"Exercise (30 min)",icon:"🏃‍♀️",days:[false,false,false,false,false,false,false]},
     affirmation:{label:"Daily Affirmation",icon:"📖",days:[false,false,false,false,false,false,false]},
-    secplus:{label:"Security+ Study",icon:"📚",days:[false,false,false,false,false,false,false]},
-    aws:{label:"AWS Study",icon:"☁️",days:[false,false,false,false,false,false,false]},
+    learning:{label:"AWS / TryHackMe",icon:"💻",days:[false,false,false,false,false,false,false]},
+    water:{label:"Water Goal",icon:"💧",days:[false,false,false,false,false,false,false]},
     bedtime:{label:"Bedtime Routine (CPAP)",icon:"😴",days:[false,false,false,false,false,false,false]},
   },
   quarterlyGoals:{
     career:["Land FTE or contract remote role with benefits","Send 25 targeted org outreach messages","Black Hat red carpet Aug 5"],
-    health:["Exercise 4x/week","CPAP compliance every night","O2 monitoring daily"],
+    health:["Exercise 5x/week","CPAP compliance every night","O2 monitoring daily"],
     finance:["Purchase own health benefits if no FTE","Track every dollar Jun–Aug","Build 1-month emergency buffer"],
-    personal:["Support Mom's dementia care transition","Milwaukee move post-Black Hat","Quality time with family"],
+    personal:["Support Mom's dementia care transition","Milwaukee move mid-June","my family, my family & my family quality time"],
   },
   quarterlyWins:[],
-  debtPaid:0,debtGoal:5000,
-  savingsAmount:0,savingsGoal:3000,
+  debtPaid:0, debtGoal:5000,
+  savingsAmount:0, savingsGoal:3000,
   netWorth:0,
-  accounts:{marcus:0,marcusGoal:5000,appleSavings:0,appleGoal:2000,rothIRA:0,rothGoal:7000,llcChecking:0,fidelity:0},
   monthlyReflection:{wins:"",challenge:"",grateful:"",learned:"",health:"",growth:"",different:"",intention:""},
   lifeVision:"To become the most recognized Digital First Responder in healthcare cybersecurity — protecting patients, empowering clinicians, and building generational wealth that blesses my family for decades.",
   nonNegotiables:["God First — always","Family is the mission","Health is wealth","Build something that outlasts me"],
+  yearlyFocus:["Land remote healthcare cyber role","Walk the Black Hat red carpet","SC-900 certification","WOSB certification complete","Support Mom's care transition","Build DFR into recognizable IP"],
   focusBuckets:[
     {title:"Wellness — Mind, Body & Soul",items:["Daily affirmation","30 min exercise","CPAP + O2 every night","Water goal daily"]},
     {title:"Wealth ERA",items:["Remote role with benefits","Federal sub-contracting pipeline","3-tier consulting services live","Savings buffer growing"]},
-    {title:"Personal Power",items:["Black Hat red carpet Aug 5","WiCyS mentor cohort 3","HCISPP study plan","DFR Lab expanding"]},
-    {title:"Legacy & Love",items:["Mom's care covered","Family thriving","WOSB certified","PhD deferred — not abandoned"]},
+    {title:"Personal Power",items:["Black Hat red carpet Aug 5","WiCyS mentor cohort 3","SC-900 study plan","DFR Lab expanding"]},
+    {title:"Legacy & Love",items:["Mom's care covered","my family, my family & my family thriving","WOSB certified","PhD deferred — not abandoned"]},
   ],
   bucketList:[
     {text:"Walk the Black Hat red carpet 🎬",done:true},
     {text:"Keynote a major cybersecurity conference",done:false},
     {text:"Publish a book on Digital First Response methodology",done:false},
+    {text:"Take my family to her first college campus tour",done:false},
     {text:"Travel to West Africa (Ghana / Senegal)",done:false},
     {text:"Own a home outright",done:false},
+    {text:"See my family go viral for something he built",done:false},
     {text:"Launch a healthcare cybersecurity nonprofit",done:false},
     {text:"Get on stage at DEF CON as a speaker",done:false},
     {text:"Retire my mother comfortably",done:false},
-    {text:"See G-Ma on the Field become a recognized brand",done:false},
-    {text:"Publish The G-Ma Playbook — sports tech security framework",done:false},
   ],
   visionBoard:[
     {emoji:"🏠",label:"Dream Home",desc:"Paid off. Peaceful. Space for family."},
     {emoji:"🎤",label:"Keynote Stage",desc:"DEF CON. Black Hat. TEDx."},
-    {emoji:"✈️",label:"Ghana / Senegal",desc:"Heritage trip with the family."},
+    {emoji:"✈️",label:"Ghana / Senegal",desc:"Heritage trip with the grandkids."},
     {emoji:"📚",label:"Published Author",desc:"Digital First Responder: The Book"},
     {emoji:"💼",label:"Remote Dream Role",desc:"Healthcare Cyber SME. Benefits. Flexibility."},
     {emoji:"🎓",label:"PhD Complete",desc:"Capitol Technology University."},
     {emoji:"👑",label:"Generational Wealth",desc:"Building something that outlasts me."},
     {emoji:"🏥",label:"Nonprofit Launched",desc:"Healthcare Cybersecurity for underserved orgs."},
-    {emoji:"🏟️",label:"G-Ma on the Field",desc:"The sports tech security brand nobody owned — until now."},
   ],
   ideasParking:[],
+  savedBriefing:"",
+  lastBriefingDate:"",
   gymLog:[],
+  lifeSystems:defaultLifeSystems(),
+  outreach:[],
+  blackHatEvents:defaultBlackHatEvents(),
 });
 
+function defaultRoutine(){
+  // Deep clone so each user's edits never mutate the shared template.
+  return JSON.parse(JSON.stringify(ROUTINE_DEFAULT));
+}
+
+function defaultBlackHatEvents(){
+  return [
+    {id:1,name:"Midnight in the War Room — Semperis Premiere",date:"2026-08-05",location:"Black Hat USA, Las Vegas",status:"confirmed",notes:"Featured Defender · red carpet"},
+    {id:2,name:"Guidepoint",date:"",location:"Black Hat USA",status:"confirmed",notes:""},
+    {id:3,name:"GreyNoise NoiseFest",date:"",location:"Black Hat USA",status:"confirmed",notes:""},
+    {id:4,name:"Arcova Cyber Lounge",date:"",location:"Black Hat USA",status:"confirmed",notes:""},
+  ];
+}
+
+function defaultLifeSystems(){
+  return{
+    autoTransfers:[
+      {id:1,label:"T1 → T2 · LLC Operating → Marcus (protection)",active:false},
+      {id:2,label:"T2 → T3 · Marcus → Apple Card HYSA",active:false},
+      {id:3,label:"T3 → T4 · Apple Card → Navy Federal Roth IRA",active:false},
+      {id:4,label:"T4 → T5 · Navy Federal → Fidelity brokerage",active:false},
+    ],
+    subscriptions:[],
+    lastAuditDate:"",
+    meals:["","","","","","",""],
+    groceryList:[],
+    returns:[],
+    exerciseSchedule:[
+      {time:"6:00 PM",type:"30 min movement"},
+      {time:"6:00 PM",type:"30 min movement"},
+      {time:"6:00 PM",type:"30 min movement"},
+      {time:"6:00 PM",type:"30 min movement"},
+      {time:"6:00 PM",type:"30 min movement"},
+      {time:"6:00 PM",type:"30 min movement"},
+      {time:"",type:"Rest"},
+    ],
+  };
+}
+
 function loadData(){
-  try{const r=localStorage.getItem(STORE);if(r)return{...defaultData(),...JSON.parse(r)};}catch{}
+  try{
+    const r=localStorage.getItem(STORE);
+    if(r){
+      const saved=JSON.parse(r);
+      // Deep-merge lifeSystems & routine specifically so new sub-fields
+      // never get wiped out by an older saved shape.
+      return{
+        ...defaultData(),...saved,
+        lifeSystems:{...defaultLifeSystems(),...(saved.lifeSystems||{})},
+        routine:{...defaultRoutine(),...(saved.routine||{})},
+      };
+    }
+  }catch{}
   return defaultData();
 }
 function saveData(d){try{localStorage.setItem(STORE,JSON.stringify(d));}catch{}}
+
+// ── CROSS-DEVICE SYNC ───────────────────────────────────────────────────────────
+// Talks to /api/store.js (Vercel Function + Blob storage). Local storage stays
+// as the instant, offline-safe cache; the remote store is the source of truth
+// that lets Mac / iPad / iPhone agree with each other.
+const SYNC_KEY = import.meta.env.VITE_CCD_HQ_KEY || "";
+async function fetchRemote(){
+  if(!SYNC_KEY) return null;
+  try{
+    const res=await fetch(`/api/store?key=${encodeURIComponent(SYNC_KEY)}`);
+    if(!res.ok) return null;
+    const json=await res.json();
+    return json.data||null;
+  }catch{ return null; }
+}
+async function pushRemote(data){
+  if(!SYNC_KEY) return false;
+  try{
+    const res=await fetch(`/api/store?key=${encodeURIComponent(SYNC_KEY)}`,{
+      method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data),
+    });
+    return res.ok;
+  }catch{ return false; }
+}
 
 function useFadeIn(dep){
   const [v,setV]=useState(false);
@@ -686,14 +274,15 @@ function useFadeIn(dep){
 }
 
 const card=(x={})=>({background:C.paper,border:`1.5px solid ${C.mist}`,borderRadius:14,padding:20,boxShadow:`0 2px 16px ${C.shadow}`,...x});
-const ST={fontFamily:"'Playfair Display',Georgia,serif",fontSize:18,color:C.forest,fontWeight:700,marginBottom:14};
-const LB={fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",color:C.olive,fontWeight:700,marginBottom:6,display:"block"};
-const INP={width:"100%",padding:"8px 12px",border:`1.5px solid ${C.mist}`,borderRadius:8,fontFamily:"'Lora',Georgia,serif",fontSize:14,color:C.ink,background:C.cream,outline:"none",boxSizing:"border-box"};
-const BTN=(bg=C.forest,x={})=>({background:bg,color:bg===C.cream?C.forest:"#fff",border:"none",borderRadius:8,padding:"7px 16px",cursor:"pointer",fontSize:13,fontFamily:"'Lora',Georgia,serif",fontWeight:600,transition:"all 0.18s",...x});
+const ST={fontFamily:"'Cormorant Garamond',Georgia,serif",fontSize:18,color:C.forest,fontWeight:700,marginBottom:14};
+const LB={fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",color:C.olive,fontWeight:700,marginBottom:6,display:"block",fontFamily:"'DM Mono',monospace"};
+const INP={width:"100%",padding:"8px 12px",border:`1.5px solid ${C.mist}`,borderRadius:8,fontFamily:"'DM Sans',Helvetica,Arial,sans-serif",fontSize:14,color:C.ink,background:C.cream,outline:"none",boxSizing:"border-box"};
+const BTN=(bg=C.forest,x={})=>({background:bg,color:bg===C.cream?C.forest:"#fff",border:"none",borderRadius:8,padding:"7px 16px",cursor:"pointer",fontSize:13,fontFamily:"'DM Sans',Helvetica,Arial,sans-serif",fontWeight:600,transition:"all 0.18s",...x});
 
-const TABS=["🌿 Today","📅 Weekly","🌙 Monthly","🌾 Quarterly","🦅 Yearly","✅ Habits","🗺️ Vision Board","🪣 Bucket List","📊 Outreach","🎬 Black Hat","🗓️ Schedule"];
+const TABS=["🌿 Today","📅 Weekly","🌙 Monthly","🌾 Quarterly","🦅 Yearly","✅ Habits","🗺️ Vision Board","🪣 Bucket List","⚙️ Life Systems","🎯 Outreach","🎬 Black Hat"];
+const DAY_LABELS_7=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
 
-// ── COUNTDOWN ─────────────────────────────────────────────────────
+// ── COUNTDOWN ─────────────────────────────────────────────────────────────────
 function Countdown(){
   const [t,setT]=useState({d:0,h:0,m:0,s:0});
   useEffect(()=>{
@@ -706,11 +295,14 @@ function Countdown(){
   },[]);
   return(
     <div style={{background:`linear-gradient(135deg,${C.ink},#1a3020)`,borderRadius:14,padding:"18px 20px",border:`1px solid ${C.gold}40`}}>
-      <div style={{fontSize:10,letterSpacing:"0.25em",color:C.gold,textTransform:"uppercase",fontWeight:700,marginBottom:10}}>🎬 BLACK HAT USA · SEMPERIS PREMIERE · AUGUST 5 2026</div>
+      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
+        <span style={{width:7,height:7,borderRadius:"50%",background:C.crimson,boxShadow:`0 0 0 0 ${C.crimson}80`,animation:"pulseDot 1.8s ease-out infinite",flexShrink:0}}/>
+        <div style={{fontSize:10,letterSpacing:"0.25em",color:C.gold,textTransform:"uppercase",fontWeight:700}}>🎬 BLACK HAT USA · SEMPERIS PREMIERE · AUGUST 5 2026</div>
+      </div>
       <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
         {[["DAYS",t.d],["HRS",t.h],["MIN",t.m],["SEC",t.s]].map(([l,v])=>(
           <div key={l} style={{textAlign:"center",background:"rgba(217,146,1,0.12)",border:`1px solid ${C.gold}30`,borderRadius:10,padding:"10px 14px",minWidth:58}}>
-            <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:26,fontWeight:900,color:C.gold,lineHeight:1}}>{String(v).padStart(2,"0")}</div>
+            <div style={{fontFamily:"'Cormorant Garamond',Georgia,serif",fontSize:26,fontWeight:900,color:C.gold,lineHeight:1}}>{String(v).padStart(2,"0")}</div>
             <div style={{fontSize:9,letterSpacing:"0.2em",color:"#a0b890",marginTop:3}}>{l}</div>
           </div>
         ))}
@@ -720,7 +312,7 @@ function Countdown(){
   );
 }
 
-// ── AFFIRMATION ────────────────────────────────────────────────────
+// ── AFFIRMATION ────────────────────────────────────────────────────────────────
 function Affirmation(){
   const base=Math.floor(Date.now()/86400000)%AFFIRMATIONS.length;
   const [idx,setIdx]=useState(base);
@@ -729,7 +321,7 @@ function Affirmation(){
   return(
     <div style={{background:`linear-gradient(135deg,${C.forest},#2d5c36)`,borderRadius:14,padding:"18px 20px",border:`1px solid ${C.olive}40`}}>
       <div style={{fontSize:10,letterSpacing:"0.25em",color:C.gold,textTransform:"uppercase",fontWeight:700,marginBottom:10}}>✨ Today's Affirmation</div>
-      <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:15,color:C.cream,lineHeight:1.75,fontStyle:"italic",minHeight:68,opacity:op,transition:"opacity 0.28s"}}>"{AFFIRMATIONS[idx]}"</div>
+      <div style={{fontFamily:"'Cormorant Garamond',Georgia,serif",fontSize:15,color:C.cream,lineHeight:1.75,fontStyle:"italic",minHeight:68,opacity:op,transition:"opacity 0.28s"}}>"{AFFIRMATIONS[idx]}"</div>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:12}}>
         <span style={{fontSize:11,color:"#a0b890"}}>{idx+1}/{AFFIRMATIONS.length}</span>
         <div style={{display:"flex",gap:6}}>
@@ -741,116 +333,91 @@ function Affirmation(){
   );
 }
 
-// ── AI BRIEFING (no API call — fully local) ────────────────────────
-function Briefing({data}){
-  const days = Math.floor((BLACK_HAT - new Date()) / 86400000);
-  const pending = data.tasks.filter(t => !t.done);
-  const hour = new Date().getHours();
-  const todayName = new Date().toLocaleDateString("en-US",{weekday:"long"});
-  const dow = new Date().getDay();
-  const isTueOrThu = [2,4].includes(dow);
-  const isSat = dow === 6;
+// ── AI BRIEFING ────────────────────────────────────────────────────────────────
+function Briefing({data,onSave}){
+  const [text,setText]=useState(data.savedBriefing||"");
+  const [loading,setLoading]=useState(false);
+  const [err,setErr]=useState("");
+  const today=new Date().toDateString();
+  const days=Math.floor((BLACK_HAT-new Date())/86400000);
+  const pending=data.tasks.filter(t=>!t.done);
 
-  const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  const dayKey=todayKey();
+  const todaysEvents=data.routine[dayKey]||[];
+  const routineLine=todaysEvents.length
+    ? todaysEvents.map(e=>`${e.time||"flexible"} ${e.title}`).join(", ")
+    : "open day — no fixed routine logged";
 
-  const faithLines = [
-    "God placed this calling on your life long before you understood it.",
-    "You are covered, protected, and walking in purpose.",
-    "Every step forward is ordered. Trust the process.",
-    "You didn't come this far to only come this far.",
-    "The work you're doing today is building something that will outlast you.",
-    "He who began a good work in you will carry it to completion.",
-    "Your story is not finished. The best chapter is still being written.",
-  ];
-  const faithLine = faithLines[dow % faithLines.length];
+  const gen=useCallback(async()=>{
+    setLoading(true);setErr("");
+    try{
+      const prompt=`You are the personal AI assistant for Chaunda C. Dallas — healthcare cybersecurity strategist, Digital First Responder, grandmother, woman of faith. Generate her personalized morning briefing for today.
 
-  const mission = [];
-  if (isTueOrThu) {
-    mission.push("▣ WiCyS Office Hours 10–11am — show up fully");
-    mission.push("▣ Paid client sessions 1–4pm — this is your funding engine");
-  } else if (isSat) {
-    mission.push("▣ WiCyS Study Hall 1–2pm — lead with generosity");
-    mission.push("▣ G-Ma on the Field content block — document the journey");
-  } else {
-    mission.push("📚 Security+ core study block — Gibson/Messer + ExamCompass");
-    mission.push("☁️ AWS main study block — stay consistent");
-  }
-  if (pending.length > 0) {
-    mission.push(`✅ Priority task: ${pending[0].text}`);
-  } else {
-    mission.push("✅ All tasks clear — log 5 outreach touches today");
-  }
+Context:
+- 28 years clinical emergency medicine, now cybersecurity
+- Featured Defender in Semperis "Midnight in the War Room" premiering Black Hat Aug 5 — ${days} days away
+- WiCyS Technical Mentor, Cohort 3 (ongoing)
+- Relocating to Milwaukee mid-July 2026 for mother's dementia care
+- Grandson my family, granddaughter my family (7th grade multi-sport athlete)
+- Weekly focus: "${data.weeklyFocus}"
+- Pending tasks (${pending.length}): ${pending.map(t=>t.text).join(", ")||"all clear"}
+- Currently studying: ${data.currentRead}
+- Today's routine: ${routineLine}
 
-  const radar = [];
-  radar.push(`🎬 Black Hat red carpet — ${days} days away. You are a Featured Defender.`);
-  if (days <= 30) radar.push("🔴 Final stretch to Black Hat — every action compounds now.");
-  radar.push("🏟️ G-Ma on the Field — document something today, even one sentence.");
-  if (isTueOrThu) radar.push("💼 Paid slots protected today — guard that time.");
+Write her morning briefing in exactly 4 sections:
+1. 🌅 GOOD MORNING — faith-forward personal greeting (2 sentences max)
+2. 🎯 TODAY'S MISSION — top 3 specific priorities for today
+3. 📅 ON YOUR RADAR — 2-3 upcoming milestones (Black Hat countdown, Milwaukee, WiCyS)
+4. 💪 YOUR WORD TODAY — one powerful sentence that speaks to where she is right now
 
-  const wordOptions = [
-    "You are not waiting for your moment — you are building it, one day at a time.",
-    "The gap between clinical floors and the SOC exists because nobody like you stepped in yet. You stepped in.",
-    "Every open door required a you that kept showing up. Keep showing up.",
-    "The credential no certification can replicate is the one you already carry.",
-    "I didn't leave healthcare. I learned to defend it. Say it like you mean it today.",
-    "G-Ma on the Field isn't just a challenge. It's a declaration.",
-    "The right role is looking for you while you're looking for it. Keep moving.",
-  ];
-  const wordToday = wordOptions[new Date().getDate() % wordOptions.length];
+Tone: warm, direct, faith-informed, no fluff. Every word earns its place.`;
 
-  return (
-    <div style={{...card(), background:`linear-gradient(160deg,#0e1e12,${C.forest})`, border:`1px solid ${C.gold}30`, color:C.cream}}>
-      <div style={{fontSize:10, letterSpacing:"0.25em", color:C.gold, textTransform:"uppercase", fontWeight:700, marginBottom:16}}>
-        ☀️ Morning Briefing · {new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})}
-      </div>
-      <div style={{marginBottom:16, paddingBottom:16, borderBottom:"1px solid rgba(255,255,255,0.1)"}}>
-        <div style={{fontSize:10, letterSpacing:"0.15em", color:C.gold, textTransform:"uppercase", fontWeight:700, marginBottom:8}}>🌅 Good Morning</div>
-        <div style={{fontFamily:"'Lora',Georgia,serif", fontSize:14, lineHeight:1.8, color:C.cream}}>
-          {greeting}, Chaunda. {faithLine}
+      const res=await fetch(`/api/briefing?key=${encodeURIComponent(SYNC_KEY)}`,{
+        method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({prompt}),
+      });
+      const json=await res.json();
+      const t=json.content?.[0]?.text||"Unable to generate.";
+      setText(t);onSave(t,today);
+    }catch(e){setErr("Connection error. Try again.");}
+    setLoading(false);
+  },[data,days,pending]);
+
+  return(
+    <div style={{...card(),background:`linear-gradient(160deg,#0e1e12,${C.forest})`,border:`1px solid ${C.gold}30`,color:C.cream}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14,flexWrap:"wrap",gap:10}}>
+        <div>
+          <div style={{fontSize:10,letterSpacing:"0.25em",color:C.gold,textTransform:"uppercase",fontWeight:700}}>☀️ AI Morning Briefing</div>
+          <div style={{fontSize:12,color:"#a0b890",marginTop:2}}>Powered by Claude · Personal to you</div>
         </div>
+        <button onClick={gen} disabled={loading} style={{...BTN(C.gold),opacity:loading?0.7:1,display:"flex",alignItems:"center",gap:6}}>
+          {loading?<><span style={{display:"inline-block",animation:"spin 1s linear infinite"}}>⟳</span> Generating…</>:(text?"🔄 Regenerate":"✨ Generate My Briefing")}
+        </button>
       </div>
-      <div style={{marginBottom:16, paddingBottom:16, borderBottom:"1px solid rgba(255,255,255,0.1)"}}>
-        <div style={{fontSize:10, letterSpacing:"0.15em", color:C.gold, textTransform:"uppercase", fontWeight:700, marginBottom:10}}>🎯 Today's Mission — {todayName}</div>
-        {mission.map((m,i) => (
-          <div key={i} style={{fontFamily:"'Lora',Georgia,serif", fontSize:13, color:C.cream, lineHeight:1.7, marginBottom:6, paddingLeft:8, borderLeft:`2px solid ${C.gold}60`}}>
-            {m}
-          </div>
-        ))}
-      </div>
-      <div style={{marginBottom:16, paddingBottom:16, borderBottom:"1px solid rgba(255,255,255,0.1)"}}>
-        <div style={{fontSize:10, letterSpacing:"0.15em", color:C.gold, textTransform:"uppercase", fontWeight:700, marginBottom:10}}>📅 On Your Radar</div>
-        {radar.map((r,i) => (
-          <div key={i} style={{fontFamily:"'Lora',Georgia,serif", fontSize:13, color:"#a0b890", lineHeight:1.7, marginBottom:5}}>
-            {r}
-          </div>
-        ))}
-      </div>
-      <div style={{marginBottom: pending.length > 0 ? 16 : 0}}>
-        <div style={{fontSize:10, letterSpacing:"0.15em", color:C.gold, textTransform:"uppercase", fontWeight:700, marginBottom:8}}>💪 Your Word Today</div>
-        <div style={{fontFamily:"'Playfair Display',Georgia,serif", fontSize:15, color:C.cream, lineHeight:1.75, fontStyle:"italic"}}>
-          "{wordToday}"
-        </div>
-      </div>
-      {pending.length > 0 && (
-        <div style={{marginTop:16, padding:"10px 14px", borderRadius:8, background:"rgba(217,146,1,0.12)", border:`1px solid ${C.gold}30`}}>
-          <div style={{fontSize:11, color:C.gold, fontWeight:700, marginBottom:6}}>⚡ {pending.length} task{pending.length>1?"s":""} pending</div>
-          {pending.slice(0,3).map((t,i) => (
-            <div key={i} style={{fontSize:12, color:"#a0b890", marginBottom:3}}>→ {t.text}</div>
-          ))}
+      {err&&<div style={{background:"rgba(224,92,92,0.2)",borderRadius:8,padding:"10px 14px",fontSize:13,color:"#ffaaaa",marginBottom:12}}>{err}</div>}
+      {!text&&!loading&&(
+        <div style={{textAlign:"center",padding:"24px",opacity:0.5}}>
+          <div style={{fontSize:28,marginBottom:6}}>☀️</div>
+          <div style={{fontSize:13,fontStyle:"italic",color:"#a0b890"}}>Hit Generate to start your day with intention.</div>
         </div>
       )}
+      {loading&&(
+        <div style={{textAlign:"center",padding:"24px"}}>
+          <div style={{display:"flex",justifyContent:"center",gap:6}}>
+            {[0,1,2].map(i=><div key={i} style={{width:8,height:8,borderRadius:"50%",background:C.gold,animation:`bounce 1.2s ease-in-out ${i*0.2}s infinite`}}/>)}
+          </div>
+          <div style={{fontSize:12,color:"#a0b890",marginTop:10,fontStyle:"italic"}}>Preparing your briefing…</div>
+        </div>
+      )}
+      {text&&!loading&&<div style={{fontFamily:"'DM Sans',Helvetica,Arial,sans-serif",fontSize:14,lineHeight:1.85,color:C.cream,whiteSpace:"pre-wrap",borderTop:`1px solid rgba(255,255,255,0.1)`,paddingTop:14}}>{text}</div>}
     </div>
   );
 }
 
-// ── HABIT TRACKER ──────────────────────────────────────────────────
+// ── HABIT TRACKER (Casey-style) ────────────────────────────────────────────────
 function HabitTracker({data,update}){
-  // FIX: derive week days and today index from real dates
-  const weekDays = getWeekDays();
-  const dayLabels = weekDays.map(d => d.toLocaleDateString("en-US",{weekday:"short"}).slice(0,2));
-  const dayNums = weekDays.map(d => d.getDate());
-  const todayIdx = weekDays.findIndex(d => isToday(d));
-
+  const dayLabels=["T","F","Sa","Su","M","T","W"];
+  const todayIdx=0;
   const allChecks=Object.values(data.habits).reduce((a,h)=>a+h.days.filter(Boolean).length,0);
   const totalChecks=Object.keys(data.habits).length*7;
   const score=Math.round((allChecks/totalChecks)*100);
@@ -866,11 +433,11 @@ function HabitTracker({data,update}){
       <div style={{...card(),background:`linear-gradient(120deg,${C.olive},${C.forest})`,color:"#fff",border:"none"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
           <div>
-            <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:20,fontWeight:700}}>Habit Tracker</div>
-            <div style={{fontSize:12,opacity:0.75,marginTop:2}}>Week of {formatWeekRange(weekDays)} · {allChecks}/{totalChecks} completions</div>
+            <div style={{fontFamily:"'Cormorant Garamond',Georgia,serif",fontSize:20,fontWeight:700}}>Habit Tracker</div>
+            <div style={{fontSize:12,opacity:0.75,marginTop:2}}>Week of Jun 4 · {allChecks}/{totalChecks} completions</div>
           </div>
           <div style={{textAlign:"right"}}>
-            <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:32,fontWeight:900,color:C.gold}}>{score}%</div>
+            <div style={{fontFamily:"'Cormorant Garamond',Georgia,serif",fontSize:32,fontWeight:900,color:C.gold}}>{score}%</div>
             <div style={{fontSize:10,color:"rgba(255,255,255,0.6)",letterSpacing:"0.1em"}}>WEEKLY SCORE</div>
           </div>
         </div>
@@ -881,17 +448,17 @@ function HabitTracker({data,update}){
 
       <div style={card()}>
         <div style={{fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",color:"#999",fontWeight:700,marginBottom:14}}>Daily Habits</div>
-        {/* Date header row */}
+        {/* Date row */}
         <div style={{display:"flex",alignItems:"center",marginBottom:10}}>
           <div style={{flex:1}}/>
           <div style={{display:"flex",gap:6,marginRight:4}}>
-            {dayNums.map((d,i)=>(
+            {[4,5,6,7,8,9,10].map((d,i)=>(
               <div key={i} style={{width:34,height:34,borderRadius:8,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
-                background:i===todayIdx?C.forest:"transparent",
-                border:i===todayIdx?`none`:`1.5px solid ${C.mist}`,
+                background:i===0?C.forest:"transparent",
+                border:i===0?`none`:`1.5px solid ${C.mist}`,
               }}>
-                <div style={{fontSize:9,color:i===todayIdx?"#fff":"#aaa",letterSpacing:"0.05em"}}>{dayLabels[i]}</div>
-                <div style={{fontSize:12,fontWeight:700,color:i===todayIdx?"#fff":C.ink}}>{d}</div>
+                <div style={{fontSize:9,color:i===0?"#fff":"#aaa",letterSpacing:"0.05em"}}>{dayLabels[i]}</div>
+                <div style={{fontSize:12,fontWeight:700,color:i===0?"#fff":C.ink}}>{d}</div>
               </div>
             ))}
           </div>
@@ -908,29 +475,17 @@ function HabitTracker({data,update}){
                     <div style={{height:"100%",width:`${(done/7)*100}%`,background:`linear-gradient(90deg,${C.olive},${C.gold})`,borderRadius:99,transition:"width 0.4s ease"}}/>
                   </div>
                 </div>
-                <div style={{fontSize:12,color:C.olive,fontWeight:700,minWidth:28,textAlign:"right"}}>{done}/7</div>
+                <div style={{fontSize:12,color:C.olive,fontWeight:700,minWidth:28,textAlign:"right"}}>{done}/5</div>
               </div>
               <div style={{display:"flex",gap:6,justifyContent:"flex-end"}}>
                 {habit.days.map((checked,i)=>(
-                  <div
-                    key={i}
-                    onClick={()=>toggle(key,i)}
-                    role="checkbox"
-                    aria-checked={checked}
-                    aria-label={`${habit.label} ${dayLabels[i]} ${dayNums[i]}`}
-                    tabIndex={0}
-                    onKeyDown={e=>(e.key===" "||e.key==="Enter")&&toggle(key,i)}
-                    style={{
-                      width:34,height:34,borderRadius:8,cursor:"pointer",
-                      background:checked?`linear-gradient(135deg,${C.olive},${C.gold})`:"transparent",
-                      border:`1.5px solid ${checked?C.olive:C.mist}`,
-                      display:"flex",alignItems:"center",justifyContent:"center",
-                      fontSize:14,transition:"all 0.18s",transform:checked?"scale(1.05)":"scale(1)",
-                      outline:"none",
-                    }}
-                  >
-                    {checked&&<span style={{color:"#fff",fontSize:13,fontWeight:700}}>✓</span>}
-                  </div>
+                  <div key={i} onClick={()=>toggle(key,i)} style={{
+                    width:34,height:34,borderRadius:8,cursor:"pointer",
+                    background:checked?`linear-gradient(135deg,${C.olive},${C.gold})`:"transparent",
+                    border:`1.5px solid ${checked?C.olive:C.mist}`,
+                    display:"flex",alignItems:"center",justifyContent:"center",
+                    fontSize:14,transition:"all 0.18s",transform:checked?"scale(1.05)":"scale(1)",
+                  }}>{checked&&<span style={{color:"#fff",fontSize:13,fontWeight:700}}>✓</span>}</div>
                 ))}
               </div>
             </div>
@@ -941,66 +496,234 @@ function HabitTracker({data,update}){
   );
 }
 
-// ── MONEY ROUTER ──────────────────────────────────────────────────
-function MoneyRouter({data,update}){
-  const acc=data.accounts||{marcus:0,marcusGoal:5000,appleSavings:0,appleGoal:2000,rothIRA:0,rothGoal:7000,llcChecking:0,fidelity:0};
-  const set=(key,val)=>update({accounts:{...acc,[key]:+val}});
-  const tiers=[
-    {tier:"T1",label:"Operating Base",icon:"🏦",color:C.ink,bg:"#e8f0e0",accounts:[{key:"llcChecking",label:"LLC Business Checking",goal:null,note:"Business income lands here first. Pay yourself from this."}],rule:"Bills, daily expenses, operating money"},
-    {tier:"T2",label:"Protection",icon:"🛡️",color:"#0f6e56",bg:"#e1f5ee",accounts:[{key:"marcus",label:"Marcus High-Yield Savings",goal:"marcusGoal",note:"Emergency + job transition buffer. Fund this first."}],rule:"3 months expenses. Do not touch."},
-    {tier:"T3",label:"Opportunity",icon:"✨",color:"#854f0b",bg:"#faeeda",accounts:[{key:"appleSavings",label:"Apple Card High-Yield Savings",goal:"appleGoal",note:"Black Hat · certs · conferences · family trips"}],rule:"Intentional spending that invests in you."},
-    {tier:"T4",label:"Future You",icon:"🌱",color:"#533ab7",bg:"#eeedfe",accounts:[{key:"rothIRA",label:"Roth IRA · Navy Federal",goal:"rothGoal",note:"Even $50/mo builds the habit and keeps it alive"}],rule:"Consistent beats maximum. Start small."},
-    {tier:"T5",label:"Wealth Building",icon:"📈",color:C.forest,bg:"#eaf3de",accounts:[{key:"fidelity",label:"Fidelity Individual Brokerage",goal:null,note:"Index funds (VTI). Long-term. Hands off."}],rule:"Open it now. Fund after T2 & T4 are consistent."},
-  ];
-  const totalAssets=(acc.marcus||0)+(acc.appleSavings||0)+(acc.rothIRA||0)+(acc.llcChecking||0)+(acc.fidelity||0);
+// ── LIFE SYSTEMS ────────────────────────────────────────────────────────────────
+function LifeSystems({data,update}){
+  const ls=data.lifeSystems;
+  const [subName,setSubName]=useState("");
+  const [subAmt,setSubAmt]=useState("");
+  const [retItem,setRetItem]=useState("");
+  const [retStore,setRetStore]=useState("");
+  const [retDeadline,setRetDeadline]=useState("");
+  const [groceryItem,setGroceryItem]=useState("");
+
+  const patch=(p)=>update({lifeSystems:{...ls,...p}});
+
+  const toggleTransfer=(id)=>patch({autoTransfers:ls.autoTransfers.map(t=>t.id===id?{...t,active:!t.active}:t)});
+
+  const addSub=()=>{
+    if(!subName.trim())return;
+    patch({subscriptions:[...ls.subscriptions,{id:Date.now(),name:subName,amount:+subAmt||0}]});
+    setSubName("");setSubAmt("");
+  };
+  const removeSub=(id)=>patch({subscriptions:ls.subscriptions.filter(s=>s.id!==id)});
+  const markAudited=()=>patch({lastAuditDate:new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})});
+  const monthlySubTotal=ls.subscriptions.reduce((a,s)=>a+(+s.amount||0),0);
+
+  const setMeal=(i,val)=>{const m=[...ls.meals];m[i]=val;patch({meals:m});};
+
+  const addGrocery=()=>{if(!groceryItem.trim())return;patch({groceryList:[...ls.groceryList,{id:Date.now(),text:groceryItem,checked:false}]});setGroceryItem("");};
+  const toggleGrocery=(id)=>patch({groceryList:ls.groceryList.map(g=>g.id===id?{...g,checked:!g.checked}:g)});
+  const clearChecked=()=>patch({groceryList:ls.groceryList.filter(g=>!g.checked)});
+
+  const addReturn=()=>{
+    if(!retItem.trim())return;
+    patch({returns:[...ls.returns,{id:Date.now(),item:retItem,store:retStore,deadline:retDeadline,done:false}]});
+    setRetItem("");setRetStore("");setRetDeadline("");
+  };
+  const toggleReturn=(id)=>patch({returns:ls.returns.map(r=>r.id===id?{...r,done:!r.done}:r)});
+  const removeReturn=(id)=>patch({returns:ls.returns.filter(r=>r.id!==id)});
+
+  const daysUntil=(dateStr)=>{
+    if(!dateStr)return null;
+    return Math.ceil((new Date(dateStr)-new Date(new Date().toDateString()))/86400000);
+  };
+
+  const sortedReturns=[...ls.returns].sort((a,b)=>{
+    if(a.done!==b.done)return a.done?1:-1;
+    return (a.deadline||"").localeCompare(b.deadline||"");
+  });
+
+  const setExercise=(i,key,val)=>{const arr=ls.exerciseSchedule.map((e,idx)=>idx===i?{...e,[key]:val}:e);patch({exerciseSchedule:arr});};
+
   return(
-    <div style={{...card(),gridColumn:"1/-1"}}>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:10,marginBottom:20}}>
-        <div>
-          <div style={ST}>💵 Money Routing System</div>
-          <div style={{fontSize:12,color:"#888",marginTop:-8,marginBottom:4}}>Every dollar has a job. Follow the tiers in order when income comes in.</div>
-        </div>
-        <div style={{textAlign:"right"}}>
-          <div style={{fontSize:11,color:C.olive,letterSpacing:"0.1em",textTransform:"uppercase",fontWeight:700}}>Total across accounts</div>
-          <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:26,fontWeight:900,color:C.forest}}>${totalAssets.toLocaleString()}</div>
-        </div>
+    <div style={{display:"flex",flexDirection:"column",gap:18}}>
+      <div style={{...card(),background:`linear-gradient(120deg,${C.forest},${C.olive})`,color:"#fff",border:"none"}}>
+        <div style={{fontFamily:"'Cormorant Garamond',Georgia,serif",fontSize:22,fontWeight:700}}>⚙️ Life Systems</div>
+        <div style={{fontSize:13,opacity:0.85,marginTop:3}}>The parts of life on autopilot — so the hours go to studying, building, and Black Hat prep.</div>
       </div>
-      <div style={{display:"flex",flexDirection:"column",gap:10}}>
-        {tiers.map((t,i)=>{
-          const mainAcc=t.accounts[0];
-          const v=acc[mainAcc.key]||0;
-          const g=mainAcc.goal?acc[mainAcc.goal]||0:null;
-          const p=g?Math.min((v/g)*100,100):null;
-          return(
-            <div key={i} style={{background:t.bg,borderRadius:10,padding:"14px 16px",border:`1.5px solid ${t.color}22`}}>
-              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8,flexWrap:"wrap"}}>
-                <div style={{background:t.color,color:"#fff",borderRadius:6,padding:"2px 9px",fontSize:10,fontWeight:700,letterSpacing:"0.1em",flexShrink:0}}>{t.tier}</div>
-                <div style={{fontSize:14,fontWeight:700,color:t.color,fontFamily:"'Playfair Display',Georgia,serif"}}>{t.icon} {t.label}</div>
-                <div style={{fontSize:11,color:"#777",marginLeft:"auto",fontStyle:"italic",textAlign:"right"}}>{t.rule}</div>
+
+      {/* MONEY AUTOMATION — full width */}
+      <div style={card()}>
+        <div style={ST}>💰 Money Automation</div>
+        <span style={LB}>5-Tier Auto-Transfer Setup</span>
+        <div style={{display:"flex",flexDirection:"column",gap:7,marginBottom:16}}>
+          {ls.autoTransfers.map(t=>(
+            <div key={t.id} onClick={()=>toggleTransfer(t.id)} style={{display:"flex",gap:9,alignItems:"center",cursor:"pointer",padding:"8px 10px",borderRadius:8,background:t.active?"#eef6ef":C.cream}}>
+              <div style={{width:20,height:20,borderRadius:6,border:`2px solid ${t.active?C.olive:C.gold}`,background:t.active?C.olive:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                {t.active&&<span style={{color:"#fff",fontSize:12}}>✓</span>}
               </div>
-              <div style={{display:"flex",gap:12,alignItems:"flex-start",flexWrap:"wrap"}}>
-                <div style={{flex:1,minWidth:160}}>
-                  <div style={{fontSize:12,fontWeight:600,color:t.color,marginBottom:2}}>{mainAcc.label}</div>
-                  <div style={{fontSize:11,color:"#888",marginBottom:g?6:0}}>{mainAcc.note}</div>
-                  {g&&(<div><div style={{height:5,background:"rgba(0,0,0,0.08)",borderRadius:99,overflow:"hidden"}}><div style={{height:"100%",width:`${p}%`,background:t.color,borderRadius:99,transition:"width 0.5s",opacity:0.85}}/></div><div style={{fontSize:10,color:t.color,marginTop:3,fontWeight:700}}>${v.toLocaleString()} of ${g.toLocaleString()} goal · {Math.round(p||0)}%</div></div>)}
-                </div>
-                <div style={{display:"flex",flexDirection:"column",gap:5,minWidth:150}}>
-                  <input type="number" value={v||""} onChange={e=>set(mainAcc.key,e.target.value)} placeholder="Current balance $" style={{...INP,fontSize:12,background:"rgba(255,255,255,0.75)",border:`1.5px solid ${t.color}44`}}/>
-                  {mainAcc.goal&&(<input type="number" value={acc[mainAcc.goal]||""} onChange={e=>set(mainAcc.goal,e.target.value)} placeholder="My goal $" style={{...INP,fontSize:11,background:"rgba(255,255,255,0.5)",border:`1.5px solid ${t.color}33`}}/>)}
-                </div>
-              </div>
+              <span style={{fontSize:13,color:t.active?C.forest:C.ink,fontWeight:t.active?600:400}}>{t.label}</span>
+              <span style={{marginLeft:"auto",fontSize:10,letterSpacing:"0.1em",textTransform:"uppercase",color:t.active?C.olive:"#aaa",fontWeight:700,fontFamily:"'DM Mono',monospace"}}>{t.active?"AUTOMATED":"MANUAL"}</span>
             </div>
-          );
-        })}
+          ))}
+        </div>
+
+        <span style={LB}>Subscription Audit</span>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:9}}>
+          <span style={{fontSize:12,color:"#777"}}>Last audit: {ls.lastAuditDate||"Never"}</span>
+          <button onClick={markAudited} style={{...BTN(C.cream),color:C.forest,border:`1.5px solid ${C.mist}`,fontSize:11}}>Mark Audited Today</button>
+        </div>
+        <div style={{display:"flex",flexDirection:"column",gap:6,marginBottom:9}}>
+          {ls.subscriptions.map(s=>(
+            <div key={s.id} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 10px",borderRadius:7,background:C.cream}}>
+              <span style={{fontSize:12,flex:1,color:C.ink}}>{s.name}</span>
+              <span style={{fontSize:12,color:C.olive,fontWeight:700}}>${(+s.amount).toFixed(2)}/mo</span>
+              <span onClick={()=>removeSub(s.id)} style={{cursor:"pointer",color:"#bbb",fontSize:14,padding:"0 4px"}}>✕</span>
+            </div>
+          ))}
+          {ls.subscriptions.length===0&&<div style={{fontSize:12,color:"#999",fontStyle:"italic"}}>No subscriptions logged yet.</div>}
+        </div>
+        <div style={{display:"flex",gap:6,marginBottom:8}}>
+          <input value={subName} onChange={e=>setSubName(e.target.value)} placeholder="Subscription name…" style={{...INP,flex:2,fontSize:12}}/>
+          <input value={subAmt} onChange={e=>setSubAmt(e.target.value)} onKeyDown={e=>e.key==="Enter"&&addSub()} type="number" placeholder="$/mo" style={{...INP,flex:1,fontSize:12}}/>
+          <button onClick={addSub} style={BTN(C.forest)}>+</button>
+        </div>
+        {ls.subscriptions.length>0&&<div style={{fontSize:12,color:C.forest,fontWeight:700,textAlign:"right"}}>Monthly total: ${monthlySubTotal.toFixed(2)}</div>}
       </div>
-      <div style={{marginTop:14,padding:"11px 14px",borderRadius:8,background:`${C.gold}18`,border:`1px solid ${C.gold}44`,fontSize:12,color:C.ink,lineHeight:1.8}}>
-        <span style={{fontWeight:700,color:C.burnt}}>The one rule:</span> When income comes in — T2 protection first, then T3 opportunity, then T4 future. T5 opens after T2 and T4 are consistent. LLC checking runs parallel to everything personal.
+
+      {/* MEAL ROTATION · GROCERY LIST · EXERCISE SCHEDULE — 3-up, wraps on mobile */}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))",gap:18}}>
+
+        <div style={card()}>
+          <div style={ST}>🍽️ Meal Rotation</div>
+          <span style={LB}>Fixed 7-Day Cycle — Kill the Daily Decision</span>
+          <div style={{display:"flex",flexDirection:"column",gap:6}}>
+            {DAY_LABELS_7.map((d,i)=>(
+              <div key={d} style={{display:"flex",gap:8,alignItems:"center"}}>
+                <span style={{fontSize:11,color:C.olive,fontWeight:700,minWidth:34,fontFamily:"'DM Mono',monospace"}}>{d}</span>
+                <input value={ls.meals[i]} onChange={e=>setMeal(i,e.target.value)} placeholder="Meal…" style={{...INP,fontSize:12,padding:"6px 10px"}}/>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={card()}>
+          <div style={ST}>🛒 Grocery List</div>
+          <div style={{display:"flex",flexDirection:"column",gap:6,marginBottom:10,maxHeight:220,overflowY:"auto"}}>
+            {ls.groceryList.map(g=>(
+              <div key={g.id} onClick={()=>toggleGrocery(g.id)} style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer",padding:"6px 9px",borderRadius:7,background:g.checked?"#edf7ed":C.cream}}>
+                <div style={{width:16,height:16,borderRadius:5,border:`2px solid ${g.checked?C.olive:C.gold}`,background:g.checked?C.olive:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                  {g.checked&&<span style={{color:"#fff",fontSize:10}}>✓</span>}
+                </div>
+                <span style={{fontSize:12,color:g.checked?"#888":C.ink,textDecoration:g.checked?"line-through":"none"}}>{g.text}</span>
+              </div>
+            ))}
+            {ls.groceryList.length===0&&<div style={{fontSize:12,color:"#999",fontStyle:"italic"}}>List is empty — add your staples below.</div>}
+          </div>
+          <div style={{display:"flex",gap:6,marginBottom:8}}>
+            <input value={groceryItem} onChange={e=>setGroceryItem(e.target.value)} onKeyDown={e=>e.key==="Enter"&&addGrocery()} placeholder="Add item…" style={{...INP,flex:1,fontSize:12}}/>
+            <button onClick={addGrocery} style={BTN(C.forest)}>+</button>
+          </div>
+          {ls.groceryList.some(g=>g.checked)&&<button onClick={clearChecked} style={{...BTN(C.cream),color:C.forest,border:`1.5px solid ${C.mist}`,fontSize:11,width:"100%"}}>Clear Checked</button>}
+        </div>
+
+        <div style={card()}>
+          <div style={ST}>🏃‍♀️ Exercise Schedule</div>
+          <span style={LB}>Fixed Weekly Block — No Daily Negotiation</span>
+          <div style={{display:"flex",flexDirection:"column",gap:6}}>
+            {DAY_LABELS_7.map((d,i)=>(
+              <div key={d} style={{display:"flex",gap:6,alignItems:"center"}}>
+                <span style={{fontSize:11,color:C.olive,fontWeight:700,minWidth:34,fontFamily:"'DM Mono',monospace"}}>{d}</span>
+                <input value={ls.exerciseSchedule[i].time} onChange={e=>setExercise(i,"time",e.target.value)} placeholder="Time…" style={{...INP,fontSize:12,padding:"6px 8px",flex:0.9}}/>
+                <input value={ls.exerciseSchedule[i].type} onChange={e=>setExercise(i,"type",e.target.value)} placeholder="Type / Rest…" style={{...INP,fontSize:12,padding:"6px 8px",flex:1.3}}/>
+              </div>
+            ))}
+          </div>
+          <div style={{fontSize:11,color:"#999",marginTop:9,fontStyle:"italic"}}>Daily completion still lives in ✅ Habits — this is just the weekly template.</div>
+        </div>
+
       </div>
+
+      {/* RETURNS TRACKER — full width */}
+      <div style={card()}>
+        <div style={ST}>📦 Returns Tracker</div>
+        <div style={{display:"flex",flexDirection:"column",gap:7,marginBottom:12}}>
+          {sortedReturns.map(r=>{
+            const dLeft=daysUntil(r.deadline);
+            const overdue=!r.done&&dLeft!==null&&dLeft<0;
+            const soon=!r.done&&dLeft!==null&&dLeft>=0&&dLeft<=3;
+            return(
+              <div key={r.id} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 12px",borderRadius:8,background:r.done?"#edf7ed":C.cream,borderLeft:`3px solid ${r.done?C.olive:overdue?C.crimson:soon?C.gold:C.mist}`}}>
+                <div onClick={()=>toggleReturn(r.id)} style={{width:18,height:18,borderRadius:5,border:`2px solid ${r.done?C.olive:C.gold}`,background:r.done?C.olive:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,cursor:"pointer"}}>
+                  {r.done&&<span style={{color:"#fff",fontSize:11}}>✓</span>}
+                </div>
+                <div style={{flex:1}}>
+                  <span style={{fontSize:13,color:r.done?"#888":C.ink,textDecoration:r.done?"line-through":"none",fontWeight:600}}>{r.item}</span>
+                  {r.store&&<span style={{fontSize:11,color:"#999"}}> · {r.store}</span>}
+                </div>
+                {r.deadline&&!r.done&&(
+                  <span style={{fontSize:10,fontWeight:700,letterSpacing:"0.05em",textTransform:"uppercase",color:overdue?C.crimson:soon?C.burnt:C.olive,fontFamily:"'DM Mono',monospace"}}>
+                    {overdue?"OVERDUE":dLeft===0?"DUE TODAY":`${dLeft}D LEFT`}
+                  </span>
+                )}
+                <span onClick={()=>removeReturn(r.id)} style={{cursor:"pointer",color:"#bbb",fontSize:14,padding:"0 4px"}}>✕</span>
+              </div>
+            );
+          })}
+          {ls.returns.length===0&&<div style={{fontSize:12,color:"#999",fontStyle:"italic"}}>Bin's empty — nothing pending return.</div>}
+        </div>
+        <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+          <input value={retItem} onChange={e=>setRetItem(e.target.value)} placeholder="Item…" style={{...INP,flex:2,fontSize:12,minWidth:120}}/>
+          <input value={retStore} onChange={e=>setRetStore(e.target.value)} placeholder="Store…" style={{...INP,flex:1,fontSize:12,minWidth:90}}/>
+          <input value={retDeadline} onChange={e=>setRetDeadline(e.target.value)} type="date" style={{...INP,flex:1,fontSize:12,minWidth:130}}/>
+          <button onClick={addReturn} style={BTN(C.forest)}>+</button>
+        </div>
+      </div>
+
     </div>
   );
 }
 
-// ── MAIN APP ──────────────────────────────────────────────────────
+// ── ROUTINE EDITOR (shared source of truth for Today + Weekly) ─────────────────
+function RoutineEditor({data,update}){
+  const dates=weekDates();
+  const tKey=todayKey();
+  const addEvent=(day)=>update({routine:{...data.routine,[day]:[...data.routine[day],{time:"",title:"",cal:"routine"}]}});
+  const updateEvent=(day,idx,key,val)=>{
+    const list=data.routine[day].map((e,i)=>i===idx?{...e,[key]:val}:e);
+    update({routine:{...data.routine,[day]:list}});
+  };
+  const removeEvent=(day,idx)=>update({routine:{...data.routine,[day]:data.routine[day].filter((_,i)=>i!==idx)}});
+
+  return(
+    <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:12}}>
+      {DAY_LABELS_7.map((day,i)=>(
+        <div key={day} style={{...card({padding:14}),background:day===tKey?`${C.forest}0d`:C.paper,border:day===tKey?`2px solid ${C.forest}`:`1.5px solid ${C.mist}`}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:8}}>
+            <span style={{fontSize:13,fontWeight:700,color:C.forest,fontFamily:"'DM Mono',monospace"}}>{day}{day===tKey?" · today":""}</span>
+            <span style={{fontSize:11,color:"#999"}}>{fmtShortDate(dates[i])}</span>
+          </div>
+          <div style={{display:"flex",flexDirection:"column",gap:6,marginBottom:8}}>
+            {data.routine[day].map((ev,idx)=>(
+              <div key={idx} style={{display:"flex",gap:5,alignItems:"center",flexWrap:"wrap"}}>
+                <input value={ev.time} onChange={e=>updateEvent(day,idx,"time",e.target.value)} placeholder="Time" style={{...INP,fontSize:11,padding:"5px 7px",flex:"0.8 1 60px"}}/>
+                <input value={ev.title} onChange={e=>updateEvent(day,idx,"title",e.target.value)} placeholder="What…" style={{...INP,fontSize:11,padding:"5px 7px",flex:"1.6 1 100px"}}/>
+                <select value={ev.cal} onChange={e=>updateEvent(day,idx,"cal",e.target.value)} style={{...INP,fontSize:10,padding:"5px 3px",flex:"0.9 1 70px"}}>
+                  {Object.keys(CAL_COLORS).map(c=><option key={c} value={c}>{c}</option>)}
+                </select>
+                <span onClick={()=>removeEvent(day,idx)} style={{cursor:"pointer",color:"#bbb",fontSize:13}}>✕</span>
+              </div>
+            ))}
+            {data.routine[day].length===0&&<div style={{fontSize:11,color:"#999",fontStyle:"italic"}}>Nothing set.</div>}
+          </div>
+          <button onClick={()=>addEvent(day)} style={{...BTN(C.cream),color:C.forest,border:`1.5px solid ${C.mist}`,fontSize:11,width:"100%"}}>+ Add</button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── MAIN APP ──────────────────────────────────────────────────────────────────
 export default function App(){
   const [tab,setTab]=useState(0);
   const [data,setData]=useState(loadData);
@@ -1009,12 +732,48 @@ export default function App(){
   const [newBucket,setNewBucket]=useState("");
   const [newIdea,setNewIdea]=useState("");
   const [newVision,setNewVision]=useState({emoji:"✨",label:"",desc:""});
+  const [newOutreach,setNewOutreach]=useState({company:"",lane:"Healthcare SME",contact:"",status:"Not Started"});
+  const [newEvent,setNewEvent]=useState({name:"",date:"",location:"",status:"tentative",notes:""});
   const [showVAdd,setShowVAdd]=useState(false);
+  const [syncStatus,setSyncStatus]=useState(SYNC_KEY?"checking":"local-only");
+  const didMount=useRef(false);
   const visible=useFadeIn(tab);
 
   const update=useCallback((patch)=>{
     setData(prev=>{const next={...prev,...patch};saveData(next);return next;});
   },[]);
+
+  // Pull the remote copy once on load — whichever device opens first this
+  // session adopts the shared state instead of a stale local snapshot.
+  useEffect(()=>{
+    if(!SYNC_KEY) return;
+    let cancelled=false;
+    (async()=>{
+      const remote=await fetchRemote();
+      if(cancelled) return;
+      if(remote){
+        const merged={...defaultData(),...remote,lifeSystems:{...defaultLifeSystems(),...(remote.lifeSystems||{})},routine:{...defaultRoutine(),...(remote.routine||{})}};
+        setData(merged);saveData(merged);
+        setSyncStatus("synced");
+      }else{
+        setSyncStatus("local-only");
+      }
+    })();
+    return ()=>{cancelled=true;};
+  },[]);
+
+  // Push local changes to the shared store, debounced so typing doesn't
+  // fire a request per keystroke.
+  useEffect(()=>{
+    if(!SYNC_KEY) return;
+    if(!didMount.current){didMount.current=true;return;}
+    setSyncStatus("syncing");
+    const t=setTimeout(async()=>{
+      const ok=await pushRemote(data);
+      setSyncStatus(ok?"synced":"offline");
+    },1200);
+    return ()=>clearTimeout(t);
+  },[data]);
 
   const toggleTask=(id)=>update({tasks:data.tasks.map(t=>t.id===id?{...t,done:!t.done}:t)});
   const addTask=()=>{if(!newTask.trim())return;update({tasks:[...data.tasks,{id:Date.now(),text:newTask,done:false}]});setNewTask("");};
@@ -1023,20 +782,40 @@ export default function App(){
   const addBucketItem=()=>{if(!newBucket.trim())return;update({bucketList:[...data.bucketList,{text:newBucket,done:false}]});setNewBucket("");};
   const addIdea=()=>{if(!newIdea.trim())return;update({ideasParking:[...data.ideasParking,newIdea]});setNewIdea("");};
   const addVision=()=>{if(!newVision.label)return;update({visionBoard:[...data.visionBoard,{...newVision}]});setNewVision({emoji:"✨",label:"",desc:""});setShowVAdd(false);};
+  const saveBriefing=(t,d)=>update({savedBriefing:t,lastBriefingDate:d});
+
+  const addOutreach=()=>{
+    if(!newOutreach.company.trim())return;
+    update({outreach:[...data.outreach,{id:Date.now(),...newOutreach,lastTouch:""}]});
+    setNewOutreach({company:"",lane:"Healthcare SME",contact:"",status:"Not Started"});
+  };
+  const updateOutreach=(id,key,val)=>update({outreach:data.outreach.map(o=>o.id===id?{...o,[key]:val}:o)});
+  const removeOutreach=(id)=>update({outreach:data.outreach.filter(o=>o.id!==id)});
+
+  const addEvent=()=>{
+    if(!newEvent.name.trim())return;
+    update({blackHatEvents:[...data.blackHatEvents,{id:Date.now(),...newEvent}]});
+    setNewEvent({name:"",date:"",location:"",status:"tentative",notes:""});
+  };
+  const updateEvent=(id,key,val)=>update({blackHatEvents:data.blackHatEvents.map(e=>e.id===id?{...e,[key]:val}:e)});
+  const removeEvent=(id)=>update({blackHatEvents:data.blackHatEvents.filter(e=>e.id!==id)});
+
+  const SYNC_LABEL={checking:"⏳ Checking sync…",syncing:"⏳ Saving…",synced:"☁️ Synced",offline:"⚠️ Offline — saved locally","local-only":"📴 Local only — sync not configured"};
 
   return(
-    <div style={{minHeight:"100vh",background:`linear-gradient(160deg,${C.forest} 0%,#0E2415 40%,#0a1a0d 100%)`,fontFamily:"'Lora',Georgia,serif",color:C.ink}}>
+    <div style={{minHeight:"100vh",background:`linear-gradient(160deg,${C.forest} 0%,#0E2415 40%,#0a1a0d 100%)`,fontFamily:"'DM Sans',Helvetica,Arial,sans-serif",color:C.ink}}>
 
       {/* HEADER */}
       <div style={{padding:"20px 20px 0",maxWidth:1100,margin:"0 auto"}}>
         <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",flexWrap:"wrap",gap:12,marginBottom:6}}>
           <div>
             <div style={{fontSize:10,letterSpacing:"0.25em",color:C.gold,textTransform:"uppercase",fontWeight:700}}>Digital First Responder HQ</div>
-            <h1 style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:26,color:C.cream,margin:"3px 0 2px",fontWeight:700,letterSpacing:"-0.02em"}}>Hey Chaunda ✦</h1>
+            <h1 style={{fontFamily:"'Cormorant Garamond',Georgia,serif",fontSize:26,color:C.cream,margin:"3px 0 2px",fontWeight:700,letterSpacing:"-0.02em"}}>Hey Chaunda ✦</h1>
             <div style={{fontSize:11,color:"#a0b890"}}>{new Date().toLocaleDateString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}</div>
+            <div style={{fontSize:10,color:syncStatus==="synced"?"#8fd19e":syncStatus==="offline"?"#e0a83e":"#a0b890",marginTop:4,fontFamily:"'DM Mono',monospace"}}>{SYNC_LABEL[syncStatus]}</div>
           </div>
           <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-            {[["🎬","Aug 5","Black Hat"],["🎓","Cohort 3","WiCyS"],["🏟️","Active","G-Ma on Field"]].map(([em,d,l])=>(
+            {[["🎬","Aug 5","Black Hat"],["🎓","Cohort 3","WiCyS"],["✈️","Mid-Jul","Milwaukee"]].map(([em,d,l])=>(
               <div key={l} style={{background:"rgba(217,146,1,0.15)",border:`1px solid ${C.gold}40`,borderRadius:10,padding:"7px 12px",textAlign:"center"}}>
                 <div style={{fontSize:15}}>{em}</div>
                 <div style={{fontSize:12,color:C.gold,fontWeight:700}}>{d}</div>
@@ -1053,7 +832,7 @@ export default function App(){
               padding:"8px 13px",borderRadius:"9px 9px 0 0",border:"none",cursor:"pointer",
               background:tab===i?C.paper:"rgba(255,255,255,0.06)",
               color:tab===i?C.forest:"#a0b890",
-              fontFamily:"'Lora',Georgia,serif",fontSize:12,fontWeight:tab===i?700:400,
+              fontFamily:"'DM Sans',Helvetica,Arial,sans-serif",fontSize:12,fontWeight:tab===i?700:400,
               transition:"all 0.18s",whiteSpace:"nowrap",flexShrink:0,
             }}>{t}</button>
           ))}
@@ -1071,11 +850,20 @@ export default function App(){
                 <Countdown/>
                 <Affirmation/>
               </div>
-              <Briefing data={data}/>
+              <Briefing data={data} onSave={saveBriefing}/>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:18}}>
                 <div style={card()}>
-                  <div style={ST}>📅 Today's Schedule</div>
-                  <TodayCalendar/>
+                  <div style={ST}>📅 Today's Calendar</div>
+                  <div style={{display:"flex",flexDirection:"column",gap:7}}>
+                    {(data.routine[todayKey()]||[]).map((ev,i)=>(
+                      <div key={i} style={{display:"flex",gap:8,alignItems:"flex-start",padding:"7px 9px",borderRadius:7,background:C.cream,borderLeft:`3px solid ${CAL_COLORS[ev.cal]||C.olive}`}}>
+                        <div style={{fontSize:10,color:C.olive,fontWeight:700,minWidth:60}}>{ev.time||"—"}</div>
+                        <div style={{fontSize:12,color:C.ink}}>{ev.title}</div>
+                      </div>
+                    ))}
+                    {(data.routine[todayKey()]||[]).length===0&&<div style={{fontSize:12,color:"#999",fontStyle:"italic"}}>Nothing scheduled today.</div>}
+                  </div>
+                  <div style={{fontSize:10,color:"#999",marginTop:8,fontStyle:"italic"}}>✎ Edit any day's routine from the Weekly tab.</div>
                 </div>
                 <div style={card()}>
                   <div style={ST}>✅ Tasks</div>
@@ -1101,8 +889,9 @@ export default function App(){
           {/* WEEKLY */}
           {tab===1&&(
             <div style={{display:"flex",flexDirection:"column",gap:18}}>
+              {/* Rotating quote bar — Casey style */}
               <div style={{...card({padding:"14px 20px"}),background:`linear-gradient(135deg,${C.forest},#2d5c36)`,border:"none",textAlign:"center"}}>
-                <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:15,color:C.cream,fontStyle:"italic"}}>
+                <div style={{fontFamily:"'Cormorant Garamond',Georgia,serif",fontSize:15,color:C.cream,fontStyle:"italic"}}>
                   "{AFFIRMATIONS[Math.floor(Date.now()/86400000)%AFFIRMATIONS.length]}"
                 </div>
               </div>
@@ -1137,9 +926,11 @@ export default function App(){
                   </div>
                 </div>
               </div>
+              {/* Weekly routine — the single editable source of truth for Today + Weekly */}
               <div style={card()}>
-                <div style={ST}>📅 This Week</div>
-                <WeeklyCalendarGrid/>
+                <div style={ST}>📆 Weekly Routine — {fmtShortDate(weekDates()[0])}–{fmtShortDate(weekDates()[6])}</div>
+                <div style={{fontSize:11,color:"#999",marginBottom:12,fontStyle:"italic"}}>This is a recurring template, not a one-off calendar — edit any day, any time. Today's tab always pulls from here.</div>
+                <RoutineEditor data={data} update={update}/>
               </div>
               <div style={card()}>
                 <div style={ST}>💭 Reflection</div>
@@ -1152,12 +943,12 @@ export default function App(){
           {tab===2&&(
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:18}}>
               <div style={{...card(),gridColumn:"1/-1",background:`linear-gradient(120deg,${C.burnt},${C.gold})`,color:"#fff",border:"none"}}>
-                <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:22,fontWeight:700}}>{new Date().toLocaleDateString("en-US",{month:"long",year:"numeric"})} — Monthly Reflection</div>
+                <div style={{fontFamily:"'Cormorant Garamond',Georgia,serif",fontSize:22,fontWeight:700}}>June 2026 — Monthly Reflection</div>
                 <div style={{fontSize:13,opacity:0.85,marginTop:3}}>Consistency beats intensity. What does this month say about you?</div>
               </div>
               {[["wins","🏆 Biggest Wins","What are you celebrating?"],["challenge","💪 Biggest Challenge","Be honest."],["grateful","🙏 Most Grateful For","What showed up?"],["learned","💡 Most Important Lesson","What shifted?"],["health","❤️ Your Health This Month","Body & mind."],["growth","🌱 Growth","What expanded?"],["different","🔄 Do Differently","No judgment."],["intention","🌅 Intention Next Month","One sentence."]].map(([key,title,ph])=>(
                 <div key={key} style={card()}>
-                  <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:14,color:C.forest,fontWeight:700,marginBottom:9}}>{title}</div>
+                  <div style={{fontFamily:"'Cormorant Garamond',Georgia,serif",fontSize:14,color:C.forest,fontWeight:700,marginBottom:9}}>{title}</div>
                   <textarea value={data.monthlyReflection[key]||""} onChange={e=>update({monthlyReflection:{...data.monthlyReflection,[key]:e.target.value}})} rows={3} placeholder={ph} style={{...INP,resize:"vertical",lineHeight:1.7,fontSize:13}}/>
                 </div>
               ))}
@@ -1168,8 +959,8 @@ export default function App(){
           {tab===3&&(
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:18}}>
               <div style={{...card(),gridColumn:"1/-1",background:`linear-gradient(120deg,${C.forest},${C.olive})`,color:"#fff",border:"none"}}>
-                <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:22,fontWeight:700}}>Q3 2026 — Jul → Sep</div>
-                <div style={{fontSize:13,opacity:0.85,marginTop:3}}>Black Hat red carpet. G-Ma on the Field. Build the pipeline.</div>
+                <div style={{fontFamily:"'Cormorant Garamond',Georgia,serif",fontSize:22,fontWeight:700}}>Q2 2026 — Apr → Jun</div>
+                <div style={{fontSize:13,opacity:0.85,marginTop:3}}>Black Hat season. Pre-sell runway. Milwaukee transition. Build the pipeline.</div>
               </div>
               {Object.entries(data.quarterlyGoals).map(([cat,goals])=>(
                 <div key={cat} style={card()}>
@@ -1177,10 +968,13 @@ export default function App(){
                   {goals.map((g,i)=>(<div key={i} style={{padding:"6px 9px",borderRadius:6,background:C.cream,marginBottom:5,fontSize:12,display:"flex",alignItems:"center",gap:7}}><span style={{color:C.gold}}>◆</span>{g}</div>))}
                 </div>
               ))}
-              <MoneyRouter data={data} update={update}/>
+              {/* Finances — dollar amounts (Casey style) */}
               <div style={card()}>
-                <div style={ST}>💰 Finances — Q3 2026</div>
-                {[["Debt Paid Off","debtPaid","debtGoal","$"],["Savings Progress","savingsAmount","savingsGoal","$"]].map(([label,valKey,goalKey,sym])=>(
+                <div style={ST}>💰 Finances — Q2 2026</div>
+                {[
+                  ["Debt Paid Off","debtPaid","debtGoal","$"],
+                  ["Savings Progress","savingsAmount","savingsGoal","$"],
+                ].map(([label,valKey,goalKey,sym])=>(
                   <div key={label} style={{marginBottom:18}}>
                     <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
                       <span style={{fontSize:13,fontWeight:600}}>{label}</span>
@@ -1189,12 +983,12 @@ export default function App(){
                     <div style={{height:8,background:C.mist,borderRadius:99,overflow:"hidden",marginBottom:5}}>
                       <div style={{height:"100%",width:`${Math.min((data[valKey]/data[goalKey])*100,100)}%`,background:`linear-gradient(90deg,${C.olive},${C.gold})`,borderRadius:99,transition:"width 0.5s"}}/>
                     </div>
-                    <input type="number" value={data[valKey]} onChange={e=>update({[valKey]:+e.target.value})} style={{...INP,fontSize:12}} placeholder="Enter amount…"/>
+                    <input type="number" value={data[valKey]} onChange={e=>update({[valKey]:+e.target.value})} style={{...INP,fontSize:12}} placeholder={`Enter amount…`}/>
                   </div>
                 ))}
                 <div>
                   <span style={LB}>Net Worth (savings − debt)</span>
-                  <div style={{fontSize:22,fontWeight:700,fontFamily:"'Playfair Display',Georgia,serif",color:data.netWorth>=0?C.forest:"#e05c5c"}}>${data.netWorth.toLocaleString()}</div>
+                  <div style={{fontSize:22,fontWeight:700,fontFamily:"'Cormorant Garamond',Georgia,serif",color:data.netWorth>=0?C.forest:"#e05c5c"}}>${data.netWorth.toLocaleString()}</div>
                   <input type="number" value={data.netWorth} onChange={e=>update({netWorth:+e.target.value})} style={{...INP,fontSize:12,marginTop:6}} placeholder="Net worth…"/>
                 </div>
               </div>
@@ -1208,7 +1002,7 @@ export default function App(){
                 </div>
               </div>
               <div style={{...card(),gridColumn:"1/-1"}}>
-                <div style={ST}>🏆 Q3 Wins</div>
+                <div style={ST}>🏆 Q2 Wins</div>
                 {data.quarterlyWins.length===0&&<div style={{fontSize:12,color:"#999",fontStyle:"italic",marginBottom:8}}>No wins logged yet — start celebrating your progress.</div>}
                 {data.quarterlyWins.map((w,i)=>(<div key={i} style={{padding:"7px 10px",borderRadius:7,background:"#f0faf0",marginBottom:6,fontSize:13,borderLeft:`3px solid ${C.olive}`}}>🎉 {w}</div>))}
                 <input placeholder="Log a quarterly win… (Enter)" style={INP} onKeyDown={e=>{if(e.key==="Enter"&&e.target.value.trim()){update({quarterlyWins:[...data.quarterlyWins,e.target.value]});e.target.value="";}}}/>
@@ -1221,7 +1015,7 @@ export default function App(){
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:18}}>
               <div style={{...card(),gridColumn:"1/-1",background:`linear-gradient(135deg,#0E1E12,${C.forest})`,color:C.cream,border:"none"}}>
                 <div style={{fontSize:10,letterSpacing:"0.2em",color:C.gold,textTransform:"uppercase",marginBottom:6}}>Life Vision 2026</div>
-                <textarea value={data.lifeVision} onChange={e=>update({lifeVision:e.target.value})} rows={2} style={{...INP,background:"transparent",color:C.cream,border:"none",fontSize:16,fontFamily:"'Playfair Display',Georgia,serif",fontWeight:700,lineHeight:1.55,padding:"4px 0",resize:"none",width:"100%"}}/>
+                <textarea value={data.lifeVision} onChange={e=>update({lifeVision:e.target.value})} rows={2} style={{...INP,background:"transparent",color:C.cream,border:"none",fontSize:16,fontFamily:"'Cormorant Garamond',Georgia,serif",fontWeight:700,lineHeight:1.55,padding:"4px 0",resize:"none",width:"100%"}}/>
               </div>
               <div style={card()}>
                 <div style={ST}>🔒 Non-Negotiables</div>
@@ -1229,32 +1023,50 @@ export default function App(){
               </div>
               <div style={card()}>
                 <div style={ST}>🎯 2026 Focus</div>
-                {["Land remote healthcare cyber role","Walk the Black Hat red carpet Aug 5","HCISPP certification Q4","WOSB certification complete","Support Mom's care transition","G-Ma on the Field — publish The Playbook Sep 12"].map((f,i)=>(
-                  <div key={i} style={{padding:"6px 9px",borderRadius:6,background:C.cream,marginBottom:5,fontSize:12,display:"flex",alignItems:"center",gap:7}}><span style={{color:C.gold}}>→</span>{f}</div>
+                {data.yearlyFocus.map((f,i)=>(
+                  <div key={i} style={{display:"flex",alignItems:"center",gap:7,marginBottom:5}}>
+                    <span style={{color:C.gold}}>→</span>
+                    <input value={f} onChange={e=>{const arr=[...data.yearlyFocus];arr[i]=e.target.value;update({yearlyFocus:arr});}} style={{...INP,padding:"6px 9px",fontSize:12,background:C.cream}}/>
+                    <span onClick={()=>update({yearlyFocus:data.yearlyFocus.filter((_,idx)=>idx!==i)})} style={{cursor:"pointer",color:"#bbb",fontSize:13}}>✕</span>
+                  </div>
                 ))}
+                <button onClick={()=>update({yearlyFocus:[...data.yearlyFocus,""]})} style={{...BTN(C.cream),color:C.forest,border:`1.5px solid ${C.mist}`,fontSize:11,width:"100%",marginTop:4}}>+ Add Focus</button>
               </div>
               {data.focusBuckets.map((bucket,i)=>(
                 <div key={i} style={card()}>
                   <div style={ST}>{bucket.title}</div>
-                  {bucket.items.map((item,j)=>(<div key={j} style={{padding:"6px 9px",borderRadius:6,background:C.cream,marginBottom:5,fontSize:12,display:"flex",alignItems:"center",gap:7}}><span style={{color:[C.olive,C.gold,C.burnt,C.forest][i%4]}}>◆</span>{item}</div>))}
+                  {bucket.items.map((item,j)=>(
+                    <div key={j} style={{display:"flex",alignItems:"center",gap:7,marginBottom:5}}>
+                      <span style={{color:[C.olive,C.gold,C.burnt,C.forest][i%4]}}>◆</span>
+                      <input value={item} onChange={e=>{
+                        const buckets=[...data.focusBuckets];
+                        const items=[...buckets[i].items];items[j]=e.target.value;
+                        buckets[i]={...buckets[i],items};
+                        update({focusBuckets:buckets});
+                      }} style={{...INP,padding:"6px 9px",fontSize:12,background:C.cream}}/>
+                    </div>
+                  ))}
                 </div>
               ))}
+              {/* + New Bucket button (Casey style) */}
               <div onClick={()=>{const t=prompt("Bucket title?");if(t)update({focusBuckets:[...data.focusBuckets,{title:t,items:[]}]});}} style={{...card({padding:"20px"}),cursor:"pointer",border:`2px dashed ${C.gold}`,background:"transparent",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:120,transition:"all 0.2s"}}
                 onMouseEnter={e=>e.currentTarget.style.background=`${C.gold}10`}
-                onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                onMouseLeave={e=>e.currentTarget.style.background="transparent"}
+              >
                 <div style={{fontSize:28,color:C.gold}}>+</div>
                 <div style={{fontSize:12,color:C.gold,fontWeight:700,marginTop:4}}>New Bucket</div>
               </div>
             </div>
           )}
 
+          {/* HABITS */}
           {tab===5&&<HabitTracker data={data} update={update}/>}
 
           {/* VISION BOARD */}
           {tab===6&&(
             <div>
               <div style={{...card(),background:`linear-gradient(135deg,${C.burnt},${C.gold})`,color:"#fff",border:"none",marginBottom:18}}>
-                <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:22,fontWeight:700}}>✨ Vision Board — I Already Have This</div>
+                <div style={{fontFamily:"'Cormorant Garamond',Georgia,serif",fontSize:22,fontWeight:700}}>✨ Vision Board — I Already Have This</div>
                 <div style={{fontSize:13,opacity:0.85,marginTop:3}}>Not wishes. Declarations. Things you KNOW are coming.</div>
               </div>
               <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:14}}>
@@ -1264,13 +1076,14 @@ export default function App(){
                     onMouseLeave={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow=`0 2px 16px ${C.shadow}`;}}
                   >
                     <div style={{fontSize:44,marginBottom:8}}>{item.emoji}</div>
-                    <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:15,fontWeight:700,color:C.forest,marginBottom:5}}>{item.label}</div>
+                    <div style={{fontFamily:"'Cormorant Garamond',Georgia,serif",fontSize:15,fontWeight:700,color:C.forest,marginBottom:5}}>{item.label}</div>
                     <div style={{fontSize:12,color:"#666",lineHeight:1.6,fontStyle:"italic"}}>{item.desc}</div>
                   </div>
                 ))}
                 <div onClick={()=>setShowVAdd(true)} style={{...card(),textAlign:"center",cursor:"pointer",border:`2px dashed ${C.gold}`,background:"transparent",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:150,transition:"all 0.2s"}}
                   onMouseEnter={e=>e.currentTarget.style.background=`${C.gold}10`}
-                  onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                  onMouseLeave={e=>e.currentTarget.style.background="transparent"}
+                >
                   <div style={{fontSize:28,color:C.gold}}>+</div>
                   <div style={{fontSize:12,color:C.gold,fontWeight:700,marginTop:4}}>Add Vision Card</div>
                 </div>
@@ -1278,7 +1091,7 @@ export default function App(){
               {showVAdd&&(
                 <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.6)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:100}}>
                   <div style={{...card(),width:320,maxWidth:"90vw"}}>
-                    <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:17,color:C.forest,fontWeight:700,marginBottom:14}}>Add Vision Card</div>
+                    <div style={{fontFamily:"'Cormorant Garamond',Georgia,serif",fontSize:17,color:C.forest,fontWeight:700,marginBottom:14}}>Add Vision Card</div>
                     <span style={LB}>Emoji</span><input value={newVision.emoji} onChange={e=>setNewVision({...newVision,emoji:e.target.value})} style={{...INP,marginBottom:9}}/>
                     <span style={LB}>Title</span><input value={newVision.label} onChange={e=>setNewVision({...newVision,label:e.target.value})} style={{...INP,marginBottom:9}} placeholder="Dream Car"/>
                     <span style={LB}>Declaration</span><input value={newVision.desc} onChange={e=>setNewVision({...newVision,desc:e.target.value})} style={{...INP,marginBottom:14}} placeholder="It's already mine because…"/>
@@ -1296,7 +1109,7 @@ export default function App(){
           {tab===7&&(
             <div style={{maxWidth:680}}>
               <div style={{...card(),background:`linear-gradient(120deg,${C.forest},#2a5a35)`,color:C.cream,border:"none",marginBottom:18}}>
-                <div style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:22,fontWeight:700}}>🪣 Life Bucket List</div>
+                <div style={{fontFamily:"'Cormorant Garamond',Georgia,serif",fontSize:22,fontWeight:700}}>🪣 Life Bucket List</div>
                 <div style={{fontSize:12,opacity:0.8,marginTop:3}}>Things to do before you kick the bucket. Check them off as you LIVE.</div>
                 <div style={{fontSize:13,color:C.gold,marginTop:7,fontWeight:700}}>{data.bucketList.filter(b=>b.done).length} / {data.bucketList.length} complete</div>
               </div>
@@ -1317,19 +1130,80 @@ export default function App(){
             </div>
           )}
 
-          {tab===8&&<OutreachTracker/>}
+          {/* LIFE SYSTEMS */}
+          {tab===8&&<LifeSystems data={data} update={update}/>}
 
-          {/* BLACK HAT TRACKER */}
-          {tab===9&&<BlackHatTracker/>}
+          {/* OUTREACH */}
+          {tab===9&&(
+            <div style={{display:"flex",flexDirection:"column",gap:18}}>
+              <div style={{...card(),background:`linear-gradient(120deg,${C.forest},${C.olive})`,color:"#fff",border:"none"}}>
+                <div style={{fontFamily:"'Cormorant Garamond',Georgia,serif",fontSize:22,fontWeight:700}}>🎯 Outreach Tracker</div>
+                <div style={{fontSize:13,opacity:0.85,marginTop:3}}>Ten real conversations beat a hundred applications. Track every target org, by lane.</div>
+                <div style={{fontSize:13,color:C.gold,marginTop:7,fontWeight:700}}>{data.outreach.length} tracked · {data.outreach.filter(o=>o.status!=="Not Started"&&o.status!=="Closed").length} active</div>
+              </div>
+              <div style={card()}>
+                <div style={{display:"flex",flexDirection:"column",gap:7,marginBottom:14}}>
+                  {data.outreach.map(o=>(
+                    <div key={o.id} style={{display:"flex",alignItems:"center",gap:8,padding:"9px 12px",borderRadius:8,background:C.cream,flexWrap:"wrap"}}>
+                      <div style={{flex:"1.4 1 140px",fontSize:13,fontWeight:600,color:C.ink}}>{o.company}</div>
+                      <div style={{flex:"1 1 110px",fontSize:11,color:C.olive,fontFamily:"'DM Mono',monospace"}}>{o.lane}</div>
+                      <input value={o.contact} onChange={e=>updateOutreach(o.id,"contact",e.target.value)} placeholder="Contact…" style={{...INP,flex:"1 1 100px",fontSize:11,padding:"5px 8px"}}/>
+                      <select value={o.status} onChange={e=>updateOutreach(o.id,"status",e.target.value)} style={{...INP,flex:"0.9 1 110px",fontSize:11,padding:"5px 6px"}}>
+                        {["Not Started","Contacted","Responded","Interview","Offer","Closed"].map(s=><option key={s} value={s}>{s}</option>)}
+                      </select>
+                      <input type="date" value={o.lastTouch} onChange={e=>updateOutreach(o.id,"lastTouch",e.target.value)} style={{...INP,flex:"0.9 1 120px",fontSize:11,padding:"5px 6px"}}/>
+                      <span onClick={()=>removeOutreach(o.id)} style={{cursor:"pointer",color:"#bbb",fontSize:14,padding:"0 4px"}}>✕</span>
+                    </div>
+                  ))}
+                  {data.outreach.length===0&&<div style={{fontSize:12,color:"#999",fontStyle:"italic"}}>No target orgs logged yet — add your first below.</div>}
+                </div>
+                <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                  <input value={newOutreach.company} onChange={e=>setNewOutreach({...newOutreach,company:e.target.value})} placeholder="Company…" style={{...INP,flex:"1.4 1 140px",fontSize:12}}/>
+                  <select value={newOutreach.lane} onChange={e=>setNewOutreach({...newOutreach,lane:e.target.value})} style={{...INP,flex:"1 1 110px",fontSize:12}}>
+                    {["Healthcare SME","AI Red Team","Sports Tech / G-Ma"].map(l=><option key={l} value={l}>{l}</option>)}
+                  </select>
+                  <input value={newOutreach.contact} onChange={e=>setNewOutreach({...newOutreach,contact:e.target.value})} placeholder="Contact…" style={{...INP,flex:"1 1 100px",fontSize:12}}/>
+                  <button onClick={addOutreach} style={BTN(C.forest)}>+</button>
+                </div>
+              </div>
+            </div>
+          )}
 
-          {/* COMMAND SCHEDULE */}
-          {tab===10&&<ScheduleCommand/>}
+          {/* BLACK HAT */}
+          {tab===10&&(
+            <div style={{display:"flex",flexDirection:"column",gap:18}}>
+              <Countdown/>
+              <div style={card()}>
+                <div style={ST}>🎬 Confirmed & Tentative Events</div>
+                <div style={{display:"flex",flexDirection:"column",gap:7,marginBottom:14}}>
+                  {data.blackHatEvents.map(ev=>(
+                    <div key={ev.id} style={{display:"flex",alignItems:"center",gap:8,padding:"9px 12px",borderRadius:8,background:C.cream,borderLeft:`3px solid ${ev.status==="confirmed"?C.olive:C.gold}`,flexWrap:"wrap"}}>
+                      <input value={ev.name} onChange={e=>updateEvent(ev.id,"name",e.target.value)} style={{...INP,flex:"1.6 1 150px",fontSize:12,fontWeight:600}}/>
+                      <input type="date" value={ev.date} onChange={e=>updateEvent(ev.id,"date",e.target.value)} style={{...INP,flex:"0.9 1 120px",fontSize:11}}/>
+                      <input value={ev.location} onChange={e=>updateEvent(ev.id,"location",e.target.value)} placeholder="Location…" style={{...INP,flex:"1 1 120px",fontSize:11}}/>
+                      <select value={ev.status} onChange={e=>updateEvent(ev.id,"status",e.target.value)} style={{...INP,flex:"0.8 1 100px",fontSize:11}}>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="tentative">Tentative</option>
+                      </select>
+                      <span onClick={()=>removeEvent(ev.id)} style={{cursor:"pointer",color:"#bbb",fontSize:14,padding:"0 4px"}}>✕</span>
+                    </div>
+                  ))}
+                </div>
+                <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                  <input value={newEvent.name} onChange={e=>setNewEvent({...newEvent,name:e.target.value})} placeholder="Event name…" style={{...INP,flex:"1.6 1 150px",fontSize:12}}/>
+                  <input type="date" value={newEvent.date} onChange={e=>setNewEvent({...newEvent,date:e.target.value})} style={{...INP,flex:"0.9 1 120px",fontSize:12}}/>
+                  <input value={newEvent.location} onChange={e=>setNewEvent({...newEvent,location:e.target.value})} placeholder="Location…" style={{...INP,flex:"1 1 120px",fontSize:12}}/>
+                  <button onClick={addEvent} style={BTN(C.forest)}>+</button>
+                </div>
+              </div>
+            </div>
+          )}
 
         </div>
       </div>
 
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Lora:ital,wght@0,400;0,600;1,400&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=DM+Mono:wght@400;500&display=swap');
         *{box-sizing:border-box;}
         ::-webkit-scrollbar{width:5px;height:5px;}
         ::-webkit-scrollbar-track{background:${C.mist};}
@@ -1337,8 +1211,12 @@ export default function App(){
         textarea:focus,input:focus{border-color:${C.gold}!important;box-shadow:0 0 0 3px ${C.gold}22;}
         button:hover{opacity:0.88;transform:translateY(-1px);}
         @keyframes spin{to{transform:rotate(360deg);}}
+        @keyframes pulseDot{0%{box-shadow:0 0 0 0 ${C.crimson}80;}70%{box-shadow:0 0 0 8px ${C.crimson}00;}100%{box-shadow:0 0 0 0 ${C.crimson}00;}}
         @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
-        @media(max-width:640px){h1{font-size:20px!important;}}
+        @media(max-width:640px){
+          h1{font-size:20px!important;}
+          .grid-2{grid-template-columns:1fr!important;}
+        }
       `}</style>
     </div>
   );
