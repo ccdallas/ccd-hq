@@ -111,7 +111,7 @@ function fmtShortDate(d){ return d.toLocaleDateString("en-US",{month:"short",day
 
 const CAL_COLORS={routine:C.olive,health:C.crimson,family:C.gold,growth:C.forest,finance:C.olive,special:C.ink,birthday:C.burnt};
 const BLACK_HAT=new Date("2026-08-05T09:00:00");
-const STORE="ccd_hq_v3";
+const STORE="ccd_hq_v4";
 
 const defaultData=()=>({
   weeklyFocus:"Land remote healthcare cyber role before Milwaukee move",
@@ -184,6 +184,7 @@ const defaultData=()=>({
   lifeSystems:defaultLifeSystems(),
   outreach:[],
   blackHatEvents:defaultBlackHatEvents(),
+  claudeLog:[],
 });
 
 function defaultRoutine(){
@@ -723,6 +724,41 @@ function RoutineEditor({data,update}){
   );
 }
 
+function ClaudeLog({data,update}){
+  const [entry,setEntry]=useState("");
+  const add=()=>{
+    if(!entry.trim())return;
+    const today=new Date().toLocaleDateString("en-US",{month:"short",day:"numeric"});
+    update({claudeLog:[{date:today,text:entry},...data.claudeLog]});
+    setEntry("");
+  };
+  const copyLatest=()=>{
+    if(data.claudeLog.length===0)return;
+    navigator.clipboard.writeText(`Continuing from ${data.claudeLog[0].date}: ${data.claudeLog[0].text}`);
+  };
+  return(
+    <div style={card()}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+        <div style={ST}>🧵 Continue With Claude</div>
+        {data.claudeLog.length>0&&<button onClick={copyLatest} style={{...BTN(C.cream),color:C.forest,border:`1.5px solid ${C.mist}`,fontSize:11}}>📋 Copy Latest</button>}
+      </div>
+      <div style={{display:"flex",gap:6,marginBottom:12}}>
+        <input value={entry} onChange={e=>setEntry(e.target.value)} onKeyDown={e=>e.key==="Enter"&&add()}
+          placeholder="Where'd you leave off? What's next?" style={{...INP,flex:1,fontSize:13}}/>
+        <button onClick={add} style={BTN(C.forest)}>+</button>
+      </div>
+      <div style={{display:"flex",flexDirection:"column",gap:6,maxHeight:180,overflowY:"auto"}}>
+        {data.claudeLog.length===0&&<div style={{fontSize:12,color:"#999",fontStyle:"italic"}}>Log your last Claude session here so the next chat picks up instantly.</div>}
+        {data.claudeLog.map((e,i)=>(
+          <div key={i} style={{padding:"7px 10px",borderRadius:7,background:C.cream,fontSize:12,borderLeft:`3px solid ${C.gold}`}}>
+            <span style={{color:C.olive,fontWeight:700}}>{e.date}</span> — {e.text}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── MAIN APP ──────────────────────────────────────────────────────────────────
 export default function App(){
   const [tab,setTab]=useState(0);
@@ -850,7 +886,8 @@ export default function App(){
                 <Countdown/>
                 <Affirmation/>
               </div>
-              <Briefing data={data} onSave={saveBriefing}/>
+               <Briefing data={data} onSave={saveBriefing}/>
+              <ClaudeLog data={data} update={update}/>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:18}}>
                 <div style={card()}>
                   <div style={ST}>📅 Today's Calendar</div>
