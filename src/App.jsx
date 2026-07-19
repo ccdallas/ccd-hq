@@ -120,16 +120,80 @@ const BRIEFING_GREETINGS=[
   "Good morning, and welcome to a day that's yours to shape.",
   "Good morning. You showed up again — that's the whole game.",
 ];
-const BRIEFING_WORDS=[
-  "You don't need permission to lead — you already are.",
-  "Every system you protect today is a life you're standing between and harm.",
-  "Rest is not the opposite of ambition — it's part of the plan.",
-  "You have survived every hard day so far. This one is no different.",
-  "Small, faithful steps are still steps toward the mission.",
-  "You are building something that will outlast every obstacle in front of you right now.",
-  "God has never brought you this far to leave you unfinished.",
-  "The version of you the next generation looks up to is being built right now.",
-];
+function defaultAffirmations(){
+  return[
+    "I was never called to fit in. I was called to protect what matters.",
+    "My name carries a legacy of compassion, courage, and excellence.",
+    "I didn't leave healthcare. I learned to defend it.",
+    "Every challenge I've survived prepared me for the people I'm called to serve.",
+    "I don't chase titles. I build trust.",
+    "I belong in every room my purpose leads me into.",
+    "My experience is not my past. It is my competitive advantage.",
+    "I carry both clinical wisdom and cybersecurity expertise. That combination is rare, and it is valuable.",
+    "The opportunities meant for me are already making their way toward me.",
+    "The right organizations recognize the value I bring before I say a word.",
+    "My expertise creates opportunities that align with my purpose.",
+    "I no longer convince people of my worth. My work speaks for itself.",
+    "My next role is not just a job. It is an assignment.",
+    "Every conversation opens a new door.",
+    "Decision makers remember my name because my mission is unforgettable.",
+    "I attract opportunities where I can protect patients, strengthen healthcare, and be compensated well for both.",
+    "Money is a tool that expands my ability to serve others.",
+    "Wealth flows to me because I create extraordinary value.",
+    "Every dollar I receive represents lives I can impact.",
+    "I am financially free enough to choose purpose over pressure.",
+    "Abundance is my new normal.",
+    "My income grows because my influence grows.",
+    "Opportunities for prosperity appear from places I never expected.",
+    "My gifts create generational wealth.",
+    "I trust myself.",
+    "I have survived things that once felt impossible.",
+    "I no longer shrink to make others comfortable.",
+    "I lead with confidence because I have earned it.",
+    "My voice carries authority because it is rooted in experience.",
+    "I don't need permission to lead.",
+    "I am exactly who I have been preparing to become.",
+    "I have already survived the hardest chapters.",
+    "Setbacks are temporary. My purpose is permanent.",
+    "I rise every single time.",
+    "Nothing I have been through was wasted.",
+    "Every obstacle sharpened my vision.",
+    "I don't fear starting over because I know how to build.",
+    "God has never abandoned me, and He isn't starting now.",
+    "Every patient deserves technology they can trust.",
+    "My work protects people I'll never meet.",
+    "Every secure device represents someone's mother, father, child, or friend.",
+    "I protect patients long before they know they're in danger.",
+    "Healthcare deserves defenders who understand both medicine and technology.",
+    "I was uniquely prepared for this mission.",
+    "I lead with humility, courage, and excellence.",
+    "My presence changes rooms.",
+    "I create calm where others see chaos.",
+    "I mentor because someone once believed in me.",
+    "I don't compete. I contribute.",
+    "The more I grow, the more people I help rise.",
+    "God orders my steps.",
+    "What is meant for me cannot miss me.",
+    "I walk in favor, wisdom, and peace.",
+    "My timing is not delayed. It is being prepared.",
+    "I trust God's process even when I cannot see the whole path.",
+    "I release fear and make room for faith.",
+    "My work will outlive me.",
+    "My story gives others permission to keep going.",
+    "I am building something that matters.",
+    "My name will be associated with protecting patients and advancing healthcare cybersecurity.",
+    "Every day I become the woman I once prayed to become.",
+    "The best chapters of my life are still ahead of me.",
+    "My mission is bigger than my circumstances.",
+    "The right people don't need convincing. They recognize value when they see it.",
+    "I protect patients through technology because lives depend on trust.",
+    "My experience is rare. My perspective is needed. My time is now.",
+    "Doors don't open because I knock louder. They open because I belong there.",
+    "God didn't bring me this far to leave me here.",
+    "My name carries purpose. My work carries impact. My legacy will carry both.",
+    "I am not rebuilding my life. I am building the life I was always meant to have.",
+  ];
+}
 const STORE="ccd_hq_v4";
 
 const defaultData=()=>({
@@ -144,6 +208,7 @@ const defaultData=()=>({
   ],
   currentRead:"Microsoft SC-900 (voucher in hand) — Security+ shelved until income allows",
   readStatus:"reading",
+  affirmations:defaultAffirmations(),
   weeklyWins:["Advisory council → full outreach playbook built","DFR Lab live on GitHub Pages"],
   reflection:"",
   routine:defaultRoutine(),
@@ -372,7 +437,8 @@ function Briefing({data,onSave}){
     setLoading(true);setErr("");
     try{
       const greeting=BRIEFING_GREETINGS[Math.floor(Math.random()*BRIEFING_GREETINGS.length)];
-      const word=BRIEFING_WORDS[Math.floor(Math.random()*BRIEFING_WORDS.length)];
+      const wordPool=data.affirmations&&data.affirmations.length?data.affirmations:["You showed up today. That matters."];
+      const word=wordPool[Math.floor(Math.random()*wordPool.length)];
 
       const missions=pending.slice(0,3).map(t=>t.text);
       for(const goal of data.weeklyGoals||[]){
@@ -409,8 +475,8 @@ function Briefing({data,onSave}){
     <div style={{...card(),background:`linear-gradient(160deg,#0e1e12,${C.forest})`,border:`1px solid ${C.gold}30`,color:C.cream}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14,flexWrap:"wrap",gap:10}}>
         <div>
-          <div style={{fontSize:10,letterSpacing:"0.25em",color:C.gold,textTransform:"uppercase",fontWeight:700}}>☀️ AI Morning Briefing</div>
-          <div style={{fontSize:12,color:"#a0b890",marginTop:2}}>Powered by Claude · Personal to you</div>
+          <div style={{fontSize:10,letterSpacing:"0.25em",color:C.gold,textTransform:"uppercase",fontWeight:700}}>☀️ Morning Briefing</div>
+          <div style={{fontSize:12,color:"#a0b890",marginTop:2}}>Built from your day · 100% offline</div>
         </div>
         <button onClick={gen} disabled={loading} style={{...BTN(C.gold),opacity:loading?0.7:1,display:"flex",alignItems:"center",gap:6}}>
           {loading?<><span style={{display:"inline-block",animation:"spin 1s linear infinite"}}>⟳</span> Generating…</>:(text?"🔄 Regenerate":"✨ Generate My Briefing")}
@@ -432,6 +498,35 @@ function Briefing({data,onSave}){
         </div>
       )}
       {text&&!loading&&<div style={{fontFamily:"'DM Sans',Helvetica,Arial,sans-serif",fontSize:14,lineHeight:1.85,color:C.cream,whiteSpace:"pre-wrap",borderTop:`1px solid rgba(255,255,255,0.1)`,paddingTop:14}}>{text}</div>}
+    </div>
+  );
+}
+
+// ── BRIEFING AFFIRMATIONS EDITOR ────────────────────────────────────────────────
+function AffirmationsEditor({data,update}){
+  const [draft,setDraft]=useState("");
+  const list=data.affirmations||[];
+  const add=()=>{if(!draft.trim())return;update({affirmations:[...list,draft.trim()]});setDraft("");};
+  const editAt=(i,val)=>{const arr=[...list];arr[i]=val;update({affirmations:arr});};
+  const removeAt=(i)=>update({affirmations:list.filter((_,idx)=>idx!==i)});
+
+  return(
+    <div style={card()}>
+      <div style={ST}>💪 Briefing Affirmations ({list.length})</div>
+      <div style={{fontSize:11,color:"#999",marginBottom:8}}>Powers "Your Word Today" above — edit, remove, or add your own anytime.</div>
+      <div style={{display:"flex",flexDirection:"column",gap:5,maxHeight:280,overflowY:"auto",paddingRight:4}}>
+        {list.map((a,i)=>(
+          <div key={i} style={{display:"flex",alignItems:"center",gap:7}}>
+            <input value={a} onChange={e=>editAt(i,e.target.value)} style={{...INP,padding:"6px 9px",fontSize:12,background:C.cream}}/>
+            <span onClick={()=>removeAt(i)} style={{cursor:"pointer",color:"#bbb",fontSize:13}}>✕</span>
+          </div>
+        ))}
+        {list.length===0&&<div style={{fontSize:12,color:"#999",fontStyle:"italic"}}>No affirmations yet — add your first below.</div>}
+      </div>
+      <div style={{display:"flex",gap:6,marginTop:8}}>
+        <input value={draft} onChange={e=>setDraft(e.target.value)} onKeyDown={e=>e.key==="Enter"&&add()} placeholder="Add an affirmation…" style={{...INP,flex:1,fontSize:12}}/>
+        <button onClick={add} style={BTN(C.gold)}>+</button>
+      </div>
     </div>
   );
 }
@@ -908,6 +1003,7 @@ export default function App(){
                 <Affirmation/>
               </div>
                <Briefing data={data} onSave={saveBriefing}/>
+               <AffirmationsEditor data={data} update={update}/>
               <ClaudeLog data={data} update={update}/>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:18}}>
                 <div style={card()}>
