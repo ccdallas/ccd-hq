@@ -1,0 +1,17 @@
+{
+  "name": "CCD HQ",
+  "short_name": "CCD HQ",
+  "description": "Digital First Responder command center for career, outreach, wellness, and events.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#12351f",
+  "theme_color": "#12351f",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

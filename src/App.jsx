@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import JobSearchTracker from "./JobSearchTracker.jsx";
 
 // ── Brand spine v2 — Green / Amber / Crimson(pulse-only) / Cream / Slate ──
 // Token names kept identical to v1 so every existing reference below
@@ -280,7 +281,7 @@ const LB={fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",color:C.o
 const INP={width:"100%",padding:"8px 12px",border:`1.5px solid ${C.mist}`,borderRadius:8,fontFamily:"'DM Sans',Helvetica,Arial,sans-serif",fontSize:14,color:C.ink,background:C.cream,outline:"none",boxSizing:"border-box"};
 const BTN=(bg=C.forest,x={})=>({background:bg,color:bg===C.cream?C.forest:"#fff",border:"none",borderRadius:8,padding:"7px 16px",cursor:"pointer",fontSize:13,fontFamily:"'DM Sans',Helvetica,Arial,sans-serif",fontWeight:600,transition:"all 0.18s",...x});
 
-const TABS=["🌿 Today","📅 Weekly","🌙 Monthly","🌾 Quarterly","🦅 Yearly","✅ Habits","🗺️ Vision Board","🪣 Bucket List","⚙️ Life Systems","🎯 Outreach","🎬 Black Hat"];
+const TABS=["🌿 Today","📅 Weekly","🌙 Monthly","🌾 Quarterly","🦅 Yearly","✅ Habits","🗺️ Vision Board","🪣 Bucket List","⚙️ Life Systems","💼 Jobs","🎯 Outreach","🎬 Black Hat"];
 const DAY_LABELS_7=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
 
 // ── COUNTDOWN ─────────────────────────────────────────────────────────────────
@@ -1170,8 +1171,11 @@ export default function App(){
           {/* LIFE SYSTEMS */}
           {tab===8&&<LifeSystems data={data} update={update}/>}
 
+          {/* JOB SEARCH TRACKER */}
+          {tab===9&&<JobSearchTracker/>}
+
           {/* OUTREACH */}
-          {tab===9&&(
+          {tab===10&&(
             <div style={{display:"flex",flexDirection:"column",gap:18}}>
               <div style={{...card(),background:`linear-gradient(120deg,${C.forest},${C.olive})`,color:"#fff",border:"none"}}>
                 <div style={{fontFamily:"'Cormorant Garamond',Georgia,serif",fontSize:22,fontWeight:700}}>🎯 Outreach Tracker</div>
@@ -1207,7 +1211,7 @@ export default function App(){
           )}
 
           {/* BLACK HAT */}
-          {tab===10&&(
+          {tab===11&&(
             <div style={{display:"flex",flexDirection:"column",gap:18}}>
               <Countdown/>
               <div style={card()}>
