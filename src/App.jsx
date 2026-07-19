@@ -25,7 +25,7 @@ const AFFIRMATIONS = [
   "Every closed door redirected me closer to my purpose. I trust the process.",
   "I protect patients from threats they never see coming. That is sacred work.",
   "My 28 years are not a detour. They are my competitive advantage.",
-  "I am building something that will outlast me — for my family, my family, my family, and every generation after.",
+  "I am building something that will outlast me — for my grandchildren, and every generation after.",
   "The red carpet on August 5th is not an arrival. It is a beginning.",
   "I am a woman of faith, a grandmother, a clinician, a defender. All of it counts. All of it matters.",
   "Remote, flexible, and fully compensated — the right role already exists and is looking for me.",
@@ -112,6 +112,24 @@ function fmtShortDate(d){ return d.toLocaleDateString("en-US",{month:"short",day
 
 const CAL_COLORS={routine:C.olive,health:C.crimson,family:C.gold,growth:C.forest,finance:C.olive,special:C.ink,birthday:C.burnt};
 const BLACK_HAT=new Date("2026-08-05T09:00:00");
+
+const BRIEFING_GREETINGS=[
+  "Good morning. Take a breath before you take on the day.",
+  "Good morning — today is another brick in the foundation you're building.",
+  "Good morning. One faithful step at a time.",
+  "Good morning, and welcome to a day that's yours to shape.",
+  "Good morning. You showed up again — that's the whole game.",
+];
+const BRIEFING_WORDS=[
+  "You don't need permission to lead — you already are.",
+  "Every system you protect today is a life you're standing between and harm.",
+  "Rest is not the opposite of ambition — it's part of the plan.",
+  "You have survived every hard day so far. This one is no different.",
+  "Small, faithful steps are still steps toward the mission.",
+  "You are building something that will outlast every obstacle in front of you right now.",
+  "God has never brought you this far to leave you unfinished.",
+  "The version of you the next generation looks up to is being built right now.",
+];
 const STORE="ccd_hq_v4";
 
 const defaultData=()=>({
@@ -140,7 +158,7 @@ const defaultData=()=>({
     career:["Land FTE or contract remote role with benefits","Send 25 targeted org outreach messages","Black Hat red carpet Aug 5"],
     health:["Exercise 5x/week","CPAP compliance every night","O2 monitoring daily"],
     finance:["Purchase own health benefits if no FTE","Track every dollar Jun–Aug","Build 1-month emergency buffer"],
-    personal:["Support Mom's dementia care transition","Milwaukee move mid-June","my family, my family & my family quality time"],
+    personal:["Support Mom's dementia care transition","Milwaukee move mid-June","Grandkids quality time"],
   },
   quarterlyWins:[],
   debtPaid:0, debtGoal:5000,
@@ -154,16 +172,16 @@ const defaultData=()=>({
     {title:"Wellness — Mind, Body & Soul",items:["Daily affirmation","30 min exercise","CPAP + O2 every night","Water goal daily"]},
     {title:"Wealth ERA",items:["Remote role with benefits","Federal sub-contracting pipeline","3-tier consulting services live","Savings buffer growing"]},
     {title:"Personal Power",items:["Black Hat red carpet Aug 5","WiCyS mentor cohort 3","SC-900 study plan","DFR Lab expanding"]},
-    {title:"Legacy & Love",items:["Mom's care covered","my family, my family & my family thriving","WOSB certified","PhD deferred — not abandoned"]},
+    {title:"Legacy & Love",items:["Mom's care covered","Grandkids thriving","WOSB certified","PhD deferred — not abandoned"]},
   ],
   bucketList:[
     {text:"Walk the Black Hat red carpet 🎬",done:true},
     {text:"Keynote a major cybersecurity conference",done:false},
     {text:"Publish a book on Digital First Response methodology",done:false},
-    {text:"Take my family to her first college campus tour",done:false},
+    {text:"Take my granddaughter to her first college campus tour",done:false},
     {text:"Travel to West Africa (Ghana / Senegal)",done:false},
     {text:"Own a home outright",done:false},
-    {text:"See my family go viral for something he built",done:false},
+    {text:"See my grandson go viral for something he built",done:false},
     {text:"Launch a healthcare cybersecurity nonprofit",done:false},
     {text:"Get on stage at DEF CON as a speaker",done:false},
     {text:"Retire my mother comfortably",done:false},
@@ -350,40 +368,42 @@ function Briefing({data,onSave}){
     ? todaysEvents.map(e=>`${e.time||"flexible"} ${e.title}`).join(", ")
     : "open day — no fixed routine logged";
 
-  const gen=useCallback(async()=>{
+  const gen=useCallback(()=>{
     setLoading(true);setErr("");
     try{
-      const prompt=`You are the personal AI assistant for Chaunda C. Dallas — healthcare cybersecurity strategist, Digital First Responder, grandmother, woman of faith. Generate her personalized morning briefing for today.
+      const greeting=BRIEFING_GREETINGS[Math.floor(Math.random()*BRIEFING_GREETINGS.length)];
+      const word=BRIEFING_WORDS[Math.floor(Math.random()*BRIEFING_WORDS.length)];
 
-Context:
-- 28 years clinical emergency medicine, now cybersecurity
-- Featured Defender in Semperis "Midnight in the War Room" premiering Black Hat Aug 5 — ${days} days away
-- WiCyS Technical Mentor, Cohort 3 (ongoing)
-- Relocating to Milwaukee mid-July 2026 for mother's dementia care
-- Grandson my family, granddaughter my family (7th grade multi-sport athlete)
-- Weekly focus: "${data.weeklyFocus}"
-- Pending tasks (${pending.length}): ${pending.map(t=>t.text).join(", ")||"all clear"}
-- Currently studying: ${data.currentRead}
-- Today's routine: ${routineLine}
+      const missions=pending.slice(0,3).map(t=>t.text);
+      for(const goal of data.weeklyGoals||[]){
+        if(missions.length>=3)break;
+        if(!missions.includes(goal))missions.push(goal);
+      }
+      if(missions.length===0)missions.push("Nothing urgent logged — a good day to get ahead on something that matters.");
 
-Write her morning briefing in exactly 4 sections:
-1. 🌅 GOOD MORNING — faith-forward personal greeting (2 sentences max)
-2. 🎯 TODAY'S MISSION — top 3 specific priorities for today
-3. 📅 ON YOUR RADAR — 2-3 upcoming milestones (Black Hat countdown, Milwaukee, WiCyS)
-4. 💪 YOUR WORD TODAY — one powerful sentence that speaks to where she is right now
+      const activeOutreach=data.outreach.filter(o=>o.status!=="Not Started"&&o.status!=="Closed").length;
+      const radar=[
+        days>=0
+          ? `Black Hat USA in ${days} day${days===1?"":"s"} — "Midnight in the War Room" premiere.`
+          : `Black Hat USA has come and gone — a good day to log the wins.`,
+        activeOutreach>0
+          ? `${activeOutreach} outreach conversation${activeOutreach===1?"":"s"} active — a follow-up today keeps momentum.`
+          : null,
+        data.currentRead ? `Still moving through: ${data.currentRead}.` : null,
+        todaysEvents.length>0 ? `${todaysEvents.length} thing${todaysEvents.length===1?"":"s"} on today's calendar: ${routineLine}.` : null,
+      ].filter(Boolean).slice(0,3);
 
-Tone: warm, direct, faith-informed, no fluff. Every word earns its place.`;
+      const t=[
+        `🌅 GOOD MORNING\n${greeting}`,
+        `🎯 TODAY'S MISSION\n${missions.slice(0,3).map((m,i)=>`${i+1}. ${m}`).join("\n")}`,
+        `📅 ON YOUR RADAR\n${radar.map(r=>`• ${r}`).join("\n")}`,
+        `💪 YOUR WORD TODAY\n${word}`,
+      ].join("\n\n");
 
-      const res=await fetch(`/api/briefing?key=${encodeURIComponent(SYNC_KEY)}`,{
-        method:"POST",headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({prompt}),
-      });
-      const json=await res.json();
-      const t=json.content?.[0]?.text||"Unable to generate.";
       setText(t);onSave(t,today);
-    }catch(e){setErr("Connection error. Try again.");}
+    }catch(e){console.error("Briefing generation failed:",e);setErr("Couldn't build your briefing. Try again.");}
     setLoading(false);
-  },[data,days,pending]);
+  },[data,days,pending,todaysEvents,routineLine,today]);
 
   return(
     <div style={{...card(),background:`linear-gradient(160deg,#0e1e12,${C.forest})`,border:`1px solid ${C.gold}30`,color:C.cream}}>
