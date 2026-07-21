@@ -111,6 +111,17 @@ function weekDates(){
 function fmtShortDate(d){ return d.toLocaleDateString("en-US",{month:"short",day:"numeric"}); }
 
 const CAL_COLORS={routine:C.olive,health:C.crimson,family:C.gold,growth:C.forest,finance:C.olive,special:C.ink,birthday:C.burnt};
+
+// Black Hat event status system — Confirmed / Waitlist / Tentative / Declined.
+// Declined uses Slate (ink), NOT crimson — pulse color stays pulse-only.
+const BH_STATUS={
+  confirmed:{label:"Confirmed",color:C.olive},
+  waitlist:{label:"Waitlist",color:C.burnt},
+  tentative:{label:"Tentative",color:C.gold},
+  declined:{label:"Declined",color:C.ink},
+};
+const BH_STATUS_ORDER=["confirmed","waitlist","tentative","declined"];
+
 const BLACK_HAT=new Date("2026-08-05T09:00:00");
 
 const BRIEFING_GREETINGS=[
@@ -278,10 +289,40 @@ function defaultRoutine(){
 
 function defaultBlackHatEvents(){
   return [
+    // ── Confirmed ──
     {id:1,name:"Midnight in the War Room — Semperis Premiere",date:"2026-08-05",location:"Black Hat USA, Las Vegas",status:"confirmed",notes:"Featured Defender · red carpet"},
-    {id:2,name:"Guidepoint",date:"",location:"Black Hat USA",status:"confirmed",notes:""},
-    {id:3,name:"GreyNoise NoiseFest",date:"",location:"Black Hat USA",status:"confirmed",notes:""},
-    {id:4,name:"Arcova Cyber Lounge",date:"",location:"Black Hat USA",status:"confirmed",notes:""},
+    {id:2,name:"Guidepoint",date:"2026-08-04",location:"Swingers, Las Vegas Blvd",status:"confirmed",notes:"Black Hat Happy Hour · 7–10 PM"},
+    {id:3,name:"GreyNoise NoiseFest",date:"",location:"Las Vegas",status:"confirmed",notes:"Confirmed via GreyNoise"},
+    {id:4,name:"Arcova Cyber Lounge",date:"2026-08-04",location:"House of Blues, Mandalay Bay",status:"confirmed",notes:"Aug 4–5"},
+    {id:5,name:"Terra Security — Sip, Style & Secure",date:"2026-08-04",location:"W Hotel, Las Vegas",status:"confirmed",notes:"Women's morning · 7:30–9:30 AM · approved"},
+    {id:6,name:"Cyberhaven Poolside Kickoff",date:"2026-08-04",location:"Mandalay Bay pool cabanas",status:"confirmed",notes:"11 AM–3 PM · moved off waitlist · w/ GuidePoint, Sublime, Tines"},
+    {id:7,name:"Semperis HIP Conference 26",date:"",location:"Nashville (separate from BH)",status:"confirmed",notes:"Registered #68927903 · book Embassy Suites room"},
+    // ── Waitlist ──
+    {id:8,name:"NetRise & StrongestLayer VIP CISO Dinner",date:"2026-08-03",location:"Mastro's Ocean Club",status:"waitlist",notes:"⚠️ Confirm attendance by Jul 23"},
+    {id:9,name:"Aikido — Omega Mart After Hours",date:"2026-08-04",location:"Meow Wolf, Las Vegas",status:"waitlist",notes:"7–10 PM"},
+    {id:10,name:"Cyera — Neat & Secure Reception",date:"2026-08-05",location:"Las Vegas",status:"waitlist",notes:"Fine Spirits & AI Insights"},
+    {id:11,name:"Black Hat Security Leaders Reception",date:"",location:"Las Vegas",status:"waitlist",notes:"via Luma"},
+    {id:12,name:"Pentera — HACKasan Party",date:"",location:"Las Vegas",status:"waitlist",notes:""},
+    {id:13,name:"Horizon3 — Black Hat Happy Hour",date:"",location:"Las Vegas",status:"waitlist",notes:""},
+    {id:14,name:"B Capital / DCVC / Khosla — Security Leaders Happy Hour",date:"2026-08-04",location:"Las Vegas",status:"waitlist",notes:""},
+    {id:15,name:"Legion Security — Off the Record",date:"",location:"Las Vegas",status:"waitlist",notes:"RSVP shows Attending: No — fix if attending"},
+    // ── Declined / closed ──
+    {id:16,name:"Guidepoint — Mid-Atlantic Happy Hour",date:"2026-08-05",location:"Rhythm & Riffs, Las Vegas",status:"declined",notes:"Retracted — students/non-sponsoring vendors"},
+  ];
+}
+
+// Researched job/contract targets — fed into the Outreach one-tap import.
+// Kept separate from defaultData().outreach (which stays empty) so importing
+// is an explicit tap, never an automatic overwrite of your own entries.
+function seedOutreach(){
+  return [
+    {company:"Deloitte",lane:"Healthcare SME",contact:"Internal referral → cyber/health",status:"Contacted"},
+    {company:"Nordic Consulting",lane:"Healthcare SME",contact:"Applied: Technical Trainer – Managed Svcs",status:"Contacted"},
+    {company:"Leidos",lane:"Healthcare SME",contact:"Outreach sent",status:"Contacted"},
+    {company:"ManTech",lane:"Healthcare SME",contact:"Outreach sent",status:"Contacted"},
+    {company:"GDIT",lane:"Healthcare SME",contact:"Outreach sent",status:"Contacted"},
+    {company:"Outlier",lane:"AI Red Team",contact:"Profile complete",status:"Contacted"},
+    {company:"Arcova (Expert List)",lane:"Healthcare SME",contact:"No availability — will notify",status:"Responded"},
   ];
 }
 
@@ -943,6 +984,16 @@ export default function App(){
   };
   const updateOutreach=(id,key,val)=>update({outreach:data.outreach.map(o=>o.id===id?{...o,[key]:val}:o)});
   const removeOutreach=(id)=>update({outreach:data.outreach.filter(o=>o.id!==id)});
+  // One-tap import of researched targets — dedupes by company, skips anything
+  // already tracked, runs through the normal sync path. Safe to tap twice.
+  const importOutreach=()=>{
+    const have=new Set(data.outreach.map(o=>(o.company||"").trim().toLowerCase()));
+    const additions=seedOutreach()
+      .filter(o=>!have.has(o.company.trim().toLowerCase()))
+      .map((o,i)=>({id:Date.now()+i,...o,lastTouch:""}));
+    if(!additions.length)return;
+    update({outreach:[...data.outreach,...additions]});
+  };
 
   const addEvent=()=>{
     if(!newEvent.name.trim())return;
@@ -951,6 +1002,15 @@ export default function App(){
   };
   const updateEvent=(id,key,val)=>update({blackHatEvents:data.blackHatEvents.map(e=>e.id===id?{...e,[key]:val}:e)});
   const removeEvent=(id)=>update({blackHatEvents:data.blackHatEvents.filter(e=>e.id!==id)});
+  // One-tap import of researched Black Hat events — same dedupe/skip pattern.
+  const importBlackHatEvents=()=>{
+    const have=new Set(data.blackHatEvents.map(e=>(e.name||"").trim().toLowerCase()));
+    const additions=defaultBlackHatEvents()
+      .filter(e=>!have.has(e.name.trim().toLowerCase()))
+      .map((e,i)=>({...e,id:Date.now()+i}));
+    if(!additions.length)return;
+    update({blackHatEvents:[...data.blackHatEvents,...additions]});
+  };
 
   const SYNC_LABEL={checking:"⏳ Checking sync…",syncing:"⏳ Saving…",synced:"☁️ Synced",offline:"⚠️ Offline — saved locally","local-only":"📴 Local only — sync not configured"};
 
@@ -1299,6 +1359,11 @@ export default function App(){
                 <div style={{fontSize:13,color:C.gold,marginTop:7,fontWeight:700}}>{data.outreach.length} tracked · {data.outreach.filter(o=>o.status!=="Not Started"&&o.status!=="Closed").length} active</div>
               </div>
               <div style={card()}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:10,marginBottom:8}}>
+                  <div style={{...ST,marginBottom:0}}>🎯 Target Orgs</div>
+                  <button onClick={importOutreach} style={{...BTN(C.gold),fontSize:12}}>⬇︎ Import researched targets</button>
+                </div>
+                <div style={{fontSize:11,color:"#999",marginBottom:14,fontStyle:"italic"}}>Adds anything not already tracked — your existing entries stay untouched. Safe to tap more than once.</div>
                 <div style={{display:"flex",flexDirection:"column",gap:7,marginBottom:14}}>
                   {data.outreach.map(o=>(
                     <div key={o.id} style={{display:"flex",alignItems:"center",gap:8,padding:"9px 12px",borderRadius:8,background:C.cream,flexWrap:"wrap"}}>
@@ -1312,7 +1377,7 @@ export default function App(){
                       <span onClick={()=>removeOutreach(o.id)} style={{cursor:"pointer",color:"#bbb",fontSize:14,padding:"0 4px"}}>✕</span>
                     </div>
                   ))}
-                  {data.outreach.length===0&&<div style={{fontSize:12,color:"#999",fontStyle:"italic"}}>No target orgs logged yet — add your first below.</div>}
+                  {data.outreach.length===0&&<div style={{fontSize:12,color:"#999",fontStyle:"italic"}}>No target orgs logged yet — tap Import above, or add your first below.</div>}
                 </div>
                 <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
                   <input value={newOutreach.company} onChange={e=>setNewOutreach({...newOutreach,company:e.target.value})} placeholder="Company…" style={{...INP,flex:"1.4 1 140px",fontSize:12}}/>
@@ -1331,26 +1396,51 @@ export default function App(){
             <div style={{display:"flex",flexDirection:"column",gap:18}}>
               <Countdown/>
               <div style={card()}>
-                <div style={ST}>🎬 Confirmed & Tentative Events</div>
-                <div style={{display:"flex",flexDirection:"column",gap:7,marginBottom:14}}>
-                  {data.blackHatEvents.map(ev=>(
-                    <div key={ev.id} style={{display:"flex",alignItems:"center",gap:8,padding:"9px 12px",borderRadius:8,background:C.cream,borderLeft:`3px solid ${ev.status==="confirmed"?C.olive:C.gold}`,flexWrap:"wrap"}}>
-                      <input value={ev.name} onChange={e=>updateEvent(ev.id,"name",e.target.value)} style={{...INP,flex:"1.6 1 150px",fontSize:12,fontWeight:600}}/>
-                      <input type="date" value={ev.date} onChange={e=>updateEvent(ev.id,"date",e.target.value)} style={{...INP,flex:"0.9 1 120px",fontSize:11}}/>
-                      <input value={ev.location} onChange={e=>updateEvent(ev.id,"location",e.target.value)} placeholder="Location…" style={{...INP,flex:"1 1 120px",fontSize:11}}/>
-                      <select value={ev.status} onChange={e=>updateEvent(ev.id,"status",e.target.value)} style={{...INP,flex:"0.8 1 100px",fontSize:11}}>
-                        <option value="confirmed">Confirmed</option>
-                        <option value="tentative">Tentative</option>
-                      </select>
-                      <span onClick={()=>removeEvent(ev.id)} style={{cursor:"pointer",color:"#bbb",fontSize:14,padding:"0 4px"}}>✕</span>
-                    </div>
-                  ))}
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:10,marginBottom:8}}>
+                  <div style={{...ST,marginBottom:0}}>🎬 Black Hat Events</div>
+                  <button onClick={importBlackHatEvents} style={{...BTN(C.gold),fontSize:12}}>⬇︎ Import researched events</button>
                 </div>
-                <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-                  <input value={newEvent.name} onChange={e=>setNewEvent({...newEvent,name:e.target.value})} placeholder="Event name…" style={{...INP,flex:"1.6 1 150px",fontSize:12}}/>
-                  <input type="date" value={newEvent.date} onChange={e=>setNewEvent({...newEvent,date:e.target.value})} style={{...INP,flex:"0.9 1 120px",fontSize:12}}/>
-                  <input value={newEvent.location} onChange={e=>setNewEvent({...newEvent,location:e.target.value})} placeholder="Location…" style={{...INP,flex:"1 1 120px",fontSize:12}}/>
-                  <button onClick={addEvent} style={BTN(C.forest)}>+</button>
+                <div style={{fontSize:11,color:"#999",marginBottom:16,fontStyle:"italic"}}>Import adds anything not already listed — your existing entries stay untouched. Safe to tap more than once.</div>
+
+                {BH_STATUS_ORDER.map(statusKey=>{
+                  const group=data.blackHatEvents.filter(e=>(e.status||"tentative")===statusKey);
+                  if(group.length===0)return null;
+                  const meta=BH_STATUS[statusKey];
+                  return(
+                    <div key={statusKey} style={{marginBottom:16}}>
+                      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+                        <span style={{width:9,height:9,borderRadius:"50%",background:meta.color}}/>
+                        <span style={{fontSize:11,letterSpacing:"0.12em",textTransform:"uppercase",color:meta.color,fontWeight:700,fontFamily:"'DM Mono',monospace"}}>{meta.label} · {group.length}</span>
+                      </div>
+                      <div style={{display:"flex",flexDirection:"column",gap:7}}>
+                        {group.map(ev=>(
+                          <div key={ev.id} style={{display:"flex",alignItems:"center",gap:8,padding:"9px 12px",borderRadius:8,background:C.cream,borderLeft:`3px solid ${meta.color}`,flexWrap:"wrap"}}>
+                            <input value={ev.name} onChange={e=>updateEvent(ev.id,"name",e.target.value)} style={{...INP,flex:"1.6 1 150px",fontSize:12,fontWeight:600}}/>
+                            <input type="date" value={ev.date} onChange={e=>updateEvent(ev.id,"date",e.target.value)} style={{...INP,flex:"0.9 1 120px",fontSize:11}}/>
+                            <input value={ev.location} onChange={e=>updateEvent(ev.id,"location",e.target.value)} placeholder="Location…" style={{...INP,flex:"1 1 120px",fontSize:11}}/>
+                            <input value={ev.notes} onChange={e=>updateEvent(ev.id,"notes",e.target.value)} placeholder="Notes…" style={{...INP,flex:"1.2 1 130px",fontSize:11}}/>
+                            <select value={ev.status} onChange={e=>updateEvent(ev.id,"status",e.target.value)} style={{...INP,flex:"0.8 1 110px",fontSize:11}}>
+                              {BH_STATUS_ORDER.map(s=><option key={s} value={s}>{BH_STATUS[s].label}</option>)}
+                            </select>
+                            <span onClick={()=>removeEvent(ev.id)} style={{cursor:"pointer",color:"#bbb",fontSize:14,padding:"0 4px"}}>✕</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+
+                <div style={{borderTop:`1px solid ${C.mist}`,paddingTop:14,marginTop:4}}>
+                  <span style={LB}>Add an event</span>
+                  <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                    <input value={newEvent.name} onChange={e=>setNewEvent({...newEvent,name:e.target.value})} placeholder="Event name…" style={{...INP,flex:"1.6 1 150px",fontSize:12}}/>
+                    <input type="date" value={newEvent.date} onChange={e=>setNewEvent({...newEvent,date:e.target.value})} style={{...INP,flex:"0.9 1 120px",fontSize:12}}/>
+                    <input value={newEvent.location} onChange={e=>setNewEvent({...newEvent,location:e.target.value})} placeholder="Location…" style={{...INP,flex:"1 1 120px",fontSize:12}}/>
+                    <select value={newEvent.status} onChange={e=>setNewEvent({...newEvent,status:e.target.value})} style={{...INP,flex:"0.8 1 110px",fontSize:12}}>
+                      {BH_STATUS_ORDER.map(s=><option key={s} value={s}>{BH_STATUS[s].label}</option>)}
+                    </select>
+                    <button onClick={addEvent} style={BTN(C.forest)}>+</button>
+                  </div>
                 </div>
               </div>
             </div>
