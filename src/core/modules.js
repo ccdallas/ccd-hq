@@ -22,6 +22,21 @@ export const modules = [
   {
     id: "healthcare-cyber-lab",
     name: "Healthcare Cyber Lab",
-    enabled: false
+    enabled: true
+  },
+  {
+    id: "event-command",
+    name: "Mission Command",
+    enabled: true
+  },
+  {
+    id: "content-studio",
+    name: "Content Studio",
+    enabled: true
+  },
+  {
+    id: "settings",
+    name: "Settings",
+    enabled: true
   }
 ];

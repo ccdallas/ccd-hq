@@ -543,3 +543,43 @@ textarea {
   color: var(--ccd-gold, #d4af37);
   font-weight: 800;
 }
+
+/* Phase 4 Grids and Cards */
+.lab-grid,
+.event-grid,
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.lab-card,
+.event-card,
+.content-card {
+  background: white;
+  padding: 22px;
+  border-radius: 16px;
+  border: 1px solid var(--ccd-mist, #e2e8f0);
+}
+
+.lab-card span,
+.event-card span,
+.content-card span {
+  color: var(--ccd-gold, #d4af37);
+  font-weight: 800;
+  display: inline-block;
+  margin-top: 8px;
+}
+
+/* Phase 5 Briefing Card Styling */
+.briefing-card {
+  background: linear-gradient(135deg, var(--ccd-forest, #1b365d), #1f5a35);
+  color: white;
+  padding: 24px;
+  border-radius: 18px;
+}
+
+.briefing-card h2 {
+  margin-top: 10px;
+}

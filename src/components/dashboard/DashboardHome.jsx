@@ -1,31 +1,31 @@
+import DailyBriefing from "../intelligence/DailyBriefing.jsx";
 import MissionControl from "../../features/mission/MissionControl.jsx";
 import JobSearchTracker from "../../features/career/JobSearchTracker.jsx";
 import RelationshipIntelligence from "../../features/relationships/RelationshipIntelligence.jsx";
 import KnowledgeVault from "../../features/knowledge/KnowledgeVault.jsx";
+import HealthcareCyberLab from "../../features/healthcare-lab/HealthcareCyberLab.jsx";
+import EventCommand from "../../features/events/EventCommand.jsx";
+import ContentStudio from "../../features/content/ContentStudio.jsx";
+import Settings from "../../features/settings/Settings.jsx";
 import MetricCard from "./MetricCard.jsx";
 import ModuleCard from "./ModuleCard.jsx";
 import { platformMetrics } from "../../core/metrics.js";
 import { modules } from "../../core/modules.js";
 
 export default function DashboardHome({ activeModule }) {
-  if (activeModule === "career-intelligence") {
-    return <JobSearchTracker />;
-  }
-
-  if (activeModule === "relationship-intelligence") {
-    return <RelationshipIntelligence />;
-  }
-
-  if (activeModule === "knowledge-vault") {
-    return <KnowledgeVault />;
-  }
-
-  if (activeModule === "mission-control") {
-    return <MissionControl />;
-  }
+  if (activeModule === "career-intelligence") return <JobSearchTracker />;
+  if (activeModule === "relationship-intelligence") return <RelationshipIntelligence />;
+  if (activeModule === "knowledge-vault") return <KnowledgeVault />;
+  if (activeModule === "healthcare-cyber-lab") return <HealthcareCyberLab />;
+  if (activeModule === "event-command") return <EventCommand />;
+  if (activeModule === "content-studio") return <ContentStudio />;
+  if (activeModule === "settings") return <Settings />;
+  if (activeModule === "mission-control") return <MissionControl />;
 
   return (
     <section className="ccd-dashboard">
+      <DailyBriefing />
+
       <div className="ccd-dashboard-header">
         <span className="ccd-kicker">Command Center</span>
         <h2>CCD-HQ Mission Overview</h2>
