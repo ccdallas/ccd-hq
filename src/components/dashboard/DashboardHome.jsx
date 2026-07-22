@@ -6,6 +6,8 @@ import KnowledgeVault from "../../features/knowledge/KnowledgeVault.jsx";
 import HealthcareCyberLab from "../../features/healthcare-lab/HealthcareCyberLab.jsx";
 import EventCommand from "../../features/events/EventCommand.jsx";
 import ContentStudio from "../../features/content/ContentStudio.jsx";
+import IntegrationCenter from "../../features/integrations/IntegrationCenter.jsx";
+import Profile from "../../features/profile/Profile.jsx";
 import Settings from "../../features/settings/Settings.jsx";
 import MetricCard from "./MetricCard.jsx";
 import ModuleCard from "./ModuleCard.jsx";
@@ -19,6 +21,8 @@ export default function DashboardHome({ activeModule }) {
   if (activeModule === "healthcare-cyber-lab") return <HealthcareCyberLab />;
   if (activeModule === "event-command") return <EventCommand />;
   if (activeModule === "content-studio") return <ContentStudio />;
+  if (activeModule === "integrations") return <IntegrationCenter />;
+  if (activeModule === "profile") return <Profile />;
   if (activeModule === "settings") return <Settings />;
   if (activeModule === "mission-control") return <MissionControl />;
 

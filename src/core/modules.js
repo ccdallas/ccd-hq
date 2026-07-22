@@ -35,6 +35,16 @@ export const modules = [
     enabled: true
   },
   {
+    id: "integrations",
+    name: "Integrations",
+    enabled: true
+  },
+  {
+    id: "profile",
+    name: "My Profile",
+    enabled: true
+  },
+  {
     id: "settings",
     name: "Settings",
     enabled: true
