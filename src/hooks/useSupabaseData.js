@@ -8,11 +8,16 @@ export function useSupabaseData(tableName, initialFallback = []) {
   useEffect(() => {
     async function loadData() {
       setLoading(true);
-      const records = await getRecords(tableName);
-      if (records && records.length > 0) {
-        setData(records);
+      try {
+        const records = await getRecords(tableName);
+        if (records && records.length > 0) {
+          setData(records);
+        }
+      } catch (err) {
+        console.warn(`Falling back for table ${tableName}:`, err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
     loadData();
   }, [tableName]);
@@ -23,7 +28,6 @@ export function useSupabaseData(tableName, initialFallback = []) {
       setData((prev) => [saved, ...prev]);
       return saved;
     } else {
-      // Local optimistic update fallback
       const fallbackRecord = { id: Date.now().toString(), ...newRecord };
       setData((prev) => [fallbackRecord, ...prev]);
       return fallbackRecord;

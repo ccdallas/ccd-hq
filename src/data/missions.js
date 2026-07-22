@@ -1,20 +1,16 @@
 export const missions = [
   {
-    id: 1,
-    title: "Build CCD-HQ Platform",
-    status: "Active",
-    priority: "Critical"
+    id: "1",
+    title: "Black Hat Strategy",
+    objective: "Schedule priority meetings and capture intelligence",
+    priority: "Critical",
+    status: "Active"
   },
   {
-    id: 2,
-    title: "Black Hat 2026 Strategy",
-    status: "Active",
-    priority: "High"
-  },
-  {
-    id: 3,
-    title: "Healthcare Cybersecurity Thought Leadership",
-    status: "Active",
-    priority: "Medium"
+    id: "2",
+    title: "CCD-HQ Platform",
+    objective: "Build healthcare cybersecurity professional OS",
+    priority: "High",
+    status: "Active"
   }
 ];
