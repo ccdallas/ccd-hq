@@ -45,6 +45,11 @@ export const modules = [
     enabled: true
   },
   {
+    id: "integration-hub",
+    name: "Integration Hub",
+    enabled: true
+  },
+  {
     id: "integrations",
     name: "Integrations",
     enabled: true

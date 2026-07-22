@@ -5,6 +5,7 @@ import ActionQueue from "./ActionQueue.jsx";
 import RelationshipRadar from "./RelationshipRadar.jsx";
 import OpportunityPulse from "./OpportunityPulse.jsx";
 import KnowledgeVault from "../knowledge/KnowledgeVault.jsx";
+import IntegrationHub from "../integrations/IntegrationHub.jsx";
 
 export default function CommandCenter() {
   return (
@@ -16,6 +17,7 @@ export default function CommandCenter() {
         <OpportunityPulse />
         <RelationshipRadar />
         <KnowledgeVault />
+        <IntegrationHub />
         <ActionQueue />
       </div>
     </section>
