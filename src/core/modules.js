@@ -12,6 +12,11 @@ export const modules = [
   {
     id: "relationship-intelligence",
     name: "Relationship Intelligence",
+    enabled: true
+  },
+  {
+    id: "healthcare-cyber-lab",
+    name: "Healthcare Cyber Lab",
     enabled: false
   }
 ];
