@@ -388,3 +388,87 @@ textarea {
     margin-left: 0;
   }
 }
+
+/* Temporary Shell Styling */
+.ccd-shell {
+  min-height: 100vh;
+  background: var(--ccd-paper, #f8f9fa);
+}
+
+.ccd-header {
+  padding: 32px;
+  background: var(--ccd-forest, #1b365d);
+  color: white;
+}
+
+.ccd-kicker {
+  color: var(--ccd-gold, #d4af37);
+  text-transform: uppercase;
+  letter-spacing: .15em;
+  font-size: 12px;
+}
+
+.ccd-header h1 {
+  margin: 8px 0;
+}
+
+.ccd-content {
+  padding: 32px;
+}
+
+.ccd-module-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.ccd-module-card {
+  padding: 20px;
+  border-radius: 16px;
+  background: white;
+  border: 1px solid var(--ccd-mist, #e2e8f0);
+}
+
+/* Phase 1.2 Sidebar & Layout Styles */
+.ccd-platform {
+  display: flex;
+  min-height: 100vh;
+}
+
+.ccd-sidebar {
+  width: 260px;
+  background: var(--ccd-forest, #1b365d);
+  color: white;
+  padding: 24px;
+}
+
+.ccd-brand span {
+  display: block;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.ccd-brand small {
+  color: var(--ccd-gold, #d4af37);
+}
+
+.ccd-sidebar button {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 0;
+  background: transparent;
+  color: white;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ccd-sidebar button.active {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.ccd-main {
+  flex: 1;
+}
