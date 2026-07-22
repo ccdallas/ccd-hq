@@ -1,15 +1,22 @@
+import MissionCard from "./MissionCard.jsx";
+import { getMissions } from "./missionService.js";
+
 export default function MissionControl() {
+  const missions = getMissions();
+
   return (
     <section>
       <span className="ccd-kicker">
         Mission Control
       </span>
       <h2>
-        Your daily cybersecurity command center.
+        Strategic Operations Center
       </h2>
-      <p>
-        Track priorities, objectives, projects, and strategic missions.
-      </p>
+      <div className="mission-grid">
+        {missions.map((mission) => (
+          <MissionCard key={mission.id} {...mission} />
+        ))}
+      </div>
     </section>
   );
 }

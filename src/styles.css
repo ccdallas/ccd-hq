@@ -515,3 +515,31 @@ textarea {
   color: var(--ccd-gold, #d4af37);
   font-weight: 800;
 }
+
+/* Phase 3 Module Cards and Grids */
+.mission-grid,
+.contact-grid,
+.knowledge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.mission-card,
+.contact-card,
+.knowledge-card {
+  background: white;
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid var(--ccd-mist, #e2e8f0);
+}
+
+.mission-card span,
+.contact-card span,
+.knowledge-card span {
+  display: inline-block;
+  margin-right: 8px;
+  color: var(--ccd-gold, #d4af37);
+  font-weight: 800;
+}

@@ -1,29 +1,40 @@
+import MissionControl from "../../features/mission/MissionControl.jsx";
+import JobSearchTracker from "../../features/career/JobSearchTracker.jsx";
+import RelationshipIntelligence from "../../features/relationships/RelationshipIntelligence.jsx";
+import KnowledgeVault from "../../features/knowledge/KnowledgeVault.jsx";
 import MetricCard from "./MetricCard.jsx";
 import ModuleCard from "./ModuleCard.jsx";
 import { platformMetrics } from "../../core/metrics.js";
 import { modules } from "../../core/modules.js";
 
-export default function DashboardHome() {
+export default function DashboardHome({ activeModule }) {
+  if (activeModule === "career-intelligence") {
+    return <JobSearchTracker />;
+  }
+
+  if (activeModule === "relationship-intelligence") {
+    return <RelationshipIntelligence />;
+  }
+
+  if (activeModule === "knowledge-vault") {
+    return <KnowledgeVault />;
+  }
+
+  if (activeModule === "mission-control") {
+    return <MissionControl />;
+  }
+
   return (
     <section className="ccd-dashboard">
       <div className="ccd-dashboard-header">
-        <span className="ccd-kicker">
-          Command Center
-        </span>
-        <h2>
-          CCD-HQ Mission Overview
-        </h2>
-        <p>
-          Your healthcare cybersecurity operating system.
-        </p>
+        <span className="ccd-kicker">Command Center</span>
+        <h2>CCD-HQ Mission Overview</h2>
+        <p>Your healthcare cybersecurity operating system.</p>
       </div>
 
       <div className="ccd-metric-grid">
         {platformMetrics.map((metric) => (
-          <MetricCard
-            key={metric.label}
-            {...metric}
-          />
+          <MetricCard key={metric.label} {...metric} />
         ))}
       </div>
 
