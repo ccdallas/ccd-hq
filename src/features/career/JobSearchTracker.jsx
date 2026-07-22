@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { cloudStatusLabel, loadJobEntries, saveJobEntries } from "./cloudState.js";
+import { cloudStatusLabel, loadJobEntries, saveJobEntries } from "../../cloudState.js";
 
 const STATUSES = [
   "Applied",

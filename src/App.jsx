@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import JobSearchTracker from "./JobSearchTracker.jsx";
+import JobSearchTracker from "./features/career/JobSearchTracker.jsx";
 
 // ── Brand spine v2 — Green / Amber / Crimson(pulse-only) / Cream / Slate ──
 // Token names kept identical to v1 so every existing reference below
