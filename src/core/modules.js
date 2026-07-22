@@ -1,7 +1,17 @@
 export const modules = [
   {
+    id: "command-center",
+    name: "Command Center",
+    enabled: true
+  },
+  {
     id: "mission-control",
     name: "Mission Control",
+    enabled: true
+  },
+  {
+    id: "mission-operations",
+    name: "Mission Operations",
     enabled: true
   },
   {
@@ -37,6 +47,11 @@ export const modules = [
   {
     id: "integrations",
     name: "Integrations",
+    enabled: true
+  },
+  {
+    id: "professional-profile",
+    name: "Professional Profile",
     enabled: true
   },
   {
