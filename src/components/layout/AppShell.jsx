@@ -1,7 +1,9 @@
-import { currentUser } from "../../core/user.js";
+import { useUser } from "../../core/UserContext.jsx";
 import Sidebar from "./Sidebar.jsx";
 
 export default function AppShell({ children, activeModule, setActiveModule }) {
+  const user = useUser();
+
   return (
     <div className="ccd-platform">
       <Sidebar
@@ -15,10 +17,10 @@ export default function AppShell({ children, activeModule, setActiveModule }) {
             CCD-HQ Platform
           </span>
           <h1>
-            {currentUser.name}
+            {user.name}
           </h1>
           <p>
-            {currentUser.role}
+            {user.title}
           </p>
         </header>
 
