@@ -5,13 +5,18 @@ export const modules = [
     enabled: true
   },
   {
-    id: "mission-control",
-    name: "Mission Control",
+    id: "ai-chief",
+    name: "AI Chief of Staff",
     enabled: true
   },
   {
-    id: "mission-operations",
-    name: "Mission Operations",
+    id: "mission-intelligence",
+    name: "Mission Intelligence",
+    enabled: true
+  },
+  {
+    id: "knowledge-vault",
+    name: "Knowledge Vault",
     enabled: true
   },
   {
@@ -22,11 +27,6 @@ export const modules = [
   {
     id: "relationship-intelligence",
     name: "Relationship Intelligence",
-    enabled: true
-  },
-  {
-    id: "knowledge-vault",
-    name: "Knowledge Vault",
     enabled: true
   },
   {

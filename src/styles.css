@@ -772,3 +772,18 @@ textarea {
   font-size: 20px;
   margin-bottom: 8px;
 }
+
+/* Phase 14 AI Chief of Staff Styling */
+.chief-card {
+  background: linear-gradient(135deg, #1E5040, #274f38);
+  color: white;
+  padding: 26px;
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+.chief-card h2 {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 28px;
+  margin-top: 6px;
+}
