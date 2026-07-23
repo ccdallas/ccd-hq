@@ -798,3 +798,5 @@ textarea {
   font-size: 12px;
   font-weight: 700;
 }
+
+@import "./styles/tokens.css";

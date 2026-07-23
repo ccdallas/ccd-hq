@@ -3,6 +3,7 @@ import "./styles.css";
 import { AuthProvider } from "./context/AuthContext.jsx";
 import AuthModal from "./features/auth/AuthModal.jsx";
 import DashboardHome from "./components/dashboard/DashboardHome.jsx";
+import CommandPalette from "./components/CommandPalette.jsx";
 import { modules } from "./core/modules.js";
 
 export default function App() {
@@ -10,16 +11,23 @@ export default function App() {
 
   return (
     <AuthProvider>
-      <div style={{ display: "flex", minHeight: "100vh", background: "#f8fafc" }}>
+      <div style={{ display: "flex", minHeight: "100vh", background: "var(--color-background)" }}>
+        <CommandPalette onSelectModule={setActiveTab} />
+
         {/* Sidebar Navigation */}
-        <aside style={{ width: "260px", background: "#1E5040", color: "white", padding: "24px 16px", display: "flex", flexDirection: "column", gap: "8px" }}>
+        <aside style={{ width: "260px", background: "var(--color-primary)", color: "white", padding: "24px 16px", display: "flex", flexDirection: "column", gap: "8px" }}>
           <div style={{ marginBottom: "20px", padding: "0 8px" }}>
-            <h1 style={{ fontSize: "22px", fontFamily: "Playfair Display, serif", color: "#E0A83E", margin: 0 }}>
+            <h1 style={{ fontSize: "22px", fontFamily: "Playfair Display, serif", color: "var(--color-accent)", margin: 0 }}>
               CCD-HQ™
             </h1>
-            <span style={{ fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.5px", opacity: 0.8 }}>
-              Founder Edition v1.0
-            </span>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "4px" }}>
+              <span style={{ fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.5px", opacity: 0.8 }}>
+                Founder Edition v1.0
+              </span>
+              <span style={{ fontSize: "10px", background: "rgba(224, 168, 62, 0.2)", color: "var(--color-accent)", padding: "2px 6px", borderRadius: "4px" }}>
+                ⌘K
+              </span>
+            </div>
           </div>
 
           <nav style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
@@ -36,10 +44,10 @@ export default function App() {
                       width: "100%",
                       textAlign: "left",
                       padding: "10px 14px",
-                      borderRadius: "8px",
+                      borderRadius: "var(--radius-sm)",
                       border: 0,
-                      background: isActive ? "#E0A83E" : "transparent",
-                      color: isActive ? "#1E5040" : "white",
+                      background: isActive ? "var(--color-accent)" : "transparent",
+                      color: isActive ? "var(--color-primary)" : "white",
                       fontWeight: isActive ? "bold" : "normal",
                       fontSize: "14px",
                       cursor: "pointer"
