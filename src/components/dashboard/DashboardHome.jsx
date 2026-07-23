@@ -6,9 +6,12 @@ import KnowledgeVault from "../../features/knowledge/KnowledgeVault.jsx";
 import RelationshipIntelligence from "../../features/relationships/RelationshipIntelligence.jsx";
 import ContentStudio from "../../features/content/ContentStudio.jsx";
 import IntegrationHub from "../../features/integrations/IntegrationHub.jsx";
+import ConferenceDashboard from "../../features/conference/ConferenceDashboard.jsx";
 
 export default function DashboardHome({ activeModule }) {
   switch (activeModule) {
+    case "conference-command":
+      return <ConferenceDashboard />;
     case "ai-chief":
       return <ChiefOfStaff />;
     case "mission-intelligence":
