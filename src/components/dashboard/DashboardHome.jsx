@@ -7,9 +7,12 @@ import RelationshipIntelligence from "../../features/relationships/RelationshipI
 import ContentStudio from "../../features/content/ContentStudio.jsx";
 import IntegrationHub from "../../features/integrations/IntegrationHub.jsx";
 import ConferenceDashboard from "../../features/conference/ConferenceDashboard.jsx";
+import MissionGraphViewer from "../../features/mission/MissionGraphViewer.jsx";
 
 export default function DashboardHome({ activeModule }) {
   switch (activeModule) {
+    case "mission-graph":
+      return <MissionGraphViewer />;
     case "conference-command":
       return <ConferenceDashboard />;
     case "ai-chief":

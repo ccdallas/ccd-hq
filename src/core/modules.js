@@ -1,5 +1,6 @@
 export const modules = [
   { id: "command-center", name: "Command Center", enabled: true },
+  { id: "mission-graph", name: "Mission Graph & Impact", enabled: true },
   { id: "conference-command", name: "Conference Command", enabled: true },
   { id: "ai-chief", name: "AI Chief of Staff", enabled: true },
   { id: "mission-intelligence", name: "Mission Intelligence", enabled: true },
