@@ -31,6 +31,12 @@ export const conference = {
   ]
 };
 
+export const networkingTargets = [
+  { id: "net-1", name: "Semperis Executive & Media Team", priority: "Critical", status: "Confirmed" },
+  { id: "net-2", name: "Healthcare CISOs & Risk Leads", priority: "Critical", status: "Pending" },
+  { id: "net-3", name: "WISP / WiCyS Leadership", priority: "Critical", status: "Confirmed" }
+];
+
 export const wispShiftSchedule = [
   { date: "2026-08-07", location: "Vendor Booth", time: "12:00 PM - 2:00 PM", role: "Shift Lead" },
   { date: "2026-08-07", location: "Community Center", time: "4:00 PM - 6:00 PM", role: "Shift Lead" },
