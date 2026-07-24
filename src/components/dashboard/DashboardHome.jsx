@@ -5,13 +5,18 @@ import ChiefOfStaff from "../../features/ai-chief/ChiefOfStaff.jsx";
 import MissionControl from "../../features/mission/MissionControl.jsx";
 import KnowledgeVault from "../../features/knowledge/KnowledgeVault.jsx";
 import RelationshipIntelligence from "../../features/relationships/RelationshipIntelligence.jsx";
-import ContentStudio from "../../features/content/ContentStudio.jsx";
 import IntegrationHub from "../../features/integrations/IntegrationHub.jsx";
 import ConferenceDashboard from "../../features/conference/ConferenceDashboard.jsx";
 import MissionGraphViewer from "../../features/mission/MissionGraphViewer.jsx";
+import ThreatIntelligenceWorkspace from "../../features/cyber-lab/ThreatIntelligenceWorkspace.jsx";
+import PlatformObservability from "../../features/ops/PlatformObservability.jsx";
 
 export default function DashboardHome({ activeModule }) {
   switch (activeModule) {
+    case "threat-intelligence":
+      return <ThreatIntelligenceWorkspace />;
+    case "platform-ops":
+      return <PlatformObservability />;
     case "mission-graph":
       return <MissionGraphViewer />;
     case "conference-command":
@@ -24,8 +29,6 @@ export default function DashboardHome({ activeModule }) {
       return <KnowledgeVault />;
     case "relationship-intelligence":
       return <RelationshipIntelligence />;
-    case "content-studio":
-      return <ContentStudio />;
     case "integration-hub":
       return <IntegrationHub />;
     case "command-center":

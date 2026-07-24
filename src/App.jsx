@@ -6,6 +6,7 @@ import WorkspaceSwitcher from "./core/workspace/WorkspaceSwitcher.jsx";
 import AuthModal from "./features/auth/AuthModal.jsx";
 import DashboardHome from "./components/dashboard/DashboardHome.jsx";
 import CommandPalette from "./components/CommandPalette.jsx";
+import QuickCaptureModal from "./components/QuickCaptureModal.jsx";
 import { modules } from "./core/modules.js";
 
 export default function App() {
@@ -16,6 +17,7 @@ export default function App() {
       <WorkspaceProvider>
         <div style={{ display: "flex", minHeight: "100vh", background: "var(--color-background)" }}>
           <CommandPalette onSelectModule={setActiveTab} />
+          <QuickCaptureModal />
 
           {/* Sidebar Navigation */}
           <aside style={{ width: "260px", background: "var(--color-primary)", color: "white", padding: "24px 16px", display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -25,10 +27,10 @@ export default function App() {
               </h1>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "4px" }}>
                 <span style={{ fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.5px", opacity: 0.8 }}>
-                  Beta Platform v1.0
+                  v1.0 Daily Driver
                 </span>
                 <span style={{ fontSize: "10px", background: "rgba(224, 168, 62, 0.2)", color: "var(--color-accent)", padding: "2px 6px", borderRadius: "4px" }}>
-                  ⌘K
+                  Press N
                 </span>
               </div>
             </div>
