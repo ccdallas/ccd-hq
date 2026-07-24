@@ -1,6 +1,7 @@
 export const modules = [
   { id: "command-center", name: "Command Center", enabled: true },
   { id: "blackhat-hub", name: "Black Hat Mission Hub", enabled: true },
+  { id: "founder-dashboard", name: "Founder & Friction Log", enabled: true },
   { id: "threat-intelligence", name: "Clinical Cyber Lab", enabled: true },
   { id: "mission-graph", name: "Mission Graph & Impact", enabled: true },
   { id: "conference-command", name: "Conference Command", enabled: true },

@@ -11,9 +11,12 @@ import MissionGraphViewer from "../../features/mission/MissionGraphViewer.jsx";
 import ThreatIntelligenceWorkspace from "../../features/cyber-lab/ThreatIntelligenceWorkspace.jsx";
 import PlatformObservability from "../../features/ops/PlatformObservability.jsx";
 import BlackHatMissionHub from "../../features/conference/BlackHatMissionHub.jsx";
+import FounderDashboard from "../../features/founder/FounderDashboard.jsx";
 
 export default function DashboardHome({ activeModule }) {
   switch (activeModule) {
+    case "founder-dashboard":
+      return <FounderDashboard />;
     case "blackhat-hub":
       return <BlackHatMissionHub />;
     case "threat-intelligence":
