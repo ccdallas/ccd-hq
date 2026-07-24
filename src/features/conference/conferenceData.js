@@ -15,8 +15,8 @@ export const conference = {
   flightDetails: {
     airline: "United Airlines (via Priceline)",
     arrival: "2026-08-01 @ 1:50 PM PST (LAS)",
-    originalReturn: "2026-08-08 (Targeting Extension to Aug 9/10)",
-    status: "Priceline Flight Extension Pending"
+    originalReturn: "2026-08-08 (Extension to Aug 9/10 required for 11 AM Sunday shift)",
+    status: "Flight Change Pending"
   },
   medicalTravelRequirements: [
     "Portable Oxygen Concentrator (POC) - Check 150% battery capacity for LAS->ATL flight",
@@ -24,43 +24,19 @@ export const conference = {
     "Doctor-signed United Airlines Medical Clearance Form",
     "Call United Accessibility Desk (1-800-228-2744) to tag reservation"
   ],
-  objectives: [
-    "Attend & Present at Midnight in the War Room World Premiere by Semperis (Aug 5)",
-    "Lead WISP Shift Lead duties at DEF CON booth (Aug 7-9 - $550 Badge Sponsored)",
-    "Strengthen healthcare cybersecurity network & IoMT research",
-    "Identify healthcare GRC & clinical AI consulting opportunities",
-    "Support Biohacking Village & WiCyS community partners"
+  keyMilestones: [
+    { date: "2026-08-05", event: "Midnight in the War Room World Premiere", location: "Oceanside A", time: "5:30 PM - 8:10 PM" },
+    { date: "2026-08-06", event: "DEF CON Badge Pickup", location: "Mandalay Bay Ballroom Foyer Level 2", time: "7:00 AM - 4:00 PM" },
+    { date: "2026-08-06", event: "Semperis Booth Swag Signing", location: "Semperis Booth", time: "1:00 PM - 2:00 PM" }
   ]
 };
 
-export const networkingTargets = [
-  {
-    id: "net-1",
-    name: "Semperis Executive & Media Production Team",
-    organization: "Semperis / Midnight in the War Room",
-    priority: "Critical",
-    objective: "Film premiere alignment, media interviews, and defender panel sync ($2,999 Pass Sponsor)",
-    status: "Confirmed",
-    followUp: true
-  },
-  {
-    id: "net-2",
-    name: "Healthcare CISOs & Risk Leads",
-    organization: "Health Systems / HIMSS Network",
-    priority: "Critical",
-    objective: "Discuss clinical AI risk frameworks and medical device security assessments",
-    status: "Pending Intro",
-    followUp: false
-  },
-  {
-    id: "net-3",
-    name: "WISP / WiCyS Leadership",
-    organization: "Women in Security and Privacy",
-    priority: "Critical",
-    objective: "Confirm Sunday Aug 9 shift lead coverage & $550 badge pickup",
-    status: "Confirmed (Badge Covered)",
-    followUp: true
-  }
+export const wispShiftSchedule = [
+  { date: "2026-08-07", location: "Vendor Booth", time: "12:00 PM - 2:00 PM", role: "Shift Lead" },
+  { date: "2026-08-07", location: "Community Center", time: "4:00 PM - 6:00 PM", role: "Shift Lead" },
+  { date: "2026-08-08", location: "Community Space", time: "12:00 PM - 2:00 PM", role: "Shift Lead" },
+  { date: "2026-08-08", location: "Vendor Booth", time: "4:00 PM - 6:00 PM", role: "Shift Lead" },
+  { date: "2026-08-09", location: "Community Space", time: "11:00 AM - 12:00 PM", role: "Shift Lead" }
 ];
 
 export const conferenceMeetings = [
@@ -68,22 +44,30 @@ export const conferenceMeetings = [
     id: "mtg-1",
     person: "Semperis Production Team & Featured Defenders",
     company: "Midnight in the War Room Premiere (Semperis)",
-    location: "Black Hat USA Premier Hall",
-    time: "2026-08-05 18:00",
-    goal: "World Premiere & Defender Panel ($2,999 Pass Sponsor)",
-    notes: "Official debut appearance as featured defender in Semperis documentary.",
-    actionItems: "Review media talking points, sync with Semperis team, attend VIP reception.",
+    location: "Oceanside A (Mandalay Bay)",
+    time: "2026-08-05 17:30",
+    goal: "VIP Reception (5:30 PM), Red Carpet (5:45 PM), Screening (6:30 PM)",
+    notes: "Featured defender appearance. General public admitted at 6:15 PM.",
     status: "Confirmed"
   },
   {
     id: "mtg-2",
-    person: "WISP Volunteer Team",
-    company: "DEF CON WISP Booth",
-    location: "DEF CON Expo Floor",
+    person: "Semperis Booth Team",
+    company: "Semperis Swag Signing",
+    location: "Semperis Booth (Black Hat Expo)",
+    time: "2026-08-06 13:00 - 14:00",
+    goal: "Featured Defender Swag Signing",
+    notes: "1:00 PM - 2:00 PM session.",
+    status: "Confirmed"
+  },
+  {
+    id: "mtg-3",
+    person: "WISP Operations Team",
+    company: "DEF CON WISP Booth & Community Space",
+    location: "DEF CON Expo Floor / Community Space",
     time: "2026-08-07 to 2026-08-09",
-    goal: "Shift Lead Oversight",
-    notes: "Coordinate booth staffing, volunteer schedules, and badge coverage through Sunday Aug 9.",
-    actionItems: "1. Call Priceline/United to extend flight. 2. Contact United Accessibility Desk for POC/CPAP tag.",
-    status: "Action Required (Flight & Medical Flag)"
+    goal: "WISP Shift Lead Duties (5 shifts total)",
+    notes: "Requires extension of United flight to Aug 9 evening or Aug 10.",
+    status: "Confirmed (Flight Change Needed)"
   }
 ];
