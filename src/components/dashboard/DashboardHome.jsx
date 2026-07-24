@@ -1,4 +1,5 @@
 import React from "react";
+import MorningReport from "./MorningReport.jsx";
 import ExecutiveBriefing from "./ExecutiveBriefing.jsx";
 import ChiefOfStaff from "../../features/ai-chief/ChiefOfStaff.jsx";
 import MissionControl from "../../features/mission/MissionControl.jsx";
@@ -31,6 +32,7 @@ export default function DashboardHome({ activeModule }) {
     default:
       return (
         <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+          <MorningReport />
           <ExecutiveBriefing />
           <ChiefOfStaff />
         </div>
